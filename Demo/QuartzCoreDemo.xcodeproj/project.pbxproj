@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		43E112C7186031EB00E771B4 /* GSQuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43E112C6186031EB00E771B4 /* GSQuartzCore.framework */; };
 		7F19ECAA15E27FCA00D53ED8 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F19ECA915E27FCA00D53ED8 /* Cocoa.framework */; };
 		7F19ECB615E27FCA00D53ED8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F19ECB515E27FCA00D53ED8 /* main.m */; };
 		7F19ECD115E2807000D53ED8 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F19ECCC15E2807000D53ED8 /* AppController.m */; };
@@ -16,12 +17,13 @@
 		7F19ECD715E2807A00D53ED8 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7F19ECD515E2807A00D53ED8 /* InfoPlist.strings */; };
 		7F19ECD815E2807A00D53ED8 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7F19ECD615E2807A00D53ED8 /* MainMenu.xib */; };
 		7F19ECFE15E2826D00D53ED8 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F19ECFD15E2826D00D53ED8 /* OpenGL.framework */; };
-		7F19ED0015E2827300D53ED8 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F19ECFF15E2827300D53ED8 /* QuartzCore.framework */; };
 		7F19ED0315E292B000D53ED8 /* TextLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F19ED0215E292B000D53ED8 /* TextLayer.m */; };
 		7F19ED0715E2A21900D53ED8 /* GradientLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F19ED0615E2A21800D53ED8 /* GradientLayer.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		43E112C6186031EB00E771B4 /* GSQuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = file; name = GSQuartzCore.framework; path = ../build/Debug/GSQuartzCore.framework; sourceTree = "<group>"; };
+		43E112D3186032DD00E771B4 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		7F19ECA515E27FCA00D53ED8 /* QuartzCoreDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QuartzCoreDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F19ECA915E27FCA00D53ED8 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		7F19ECAC15E27FCA00D53ED8 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -38,7 +40,6 @@
 		7F19ECD515E2807A00D53ED8 /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = InfoPlist.strings; path = Mac/InfoPlist.strings; sourceTree = SOURCE_ROOT; };
 		7F19ECD615E2807A00D53ED8 /* MainMenu.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainMenu.xib; path = Mac/MainMenu.xib; sourceTree = SOURCE_ROOT; };
 		7F19ECFD15E2826D00D53ED8 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
-		7F19ECFF15E2827300D53ED8 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		7F19ED0115E292B000D53ED8 /* TextLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextLayer.h; sourceTree = "<group>"; };
 		7F19ED0215E292B000D53ED8 /* TextLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextLayer.m; sourceTree = "<group>"; };
 		7F19ED0415E292BB00D53ED8 /* GNUmakefile */ = {isa = PBXFileReference; lastKnownFileType = text; path = GNUmakefile; sourceTree = "<group>"; };
@@ -51,7 +52,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7F19ED0015E2827300D53ED8 /* QuartzCore.framework in Frameworks */,
+				43E112C7186031EB00E771B4 /* GSQuartzCore.framework in Frameworks */,
 				7F19ECFE15E2826D00D53ED8 /* OpenGL.framework in Frameworks */,
 				7F19ECAA15E27FCA00D53ED8 /* Cocoa.framework in Frameworks */,
 			);
@@ -63,7 +64,6 @@
 		7F19EC9A15E27FCA00D53ED8 = {
 			isa = PBXGroup;
 			children = (
-				7F19ECFF15E2827300D53ED8 /* QuartzCore.framework */,
 				7F19ECFD15E2826D00D53ED8 /* OpenGL.framework */,
 				7F19ECAF15E27FCA00D53ED8 /* QuartzCoreDemo */,
 				7F19ECA815E27FCA00D53ED8 /* Frameworks */,
@@ -82,6 +82,8 @@
 		7F19ECA815E27FCA00D53ED8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				43E112D3186032DD00E771B4 /* QuartzCore.framework */,
+				43E112C6186031EB00E771B4 /* GSQuartzCore.framework */,
 				7F19ECA915E27FCA00D53ED8 /* Cocoa.framework */,
 				7F19ECAB15E27FCA00D53ED8 /* Other Frameworks */,
 			);

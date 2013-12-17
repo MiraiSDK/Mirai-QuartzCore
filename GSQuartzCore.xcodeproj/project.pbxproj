@@ -191,6 +191,7 @@
 		43E112A3185EDBFF00E771B4 /* CAAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CAAction.h; sourceTree = "<group>"; };
 		43E112AB185EDCFF00E771B4 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
 		43E112C31860304600E771B4 /* Android.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Android.xcconfig; sourceTree = "<group>"; };
+		43E112D1186032C800E771B4 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		7F19ECE015E2813200D53ED8 /* QuartzCoreDemo.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = QuartzCoreDemo.xcodeproj; path = Demo/QuartzCoreDemo.xcodeproj; sourceTree = "<group>"; };
 		7F1DE5A215D6EBAC00C2AE2A /* CAGLShader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CAGLShader.h; sourceTree = "<group>"; };
 		7F1DE5A315D6EBAC00C2AE2A /* CAGLShader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CAGLShader.m; sourceTree = "<group>"; };
@@ -377,6 +378,7 @@
 		7F7751611594AE2A00F56E92 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				43E112D1186032C800E771B4 /* QuartzCore.framework */,
 				7F74229D1594C2A400AEB117 /* OpenGL.framework */,
 				43E112AB185EDCFF00E771B4 /* ImageIO.framework */,
 				43BA695B185DA18E00526D8E /* libGLESv2.dylib */,
