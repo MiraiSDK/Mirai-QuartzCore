@@ -188,9 +188,9 @@
 		43A9D0C5185D9C9400720B81 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		43BA695B185DA18E00526D8E /* libGLESv2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGLESv2.dylib; path = usr/lib/libGLESv2.dylib; sourceTree = SDKROOT; };
 		43BA6965185DA26500526D8E /* GSQuartzCore-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GSQuartzCore-Prefix.pch"; sourceTree = "<group>"; };
-		43BA6973185DB72300526D8E /* Android.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Android.xcconfig; sourceTree = "<group>"; };
 		43E112A3185EDBFF00E771B4 /* CAAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CAAction.h; sourceTree = "<group>"; };
 		43E112AB185EDCFF00E771B4 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
+		43E112C31860304600E771B4 /* Android.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Android.xcconfig; sourceTree = "<group>"; };
 		7F19ECE015E2813200D53ED8 /* QuartzCoreDemo.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = QuartzCoreDemo.xcodeproj; path = Demo/QuartzCoreDemo.xcodeproj; sourceTree = "<group>"; };
 		7F1DE5A215D6EBAC00C2AE2A /* CAGLShader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CAGLShader.h; sourceTree = "<group>"; };
 		7F1DE5A315D6EBAC00C2AE2A /* CAGLShader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CAGLShader.m; sourceTree = "<group>"; };
@@ -293,20 +293,19 @@
 		43BA6964185DA26500526D8E /* Android */ = {
 			isa = PBXGroup;
 			children = (
-				43BA6972185DB72300526D8E /* xcconfig */,
+				43E112C21860304600E771B4 /* xcconfig */,
 				43BA6965185DA26500526D8E /* GSQuartzCore-Prefix.pch */,
 			);
 			path = Android;
 			sourceTree = "<group>";
 		};
-		43BA6972185DB72300526D8E /* xcconfig */ = {
+		43E112C21860304600E771B4 /* xcconfig */ = {
 			isa = PBXGroup;
 			children = (
-				43BA6973185DB72300526D8E /* Android.xcconfig */,
+				43E112C31860304600E771B4 /* Android.xcconfig */,
 			);
-			name = xcconfig;
-			path = ../../../xcconfig;
-			sourceTree = "<group>";
+			path = xcconfig;
+			sourceTree = SOURCE_ROOT;
 		};
 		7F19ECE115E2813200D53ED8 /* Products */ = {
 			isa = PBXGroup;
@@ -802,7 +801,7 @@
 /* Begin XCBuildConfiguration section */
 		43A9D0BB185D9B2E00720B81 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 43BA6973185DB72300526D8E /* Android.xcconfig */;
+			baseConfigurationReference = 43E112C31860304600E771B4 /* Android.xcconfig */;
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -824,7 +823,7 @@
 		};
 		43A9D0BC185D9B2E00720B81 /* UsingGNUstepImpl */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 43BA6973185DB72300526D8E /* Android.xcconfig */;
+			baseConfigurationReference = 43E112C31860304600E771B4 /* Android.xcconfig */;
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -846,7 +845,7 @@
 		};
 		43A9D0BD185D9B2E00720B81 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 43BA6973185DB72300526D8E /* Android.xcconfig */;
+			baseConfigurationReference = 43E112C31860304600E771B4 /* Android.xcconfig */;
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
