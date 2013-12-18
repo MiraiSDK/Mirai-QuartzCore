@@ -143,6 +143,7 @@
 		7FFBC86615AB4F58004B0E68 /* CAImplicitAnimationObserver.h in Headers */ = {isa = PBXBuildFile; fileRef = 7FFBC86415AB4F58004B0E68 /* CAImplicitAnimationObserver.h */; };
 		7FFBC86715AB4F58004B0E68 /* CAImplicitAnimationObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FFBC86515AB4F58004B0E68 /* CAImplicitAnimationObserver.m */; };
 		7FFBC86915AB6391004B0E68 /* CATransaction+FrameworkPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 7FFBC86815AB6390004B0E68 /* CATransaction+FrameworkPrivate.h */; };
+		BD0D61F318607AFF00BD348A /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD0D61F218607AFF00BD348A /* CoreText.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -265,6 +266,7 @@
 		7FFBC86415AB4F58004B0E68 /* CAImplicitAnimationObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CAImplicitAnimationObserver.h; sourceTree = "<group>"; };
 		7FFBC86515AB4F58004B0E68 /* CAImplicitAnimationObserver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CAImplicitAnimationObserver.m; sourceTree = "<group>"; };
 		7FFBC86815AB6390004B0E68 /* CATransaction+FrameworkPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CATransaction+FrameworkPrivate.h"; sourceTree = "<group>"; };
+		BD0D61F218607AFF00BD348A /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -282,6 +284,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BD0D61F318607AFF00BD348A /* CoreText.framework in Frameworks */,
 				43E112AC185EDCFF00E771B4 /* ImageIO.framework in Frameworks */,
 				43E112A2185EDB3400E771B4 /* CoreGraphics.framework in Frameworks */,
 				7F74229E1594C2A400AEB117 /* OpenGL.framework in Frameworks */,
@@ -378,6 +381,7 @@
 		7F7751611594AE2A00F56E92 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				BD0D61F218607AFF00BD348A /* CoreText.framework */,
 				43E112D1186032C800E771B4 /* QuartzCore.framework */,
 				7F74229D1594C2A400AEB117 /* OpenGL.framework */,
 				43E112AB185EDCFF00E771B4 /* ImageIO.framework */,

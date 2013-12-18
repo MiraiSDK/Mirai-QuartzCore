@@ -19,10 +19,11 @@
 		7F19ECFE15E2826D00D53ED8 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F19ECFD15E2826D00D53ED8 /* OpenGL.framework */; };
 		7F19ED0315E292B000D53ED8 /* TextLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F19ED0215E292B000D53ED8 /* TextLayer.m */; };
 		7F19ED0715E2A21900D53ED8 /* GradientLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F19ED0615E2A21800D53ED8 /* GradientLayer.m */; };
+		BD0D61FB186149CB00BD348A /* CATextLayerTestView.m in Sources */ = {isa = PBXBuildFile; fileRef = BD0D61FA186149CB00BD348A /* CATextLayerTestView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		43E112C6186031EB00E771B4 /* GSQuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = file; name = GSQuartzCore.framework; path = ../build/Debug/GSQuartzCore.framework; sourceTree = "<group>"; };
+		43E112C6186031EB00E771B4 /* GSQuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GSQuartzCore.framework; path = ../build/Debug/GSQuartzCore.framework; sourceTree = "<group>"; };
 		43E112D3186032DD00E771B4 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		7F19ECA515E27FCA00D53ED8 /* QuartzCoreDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QuartzCoreDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F19ECA915E27FCA00D53ED8 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
@@ -45,6 +46,8 @@
 		7F19ED0415E292BB00D53ED8 /* GNUmakefile */ = {isa = PBXFileReference; lastKnownFileType = text; path = GNUmakefile; sourceTree = "<group>"; };
 		7F19ED0515E2A21800D53ED8 /* GradientLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GradientLayer.h; sourceTree = "<group>"; };
 		7F19ED0615E2A21800D53ED8 /* GradientLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GradientLayer.m; sourceTree = "<group>"; };
+		BD0D61F9186149CB00BD348A /* CATextLayerTestView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CATextLayerTestView.h; sourceTree = "<group>"; };
+		BD0D61FA186149CB00BD348A /* CATextLayerTestView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CATextLayerTestView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,6 +110,8 @@
 				7F19ECCC15E2807000D53ED8 /* AppController.m */,
 				7F19ECCD15E2807000D53ED8 /* DemoOpenGLView.h */,
 				7F19ECCE15E2807000D53ED8 /* DemoOpenGLView.m */,
+				BD0D61F9186149CB00BD348A /* CATextLayerTestView.h */,
+				BD0D61FA186149CB00BD348A /* CATextLayerTestView.m */,
 				7F19ED0115E292B000D53ED8 /* TextLayer.h */,
 				7F19ED0215E292B000D53ED8 /* TextLayer.m */,
 				7F19ED0515E2A21800D53ED8 /* GradientLayer.h */,
@@ -198,6 +203,7 @@
 				7F19ECB615E27FCA00D53ED8 /* main.m in Sources */,
 				7F19ECD115E2807000D53ED8 /* AppController.m in Sources */,
 				7F19ECD215E2807000D53ED8 /* DemoOpenGLView.m in Sources */,
+				BD0D61FB186149CB00BD348A /* CATextLayerTestView.m in Sources */,
 				7F19ED0315E292B000D53ED8 /* TextLayer.m in Sources */,
 				7F19ED0715E2A21900D53ED8 /* GradientLayer.m in Sources */,
 			);
