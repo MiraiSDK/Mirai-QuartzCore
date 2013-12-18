@@ -120,11 +120,11 @@
   }
     
     
-//    [self testNSString];
-//    [self testAString];
-//    [self testCTFont];
-//    [self testCGFtont];
-    [self testWarpped];
+    [self testNSString];
+    [self testAString];
+    [self testCTFont];
+    [self testCGFtont];
+    //[self testWarpped];
     
   [self startAnimation];
   
