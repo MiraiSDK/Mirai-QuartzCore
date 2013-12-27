@@ -47,95 +47,15 @@
 #import <GSQuartzCore/CATextLayer.h>
 #endif
 
-#import "TextLayer.h"
-#import "GradientLayer.h"
-
-
 @implementation CATextLayerTestView
 
-- (void) dealloc
-{
-  if (_isAnimating)
-    [self stopAnimation];
+- (void) doTest {
 
-  [super dealloc];
-}
-
-- (void) startAnimation
-{
-  if (!_timer)
-    _timer = [NSTimer scheduledTimerWithTimeInterval: 1./60. 
-                                              target: self 
-                                            selector: @selector(timerAnimation:) 
-                                            userInfo: nil 
-                                             repeats: YES];
-  _isAnimating = YES;
-
-}
-
-- (void) stopAnimation
-{
-  [_timer invalidate];
-  _timer = nil;
-
-  _isAnimating = NO;
-}
-
-
-- (void) prepareOpenGL
-{
-  [super prepareOpenGL];
-  CGColorRef whiteColor = CGColorCreateGenericRGB(1, 1, 1, 1);
-  CGColorRef yellowColor = CGColorCreateGenericRGB(1, 1, 0, 1);
-  CGColorRef blackColor = CGColorCreateGenericRGB(0, 0, 0, 1);
-  CGColorRef grayColor = CGColorCreateGenericRGB(0.4, 0.4, 0.4, 1);
-
-  /* Create renderer */
-#if GNUSTEP || GSIMPL_UNDER_COCOA
-  _renderer = [CARenderer rendererWithNSOpenGLContext: [self openGLContext]
-                                              options: nil];
-#else
-  _renderer = [CARenderer rendererWithCGLContext: [self openGLContext].CGLContextObj
-                                         options: nil];
-#endif
-  [_renderer retain];
-  [_renderer setBounds: NSRectToCGRect([self bounds])];
-
-  /* Create root layer */
-  {
-    CALayer * layer = [CALayer layer];
-    [_renderer setLayer: layer];
-    [layer setBounds: NSRectToCGRect([self bounds])];
-    [layer setBackgroundColor: whiteColor];  
-    CGPoint midPos = CGPointMake([_renderer bounds].size.width/2,
-                                 [_renderer bounds].size.height/2);
-    [layer setPosition: midPos];
-
-    /* Load a perspective transform */
-    CATransform3D perspective = CATransform3DIdentity;
-    perspective.m34 = 1.0 / -500.;
-    [layer setSublayerTransform: perspective];
-
-    _rootLayer = [layer retain];
-  }
-    
-    
     [self testNSString];
     [self testAString];
     [self testCTFont];
     [self testCGFtont];
-    //[self testWarpped];
-    
-  [self startAnimation];
-  
-  CGColorRelease(yellowColor);
-  CGColorRelease(whiteColor);
-  CGColorRelease(blackColor);
-  CGColorRelease(grayColor);
-
-  glViewport(0, 0, [self frame].size.width, [self frame].size.height);
-  glClear(GL_COLOR_BUFFER_BIT);
-
+//    [self testWarpped];
 }
 
 -(void)testNSString {
@@ -216,44 +136,5 @@
     [layer setNeedsDisplay];
 }
 
-- (void) timerAnimation: (NSTimer *)timer
-{
-  [[self openGLContext] makeCurrentContext];
-
-  glViewport(0, 0, [self frame].size.width, [self frame].size.height);
-
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  glOrtho(0, [self frame].size.width, 0, [self frame].size.height, -2500, 2500);
-
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-
-  /* */
-  [_renderer beginFrameAtTime: CACurrentMediaTime()
-                    timeStamp: NULL];
-  [self clearBounds: [_renderer updateBounds]];
-  [_renderer render];
-  [_renderer endFrame];
-  /* */
-
-  glFlush();
-
-  [[self openGLContext] flushBuffer];
-}
-
-- (void)clearBounds:(CGRect)bounds
-{  
-  glBegin(GL_QUADS);
-  glColor4f(0,0,0,1);
-  glVertex2f(bounds.origin.x, bounds.origin.y);
-  glVertex2f(bounds.origin.x+bounds.size.width, bounds.origin.y);
-  glVertex2f(bounds.origin.x+bounds.size.width, bounds.origin.y+bounds.size.height);
-  glVertex2f(bounds.origin.x, bounds.origin.y+bounds.size.height);
-  glEnd();
-}
-
-
 @end
 
-/* vim: set cindent cinoptions=>4,n-2,{2,^-2,:2,=2,g0,h2,p5,t0,+2,(0,u0,w1,m1 expandtabs shiftwidth=2 tabstop=8: */

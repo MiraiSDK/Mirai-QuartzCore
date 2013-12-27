@@ -22,3 +22,52 @@
    Free Software Foundation, 51 Franklin Street, Fifth Floor,
    Boston, MA 02110-1301, USA.
 */
+#import "CAGradientLayer.h"
+
+@implementation CAGradientLayer
+@synthesize colors = _colors;
+@synthesize locations = _locations;
+@synthesize startPoint = _startPoint;
+@synthesize endPoint = _endPoint;
+@synthesize type = _type;
+
+
+- (void) drawInContext: (CGContextRef)context
+{
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    
+#if !GNUSTEP
+    
+    CGColorRef startColor = CGColorCreateGenericRGB(1, 1, 0, 1);
+    CGColorRef endColor = CGColorCreateGenericRGB(0.4, 0.4, 0.4, 1);
+    
+    CGFloat locations[] = { 0.0, 1.0 };
+    
+    NSArray *colors = [NSArray arrayWithObjects:(id)startColor, (id)endColor, nil];
+    
+    CGGradientRef gradient = CGGradientCreateWithColors(colorSpace,
+                                                        (CFArrayRef) colors, locations);
+#else
+    CGFloat components[8] = { 0.9, 0.9, 0.8, 1.0,  // Start color
+        1., 1., 1., 1.0 }; // End color
+    size_t num_locations = 2;
+    CGFloat locations[] = { 0.0, 1.0 };
+    CGGradientRef gradient = CGGradientCreateWithColorComponents (colorSpace,
+                                                                  components, locations, num_locations);
+#endif
+    
+    CGRect rect = CGContextGetClipBoundingBox(context);
+    CGPoint startPoint = CGPointMake(CGRectGetMidX(rect), CGRectGetMinY(rect));
+    CGPoint endPoint = CGPointMake(CGRectGetMidX(rect), CGRectGetMaxY(rect));
+    CGContextDrawLinearGradient(context, gradient, startPoint, endPoint, 0);
+    
+    CGColorSpaceRelease(colorSpace);
+#if !GNUSTEP
+    CGColorRelease(startColor);
+    CGColorRelease(endColor);
+#endif
+    CGGradientRelease(gradient);
+}
+
+
+@end
