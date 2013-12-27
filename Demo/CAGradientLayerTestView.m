@@ -42,10 +42,24 @@
 
 -(void)test1 {
     
-    CAGradientLayer * backgroundLayer = [CAGradientLayer layer];
-    [backgroundLayer setBounds: CGRectMake(0, 0, 200, 200)];
-    [_rootLayer addSublayer: backgroundLayer];
-    [backgroundLayer setNeedsDisplay];
+    CAGradientLayer * layer = [CAGradientLayer layer];
+    [layer setBounds: CGRectMake(0, 0, 200, 200)];
+    CGColorRef redColor = CGColorCreateGenericRGB(1.0, 0.0, 0.0, 1);
+    CGColorRef orangeColor = CGColorCreateGenericRGB(1.0, 0.5, 0.0, 1);
+    CGColorRef yellowColor = CGColorCreateGenericRGB(1.0, 1.0, 0.0, 1);
+    CGColorRef blueColor = CGColorCreateGenericRGB(0.0, 0.0, 1.0, 1);
+
+    layer.colors = [NSArray arrayWithObjects:
+                    (id)redColor,
+                    (id)orangeColor,
+                    (id)yellowColor,
+                    (id)blueColor,
+                    nil];
+    layer.startPoint = CGPointMake(0, 0);
+    layer.endPoint = CGPointMake(1, 1);
+
+    [_rootLayer addSublayer: layer];
+    [layer setNeedsDisplay];
 }
 
 
