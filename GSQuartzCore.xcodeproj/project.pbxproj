@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		43840645188167B2000D092C /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43840644188167B2000D092C /* CoreText.framework */; };
+		43840647188167E5000D092C /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43840646188167E5000D092C /* CoreFoundation.framework */; };
 		43A9D075185D9B2E00720B81 /* CAAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F77517C1594AF2900F56E92 /* CAAnimation.m */; };
 		43A9D076185D9B2E00720B81 /* CABase.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F77517D1594AF2900F56E92 /* CABase.m */; };
 		43A9D077185D9B2E00720B81 /* CADisplayLink.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F77517E1594AF2900F56E92 /* CADisplayLink.m */; };
@@ -185,6 +187,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		43840644188167B2000D092C /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = ../MiraSDK/Products/android/Xcode/Platforms/MacOSX.platform/Developer/SDKs/FakeMacOSX10.9.sdk/System/Library/Frameworks/CoreText.framework; sourceTree = "<group>"; };
+		43840646188167E5000D092C /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = ../MiraSDK/Products/android/Xcode/Platforms/MacOSX.platform/Developer/SDKs/FakeMacOSX10.9.sdk/System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<group>"; };
 		43A9D0BE185D9B2E00720B81 /* QuartzCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = QuartzCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		43A9D0C5185D9C9400720B81 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		43BA695B185DA18E00526D8E /* libGLESv2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGLESv2.dylib; path = usr/lib/libGLESv2.dylib; sourceTree = SDKROOT; };
@@ -276,7 +280,9 @@
 			files = (
 				43BA695C185DA18E00526D8E /* libGLESv2.dylib in Frameworks */,
 				43DBF183185DA05A00BF9025 /* Foundation.framework in Frameworks */,
+				43840647188167E5000D092C /* CoreFoundation.framework in Frameworks */,
 				43A9D0C6185D9C9400720B81 /* CoreGraphics.framework in Frameworks */,
+				43840645188167B2000D092C /* CoreText.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -381,6 +387,8 @@
 		7F7751611594AE2A00F56E92 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				43840646188167E5000D092C /* CoreFoundation.framework */,
+				43840644188167B2000D092C /* CoreText.framework */,
 				BD0D61F218607AFF00BD348A /* CoreText.framework */,
 				43E112D1186032C800E771B4 /* QuartzCore.framework */,
 				7F74229D1594C2A400AEB117 /* OpenGL.framework */,
@@ -816,11 +824,6 @@
 				INFOPLIST_FILE = "Mac/GSQuartzCore-Info.plist";
 				LD_DEPENDENCY_INFO_FILE = "";
 				MACOSX_DEPLOYMENT_TARGET = "";
-				OTHER_LDFLAGS = (
-					"-lobjc",
-					"-lm",
-					"-lgnustl_shared",
-				);
 				PRODUCT_NAME = QuartzCore;
 				SDKROOT = macosx0.0;
 				WRAPPER_EXTENSION = framework;
@@ -838,11 +841,6 @@
 				INFOPLIST_FILE = "Mac/GSQuartzCore-Info.plist";
 				LD_DEPENDENCY_INFO_FILE = "";
 				MACOSX_DEPLOYMENT_TARGET = "";
-				OTHER_LDFLAGS = (
-					"-lobjc",
-					"-lm",
-					"-lgnustl_shared",
-				);
 				PRODUCT_NAME = QuartzCore;
 				SDKROOT = macosx0.0;
 				WRAPPER_EXTENSION = framework;
@@ -860,11 +858,6 @@
 				INFOPLIST_FILE = "Mac/GSQuartzCore-Info.plist";
 				LD_DEPENDENCY_INFO_FILE = "";
 				MACOSX_DEPLOYMENT_TARGET = "";
-				OTHER_LDFLAGS = (
-					"-lobjc",
-					"-lm",
-					"-lgnustl_shared",
-				);
 				PRODUCT_NAME = QuartzCore;
 				SDKROOT = macosx0.0;
 				WRAPPER_EXTENSION = framework;

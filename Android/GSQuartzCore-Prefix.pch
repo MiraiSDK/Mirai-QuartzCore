@@ -3,11 +3,12 @@
 //
 
 #define GNUSTEP 1
-#define ANDROID 1
 
 #ifdef __OBJC__
     #import <Foundation/Foundation.h>
+#ifndef ANDROID
     #import "AppleSupport.h"
+#endif
     #import "QuartzCore/QuartzCore.h"
 #endif
 
