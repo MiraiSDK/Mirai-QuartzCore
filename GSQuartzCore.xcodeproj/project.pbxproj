@@ -78,7 +78,7 @@
 		43DBF183185DA05A00BF9025 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F7751671594AE2A00F56E92 /* Foundation.framework */; };
 		43E112A2185EDB3400E771B4 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43A9D0C5185D9C9400720B81 /* CoreGraphics.framework */; };
 		43E112A4185EDBFF00E771B4 /* CAAction.h in Headers */ = {isa = PBXBuildFile; fileRef = 43E112A3185EDBFF00E771B4 /* CAAction.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		43E112A5185EDBFF00E771B4 /* CAAction.h in Headers */ = {isa = PBXBuildFile; fileRef = 43E112A3185EDBFF00E771B4 /* CAAction.h */; };
+		43E112A5185EDBFF00E771B4 /* CAAction.h in Headers */ = {isa = PBXBuildFile; fileRef = 43E112A3185EDBFF00E771B4 /* CAAction.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		43E112AC185EDCFF00E771B4 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43E112AB185EDCFF00E771B4 /* ImageIO.framework */; };
 		7F1DE5A415D6EBAC00C2AE2A /* CAGLShader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7F1DE5A215D6EBAC00C2AE2A /* CAGLShader.h */; };
 		7F1DE5A515D6EBAC00C2AE2A /* CAGLShader.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F1DE5A315D6EBAC00C2AE2A /* CAGLShader.m */; };
@@ -532,6 +532,7 @@
 				43A9D0A2185D9B2E00720B81 /* CATransformLayer.h in Headers */,
 				43A9D0A3185D9B2E00720B81 /* CAValueFunction.h in Headers */,
 				43A9D0A4185D9B2E00720B81 /* CoreAnimation.h in Headers */,
+				43E112A5185EDBFF00E771B4 /* CAAction.h in Headers */,
 				43A9D0A5185D9B2E00720B81 /* QuartzCore.h in Headers */,
 				43A9D0A8185D9B2E00720B81 /* CABackingStore.h in Headers */,
 				43A9D0A9185D9B2E00720B81 /* CAAnimation+FrameworkPrivate.h in Headers */,
@@ -541,7 +542,6 @@
 				43A9D0AD185D9B2E00720B81 /* CAMediaTimingFunction+FrameworkPrivate.h in Headers */,
 				43A9D0AE185D9B2E00720B81 /* CAGLSimpleFramebuffer.h in Headers */,
 				43A9D0AF185D9B2E00720B81 /* CAGLTexture.h in Headers */,
-				43E112A5185EDBFF00E771B4 /* CAAction.h in Headers */,
 				43A9D0B0185D9B2E00720B81 /* CALayer+DynamicProperties.h in Headers */,
 				43A9D0B1185D9B2E00720B81 /* CAGLShader.h in Headers */,
 				43A9D0B2185D9B2E00720B81 /* CAGLProgram.h in Headers */,
