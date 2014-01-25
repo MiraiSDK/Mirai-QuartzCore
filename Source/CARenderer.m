@@ -33,23 +33,24 @@
 #import "CALayer+FrameworkPrivate.h"
 #import "CATransaction+FrameworkPrivate.h"
 #import "CABackingStore.h"
-#if !(__APPLE__)
-#   ifdef ANDROID
-#       import <GLES/gl.h>
-#       import <GLES/glext.h>
-#   else
-#       define GL_GLEXT_PROTOTYPES 1
-#       import <GL/gl.h>
-#       import <GL/glu.h>
-#       import <GL/glext.h>
-#   endif
-#else
+
+#if defined(__APPLE__)
 #import <OpenGL/OpenGL.h>
 #import <OpenGL/gl.h>
 #import <OpenGL/glu.h>
+#elif defined(ANDROID)
+#import <GLES/gl.h>
+#import <GLES/glext.h>
+#else
+#define GL_GLEXT_PROTOTYPES 1
+#import <GL/gl.h>
+#import <GL/glu.h>
+#import <GL/glext.h>
 #endif
 
-#ifndef ANDROID
+#ifdef ANDROID
+#import <OpenGLES/EAGL.h>
+#else
 #import <AppKit/NSOpenGL.h>
 #endif
 
@@ -62,16 +63,6 @@
 #import <CoreGraphics/CoreGraphics.h>
 #endif
 
-#if ANDROID
-@interface EAGLContext : NSObject
-@end
-@implementation EAGLContext
-- (void)makeCurrentContext
-{
-    NSLog(@"unimplementation methods: %s",__PRETTY_FUNCTION__);
-}
-@end
-#endif
 
 @interface CARenderer()
 #if ANDROID
@@ -253,9 +244,45 @@
 
 /* Renders a frame to the target context. Best case scenario, it 
    should be rendering the update region only. */
+#if __OPENGL_ES__
+- (void)render
+{
+    /* If we have nothing to render, just skip rendering */
+    CGRect updateBounds = [self updateBounds];
+    if (isinf(updateBounds.origin.x) &&
+        isinf(updateBounds.origin.y))
+        return;
+
+    [_GLContext makeCurrentContext];
+
+//    glMatrixMode(GL_MODELVIEW);
+    
+//    glEnableClientState(GL_VERTEX_ARRAY);
+//    glEnableClientState(GL_COLOR_ARRAY);
+//    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    
+//    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    [self _rasterizeAll];
+    
+    /* Perform render */
+    [self _renderLayer: [[self layer] presentationLayer]
+         withTransform: CATransform3DIdentity];
+    
+    /* Restore defaults */
+//    glMatrixMode(GL_MODELVIEW);
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+//    glDisableClientState(GL_VERTEX_ARRAY);
+//    glDisableClientState(GL_COLOR_ARRAY);
+//    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+//    glDisable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ZERO);
+//    glLoadIdentity();
+}
+#else /* OPENGL */
 - (void) render
 {
-#if !ANDROID
   /* If we have nothing to render, just skip rendering */
   CGRect updateBounds = [self updateBounds];
   if (isinf(updateBounds.origin.x) &&
@@ -288,8 +315,8 @@
   glDisable(GL_BLEND);
   glBlendFunc(GL_ONE, GL_ZERO);
   glLoadIdentity();
-#endif
 }
+#endif
 
 /* Returns rectangle containing all pixels that should be updated. */
 - (CGRect) updateBounds
@@ -362,21 +389,180 @@
   [self _determineAndScheduleRasterizationForLayer: layer];
 }
 /* Internal method that renders a single layer and then proceeds by recursing, rendering its children. */
+
+#if __OPENGL_ES__
 - (void) _renderLayer: (CALayer *)layer
         withTransform: (CATransform3D)transform
 {
-#ifndef ANDROID
+    if (![layer isPresentationLayer])
+        layer = [layer presentationLayer];
+
+    // apply transform and translate to position
+
+    glClearColor(1, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    /*
+    // if the layer was offscreen-rendered, render just the texture
+    CAGLTexture * texture = [[layer backingStore] offscreenRenderTexture];
+    if (texture) {
+        
+    } else { // not offscreen-rendered
+        [layer displayIfNeeded];
+        
+        // fill vertex arrays
+        GLfloat vertices[] = {
+            0.0, 0.0,
+            [layer bounds].size.width, 0.0,
+            [layer bounds].size.width, [layer bounds].size.height,
+            
+            [layer bounds].size.width, [layer bounds].size.height,
+            0.0, [layer bounds].size.height,
+            0.0, 0.0,
+        };
+        CGRect cr = [layer contentsRect];
+        GLfloat texCoords[] = {
+            cr.origin.x,                 1.0 - (cr.origin.y),
+            cr.origin.x + cr.size.width, 1.0 - (cr.origin.y),
+            cr.origin.x + cr.size.width, 1.0 - (cr.origin.y + cr.size.height),
+            
+            cr.origin.x + cr.size.width, 1.0 - (cr.origin.y + cr.size.height),
+            cr.origin.x,                 1.0 - (cr.origin.y + cr.size.height),
+            cr.origin.x,                 1.0 - (cr.origin.y),
+        };
+        GLfloat whiteColor[] = {
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+        };
+        GLfloat backgroundColor[] = {
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+        };
+        glVertexPointer(2, GL_FLOAT, 0, vertices);
+        glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
+        
+        // apply anchor point
+        for (int i = 0; i < 6; i++)
+        {
+            vertices[i*2 + 0] -= [layer anchorPoint].x * [layer bounds].size.width;
+            vertices[i*2 + 1] -= [layer anchorPoint].y * [layer bounds].size.height;
+        }
+        
+        // apply opacity to white color
+        for (int i = 0; i < 6; i++)
+        {
+            whiteColor[i*4 + 3] *= [layer opacity];
+        }
+        
+        // apply background color
+        if ([layer backgroundColor] && CGColorGetAlpha([layer backgroundColor]) > 0)
+        {
+            const CGFloat * componentsCG = CGColorGetComponents([layer backgroundColor]);
+            GLfloat components[4] = { 0, 0, 0, 1 };
+            
+            // convert
+            components[0] = componentsCG[0];
+            components[1] = componentsCG[1];
+            components[2] = componentsCG[2];
+            if (CGColorGetNumberOfComponents([layer backgroundColor]) == 4)
+                components[3] = componentsCG[3];
+            
+            // apply opacity
+            components[3] *= [layer opacity];
+            
+            
+            // FIXME: here we presume that color contains RGBA channels.
+            // However this may depend on colorspace, number of components et al
+            memcpy(backgroundColor + 0*4, components, sizeof(GLfloat)*4);
+            memcpy(backgroundColor + 1*4, components, sizeof(GLfloat)*4);
+            memcpy(backgroundColor + 2*4, components, sizeof(GLfloat)*4);
+            memcpy(backgroundColor + 3*4, components, sizeof(GLfloat)*4);
+            memcpy(backgroundColor + 4*4, components, sizeof(GLfloat)*4);
+            memcpy(backgroundColor + 5*4, components, sizeof(GLfloat)*4);
+            glColorPointer(4, GL_FLOAT, 0, backgroundColor);
+            
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            
+        }
+        
+        // if there are some contents, draw them
+        if ([layer contents])
+        {
+            CAGLTexture * texture = nil;
+            id layerContents = [layer contents];
+            
+            if ([layerContents isKindOfClass: [CABackingStore class]])
+            {
+                CABackingStore * backingStore = layerContents;
+                
+                texture = [backingStore contentsTexture];
+            }
+#if GNUSTEP
+            else if ([layerContents isKindOfClass: NSClassFromString(@"CGImage")])
+#else
+                else if ([layerContents isKindOfClass: NSClassFromString(@"__NSCFType")] &&
+                         CFGetTypeID(layerContents) == CGImageGetTypeID())
+#endif
+                {
+                    CGImageRef image = (CGImageRef)layerContents;
+                    
+                    texture = [CAGLTexture texture];
+                    [texture loadImage: image];
+                }
+            
+#if !__OPENGL_ES__
+            if ([texture textureTarget] == GL_TEXTURE_RECTANGLE_ARB)
+            {
+                // Rectangle textures use non-normalized coordinates.
+                
+                for (int i = 0; i < 6; i++)
+                {
+                    texCoords[i*2 + 0] *= [texture width];
+                    texCoords[i*2 + 1] *= [texture height];
+                }
+            }
+#endif
+            
+            [texture bind];
+            glColorPointer(4, GL_FLOAT, 0, whiteColor);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            [texture unbind];
+            
+        }
+        
+        transform = CATransform3DConcat ([layer sublayerTransform], transform);
+        transform = CATransform3DTranslate (transform, -[layer bounds].size.width/2, -[layer bounds].size.height/2, 0);
+
+    }
+    
+    */
+
+}
+#else
+- (void) _renderLayer: (CALayer *)layer
+        withTransform: (CATransform3D)transform
+{
   if (![layer isPresentationLayer])
     layer = [layer presentationLayer];
   
   // apply transform and translate to position
   transform = CATransform3DTranslate(transform, [layer position].x, [layer position].y, 0);
   transform = CATransform3DConcat([layer transform], transform);
-  
-  if (sizeof(transform.m11) == sizeof(GLdouble))
-    glLoadMatrixd((GLdouble*)&transform);
-  else
-    glLoadMatrixf((GLfloat*)&transform);
+#ifndef __OPENGL_ES__
+    if (sizeof(transform.m11) == sizeof(GLdouble))
+        glLoadMatrixd((GLdouble*)&transform);
+    else
+#endif
 
   // if the layer was offscreen-rendered, render just the texture
   CAGLTexture * texture = [[layer backingStore] offscreenRenderTexture];
@@ -403,9 +589,11 @@
           
           
           /* Setup transform for first pass */
-          if (sizeof(rasterizedTextureTransform.m11) == sizeof(GLdouble))
-            glLoadMatrixd((GLdouble*)&rasterizedTextureTransform);
-          else
+#if !__OPENGL_ES__
+            if (sizeof(rasterizedTextureTransform.m11) == sizeof(GLdouble))
+                glLoadMatrixd((GLdouble*)&rasterizedTextureTransform);
+            else
+#endif
             glLoadMatrixf((GLfloat*)&rasterizedTextureTransform);
 
           /* Setup FBO for first pass */
@@ -425,27 +613,33 @@
           [texture bind];
           
           GLfloat textureMaxX = 1.0, textureMaxY = 1.0;
-          if ([texture textureTarget] == GL_TEXTURE_RECTANGLE_ARB)
+#if !__OPENGL_ES__
+            if ([texture textureTarget] == GL_TEXTURE_RECTANGLE_ARB)
             {
-              textureMaxX = [texture width];
-              textureMaxY = [texture height];
+                textureMaxX = [texture width];
+                textureMaxY = [texture height];
             }
-          else
+            else
+#endif
             {
               glTexParameteri([texture textureTarget], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
               glTexParameteri([texture textureTarget], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             }
-          
-          glBegin(GL_QUADS);
-          glTexCoord2f(0, 0);
-          glVertex2f(-[texture width]/2.0, -[texture height]/2.0);
-          glTexCoord2f(0, textureMaxY);
-          glVertex2f(-[texture width]/2.0, [texture height]/2.0);
-          glTexCoord2f(textureMaxX, textureMaxY);
-          glVertex2f([texture width]/2.0, [texture height]/2.0);
-          glTexCoord2f(textureMaxX, 0);
-          glVertex2f([texture width]/2.0, -[texture height]/2.0);
-          glEnd();
+#if __OPENGL_ES__
+
+#else
+            glBegin(GL_QUADS);
+            glTexCoord2f(0, 0);
+            glVertex2f(-[texture width]/2.0, -[texture height]/2.0);
+            glTexCoord2f(0, textureMaxY);
+            glVertex2f(-[texture width]/2.0, [texture height]/2.0);
+            glTexCoord2f(textureMaxX, textureMaxY);
+            glVertex2f([texture width]/2.0, [texture height]/2.0);
+            glTexCoord2f(textureMaxX, 0);
+            glVertex2f([texture width]/2.0, -[texture height]/2.0);
+            glEnd();
+#endif
+
           glDisable([texture textureTarget]);
           
           
@@ -461,9 +655,11 @@
           /************************************/
           
           /* Setup transform for second pass */
-          if (sizeof(shadowRasterizeTransform.m11) == sizeof(GLdouble))
-            glLoadMatrixd((GLdouble*)&shadowRasterizeTransform);
-          else
+#if !__OPENGL_ES__
+            if (sizeof(shadowRasterizeTransform.m11) == sizeof(GLdouble))
+                glLoadMatrixd((GLdouble*)&shadowRasterizeTransform);
+            else
+#endif
             glLoadMatrixf((GLfloat*)&shadowRasterizeTransform);
            
           
@@ -519,17 +715,21 @@
           [firstPassTexture bind];
           
           GLfloat firstPassTextureMaxX = 1.0, firstPassTextureMaxY = 1.0;
-          if ([firstPassTexture textureTarget] == GL_TEXTURE_RECTANGLE_ARB)
+#if !__OPENGL_ES__
+            if ([firstPassTexture textureTarget] == GL_TEXTURE_RECTANGLE_ARB)
             {
-              firstPassTextureMaxX = [firstPassTexture width];
-              firstPassTextureMaxY = [firstPassTexture height];
+                firstPassTextureMaxX = [firstPassTexture width];
+                firstPassTextureMaxY = [firstPassTexture height];
             }
-          else
+            else
+#endif
             {
               glTexParameteri([firstPassTexture textureTarget], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
               glTexParameteri([firstPassTexture textureTarget], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
             }
+#if __OPENGL_ES__
+#else
           glBegin(GL_QUADS);
           glTexCoord2f(0, 0);
           glVertex2f(-[firstPassTexture width]/2.0, -[firstPassTexture height]/2.0);
@@ -540,6 +740,7 @@
           glTexCoord2f(firstPassTextureMaxX, 0);
           glVertex2f([firstPassTexture width]/2.0, -[firstPassTexture height]/2.0);
           glEnd();
+#endif
           glDisable([firstPassTexture textureTarget]);
           
           glUseProgram(0);
@@ -554,25 +755,31 @@
           /************************************/
           
           /* Finally! Draw shadow into draw buffer */
-          if (sizeof(transform.m11) == sizeof(GLdouble))
-            glLoadMatrixd((GLdouble*)&transform);
-          else
+#if !__OPENGL_ES__
+            if (sizeof(transform.m11) == sizeof(GLdouble))
+                glLoadMatrixd((GLdouble*)&transform);
+            else
+#endif
             glLoadMatrixf((GLfloat*)&transform);
           glTranslatef([layer shadowOffset].width, [layer shadowOffset].height, 0);
 
           [secondPassTexture bind];
 
           GLfloat secondPassTextureMaxX = 1.0, secondPassTextureMaxY = 1.0;
-          if ([secondPassTexture textureTarget] == GL_TEXTURE_RECTANGLE_ARB)
+#if !__OPENGL_ES__
+            if ([secondPassTexture textureTarget] == GL_TEXTURE_RECTANGLE_ARB)
             {
-              secondPassTextureMaxX = [secondPassTexture width];
-              secondPassTextureMaxY = [secondPassTexture height];
+                secondPassTextureMaxX = [secondPassTexture width];
+                secondPassTextureMaxY = [secondPassTexture height];
             }
-          else
+            else
+#endif
             {
               glTexParameteri([secondPassTexture textureTarget], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
               glTexParameteri([secondPassTexture textureTarget], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             }
+#if __OPENGL_ES__
+#else
           glBegin(GL_QUADS);
           glTexCoord2f(0, 0);
           glVertex2f(-[secondPassTexture width]/2.0, -[secondPassTexture height]/2.0);
@@ -583,15 +790,18 @@
           glTexCoord2f(secondPassTextureMaxX, 0);
           glVertex2f([secondPassTexture width]/2.0, -[secondPassTexture height]/2.0);
           glEnd();
+#endif
           glDisable([secondPassTexture textureTarget]);
           
           [firstPassTexture release];
           [secondPassTexture release];
           
           /* Without shadow offset */
-          if (sizeof(transform.m11) == sizeof(GLdouble))
-            glLoadMatrixd((GLdouble*)&transform);
-          else
+#if !__OPENGL_ES__
+            if (sizeof(transform.m11) == sizeof(GLdouble))
+                glLoadMatrixd((GLdouble*)&transform);
+            else
+#endif
             glLoadMatrixf((GLfloat*)&transform);
 
         }
@@ -602,9 +812,11 @@
       #warning Intentionally applying shader to offscreen-rendered layer
       [_simpleProgram use];
       GLint loc;
-      if ([texture textureTarget] == GL_TEXTURE_RECTANGLE_ARB)
-        loc = [_simpleProgram locationForUniform:@"texture_2drect"];
-      else
+#if !__OPENGL_ES__
+        if ([texture textureTarget] == GL_TEXTURE_RECTANGLE_ARB)
+            loc = [_simpleProgram locationForUniform:@"texture_2drect"];
+        else
+#endif
         loc = [_simpleProgram locationForUniform:@"texture_2d"];
       
       [_simpleProgram bindUniformAtLocation: loc
@@ -615,17 +827,21 @@
       [texture bind];
       
       GLfloat textureMaxX = 1.0, textureMaxY = 1.0;
-      if ([texture textureTarget] == GL_TEXTURE_RECTANGLE_ARB)
+#if !__OPENGL_ES__
+        if ([texture textureTarget] == GL_TEXTURE_RECTANGLE_ARB)
         {
-          textureMaxX = [texture width];
-          textureMaxY = [texture height];
+            textureMaxX = [texture width];
+            textureMaxY = [texture height];
         }
-      else
+        else
+#endif
         {
           glTexParameteri([texture textureTarget], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
           glTexParameteri([texture textureTarget], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         }
         
+#if __OPENGL_ES__
+#else
       glBegin(GL_QUADS);
       glTexCoord2f(0, 0);
       glVertex2f(-256, -256);
@@ -636,6 +852,7 @@
       glTexCoord2f(textureMaxX, 0);
       glVertex2f(256, -256);
       glEnd();
+#endif
       glDisable([texture textureTarget]);
       
       #warning Intentionally coloring offscreen-rendered layer
@@ -758,16 +975,18 @@
           [texture loadImage: image];
         }
       
-      if ([texture textureTarget] == GL_TEXTURE_RECTANGLE_ARB)
+#if !__OPENGL_ES__
+        if ([texture textureTarget] == GL_TEXTURE_RECTANGLE_ARB)
         {
-          /* Rectangle textures use non-normalized coordinates. */
-          
-          for (int i = 0; i < 6; i++)
+            /* Rectangle textures use non-normalized coordinates. */
+            
+            for (int i = 0; i < 6; i++)
             {
-              texCoords[i*2 + 0] *= [texture width];
-              texCoords[i*2 + 1] *= [texture height];
+                texCoords[i*2 + 0] *= [texture width];
+                texCoords[i*2 + 1] *= [texture height];
             }
         }
+#endif
       
       [texture bind];
       glColorPointer(4, GL_FLOAT, 0, whiteColor);
@@ -782,8 +1001,8 @@
     {
       [self _renderLayer: sublayer withTransform: transform];
     }
-#endif
 }
+#endif
 
 - (void) _determineAndScheduleRasterizationForLayer: (CALayer*)layer
 {

@@ -6,7 +6,11 @@
 
 #ifdef __OBJC__
     #import <Foundation/Foundation.h>
-#ifndef ANDROID
+#ifdef ANDROID
+#undef __APPLE__
+#define __OPENGL_ES__ 1
+#else
+#define __OPENGL_ES__ 0
     #import "AppleSupport.h"
 #endif
     #import "QuartzCore/QuartzCore.h"

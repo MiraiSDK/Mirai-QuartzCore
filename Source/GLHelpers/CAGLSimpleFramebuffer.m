@@ -54,9 +54,12 @@ static NSMutableArray * framebufferStack = nil;
 
   [_texture bind];
   /* Ogre3d sets these parameters to ensure functionality under nVidia cards */
-#if !ANDROID
 
+#if __OPENGL_ES__
+#else
   glTexParameteri([_texture textureTarget], GL_TEXTURE_MAX_LEVEL, 0);
+#endif
+
   glTexParameteri([_texture textureTarget], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri([_texture textureTarget], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri([_texture textureTarget], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -64,8 +67,12 @@ static NSMutableArray * framebufferStack = nil;
   [_texture loadEmptyImageWithWidth: width
                              height: height];
   
-  glBindFramebuffer(GL_FRAMEBUFFER_EXT, _framebufferID);
-  glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, [_texture textureTarget], [_texture textureID], 0);
+#if __OPENGL_ES__
+    glBindFramebuffer(GL_FRAMEBUFFER, _framebufferID);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, [_texture textureTarget], [_texture textureID], 0);
+#else
+    glBindFramebuffer(GL_FRAMEBUFFER_EXT, _framebufferID);
+    glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, [_texture textureTarget], [_texture textureID], 0);
 #endif
 
   return self;
@@ -99,52 +106,73 @@ static NSMutableArray * framebufferStack = nil;
   
   _depthBufferEnabled = depthBufferEnabled;
   [self bind];
-#if !ANDROID
+
   if (_depthBufferEnabled)
   {
     glGenRenderbuffers(1, &_depthRenderbufferID);
-    glBindRenderbuffer(GL_RENDERBUFFER_EXT, _depthRenderbufferID);
-    glRenderbufferStorage(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, [_texture width], [_texture height]);
+#if __OPENGL_ES__
+      glBindRenderbuffer(GL_RENDERBUFFER, _depthRenderbufferID);
+      glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24_OES, [_texture width], [_texture height]);
+      
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderbufferID);
+#else
+      glBindRenderbuffer(GL_RENDERBUFFER_EXT, _depthRenderbufferID);
+      glRenderbufferStorage(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, [_texture width], [_texture height]);
+      
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, _depthRenderbufferID);
+#endif
 
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, _depthRenderbufferID);
   }
   else
   {
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, 0);
+#if __OPENGL_ES__
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+#else
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, 0);
+#endif
     
     glDeleteRenderbuffers(1, &_depthRenderbufferID);
   }
-#endif
   
   [self unbind];
 }
 
 - (void) bind
 {
-#if !ANDROID
   if (!framebufferStack)
     {
       framebufferStack = [NSMutableArray new];
     }
-  glBindFramebuffer(GL_FRAMEBUFFER_EXT, _framebufferID);
-  [framebufferStack addObject: self];
+#if __OPENGL_ES__
+    glBindFramebuffer(GL_FRAMEBUFFER, _framebufferID);
+#else
+    glBindFramebuffer(GL_FRAMEBUFFER_EXT, _framebufferID);
 #endif
+
+  [framebufferStack addObject: self];
 }
 
 - (void) unbind
 {
-#if !ANDROID
   if ([framebufferStack lastObject] != self)
     {
       NSLog(@"Unbinding a framebuffer that is not on top of the stack");
     }
   [framebufferStack removeLastObject];
   
-  if ([framebufferStack count] > 0)
-    glBindFramebuffer(GL_FRAMEBUFFER_EXT, [((CAGLSimpleFramebuffer*)[framebufferStack lastObject]) framebufferID]);
-  else
-    glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
+    if ([framebufferStack count] > 0)
+#if __OPENGL_ES__
+        glBindFramebuffer(GL_FRAMEBUFFER, [((CAGLSimpleFramebuffer*)[framebufferStack lastObject]) framebufferID]);
+#else
+        glBindFramebuffer(GL_FRAMEBUFFER_EXT, [((CAGLSimpleFramebuffer*)[framebufferStack lastObject]) framebufferID]);
 #endif
+  else
+#if __OPENGL_ES__
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+#else
+      glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
+#endif
+
 }
 
 /*

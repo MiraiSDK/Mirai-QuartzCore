@@ -221,14 +221,13 @@
 	GLuint internalFormat = GL_RGBA; /* does not depend on hasAlpha, we always paint a RGBA image into CGContext (sadly) */
   #endif
   
-#if !ANDROID
 
   #if !USE_RECT
   /* Since we release the context, we also release its pixels.
      We cannot use client storage extension. */
-  glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, GL_FALSE);
+    // FIXME: WHAT?
+//  glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, GL_FALSE);
   #endif
-#endif
   
   [self loadRGBATexImage: data
                    width: width
@@ -259,8 +258,10 @@
 {
   char pixels[[self width]*[self height]*4];
   [self bind];
-#if !ANDROID
-  glGetTexImage([self textureTarget], 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+#if __OPENGL_ES__
+    NSLog(@"%s unimplemented",__PRETTY_FUNCTION__);
+#else
+    glGetTexImage([self textureTarget], 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 #endif
     
   CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);

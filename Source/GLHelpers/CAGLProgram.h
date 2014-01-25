@@ -25,20 +25,18 @@
 */
 
 #import <Foundation/Foundation.h>
-#if (__APPLE__)
-#import <OpenGL/OpenGL.h>
-#import <OpenGL/gl.h>
-#import <OpenGL/glu.h>
+#if defined (__APPLE__)
+#   import <OpenGL/OpenGL.h>
+#   import <OpenGL/gl.h>
+#   import <OpenGL/glu.h>
+#elif defined(ANDROID)
+#   import <GLES2/gl2.h>
+#   import <GLES2/gl2ext.h>
 #else
-#   ifdef ANDROID
-#       import <GLES2/gl2.h>
-#       import <GLES2/gl2ext.h>
-#   else
-#       define GL_GLEXT_PROTOTYPES 1
-#       import <GL/gl.h>
-#       import <GL/glu.h>
-#       import <GL/glext.h>
-#   endif
+#   define GL_GLEXT_PROTOTYPES 1
+#   import <GL/gl.h>
+#   import <GL/glu.h>
+#   import <GL/glext.h>
 #endif
 
 @interface CAGLProgram : NSObject
