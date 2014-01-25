@@ -54,8 +54,8 @@
 		43A9D0A3185D9B2E00720B81 /* CAValueFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 7F7751B51594AF3A00F56E92 /* CAValueFunction.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		43A9D0A4185D9B2E00720B81 /* CoreAnimation.h in Headers */ = {isa = PBXBuildFile; fileRef = 7F7751B61594AF3A00F56E92 /* CoreAnimation.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		43A9D0A5185D9B2E00720B81 /* QuartzCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 7F7751B71594AF3A00F56E92 /* QuartzCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		43A9D0A6185D9B2E00720B81 /* AppleSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = 7F5CF3DD1594B35B00A5D114 /* AppleSupport.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		43A9D0A7185D9B2E00720B81 /* AppleSupportRevert.h in Headers */ = {isa = PBXBuildFile; fileRef = 7F5909751594B7ED00AF49AF /* AppleSupportRevert.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		43A9D0A6185D9B2E00720B81 /* AppleSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = 7F5CF3DD1594B35B00A5D114 /* AppleSupport.h */; };
+		43A9D0A7185D9B2E00720B81 /* AppleSupportRevert.h in Headers */ = {isa = PBXBuildFile; fileRef = 7F5909751594B7ED00AF49AF /* AppleSupportRevert.h */; };
 		43A9D0A8185D9B2E00720B81 /* CABackingStore.h in Headers */ = {isa = PBXBuildFile; fileRef = 7F43F22C1594ECD800F1C5EB /* CABackingStore.h */; };
 		43A9D0A9185D9B2E00720B81 /* CAAnimation+FrameworkPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 7F8CC66C15A0A964003AEB38 /* CAAnimation+FrameworkPrivate.h */; };
 		43A9D0AA185D9B2E00720B81 /* CALayer+FrameworkPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 7F8CC66D15A0A964003AEB38 /* CALayer+FrameworkPrivate.h */; };
@@ -533,8 +533,6 @@
 				43A9D0A3185D9B2E00720B81 /* CAValueFunction.h in Headers */,
 				43A9D0A4185D9B2E00720B81 /* CoreAnimation.h in Headers */,
 				43A9D0A5185D9B2E00720B81 /* QuartzCore.h in Headers */,
-				43A9D0A6185D9B2E00720B81 /* AppleSupport.h in Headers */,
-				43A9D0A7185D9B2E00720B81 /* AppleSupportRevert.h in Headers */,
 				43A9D0A8185D9B2E00720B81 /* CABackingStore.h in Headers */,
 				43A9D0A9185D9B2E00720B81 /* CAAnimation+FrameworkPrivate.h in Headers */,
 				43A9D0AA185D9B2E00720B81 /* CALayer+FrameworkPrivate.h in Headers */,
@@ -547,6 +545,8 @@
 				43A9D0B0185D9B2E00720B81 /* CALayer+DynamicProperties.h in Headers */,
 				43A9D0B1185D9B2E00720B81 /* CAGLShader.h in Headers */,
 				43A9D0B2185D9B2E00720B81 /* CAGLProgram.h in Headers */,
+				43A9D0A6185D9B2E00720B81 /* AppleSupport.h in Headers */,
+				43A9D0A7185D9B2E00720B81 /* AppleSupportRevert.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
