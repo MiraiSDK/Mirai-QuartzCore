@@ -38,11 +38,16 @@
 #if GNUSTEP
 #import <CoreGraphics/CoreGraphics.h>
 #endif
-#if (__APPLE__)
+#if defined (__APPLE__)
 #define GL_GLEXT_PROTOTYPES 1
-#import <OpenGL/OpenGL.h>
-#import <OpenGL/gl.h>
-#import <OpenGL/glu.h>
+#   if TARGET_OS_IPHONE
+#   import <OpenGLES/ES2/gl.h>
+#   import <OpenGLES/ES2/glext.h>
+#   else
+#   import <OpenGL/OpenGL.h>
+#   import <OpenGL/gl.h>
+#   import <OpenGL/glu.h>
+#   endif
 #else
 #   ifdef ANDROID
 #       import <GLES/gl.h>

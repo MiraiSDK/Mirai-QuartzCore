@@ -36,10 +36,15 @@
 #import "CABackingStore.h"
 #import "CALayer+Texture.h"
 
-#if defined(__APPLE__)
-#import <OpenGL/OpenGL.h>
-#import <OpenGL/gl.h>
-#import <OpenGL/glu.h>
+#if defined (__APPLE__)
+#   if TARGET_OS_IPHONE
+#   import <OpenGLES/ES2/gl.h>
+#   import <OpenGLES/ES2/glext.h>
+#   else
+#   import <OpenGL/OpenGL.h>
+#   import <OpenGL/gl.h>
+#   import <OpenGL/glu.h>
+#   endif
 #elif defined(ANDROID)
 #import <GLES2/gl2.h>
 #import <GLES2/gl2ext.h>
@@ -52,7 +57,7 @@
 #import <GL/glext.h>
 #endif
 
-#ifdef ANDROID
+#if defined(ANDROID) || defined(TARGET_OS_IPHONE)
 #import <OpenGLES/EAGL.h>
 #else
 #import <AppKit/NSOpenGL.h>
@@ -69,7 +74,7 @@
 
 
 @interface CARenderer()
-#if ANDROID
+#if ANDROID || TARGET_OS_IPHONE
 @property (assign) EAGLContext *GLContext;
 - (id) initWithEAGLContext:(EAGLContext *)ctx options: (NSDictionary *)options;
 #else
@@ -121,7 +126,7 @@
 
 /* *** class methods *** */
 /* Creates a renderer which renders into an OpenGL context. */
-#if ANDROID
+#if ANDROID || TARGET_OS_IPHONE
 + (CARenderer *)rendererWithEAGLContext:(EAGLContext *)context options:(NSDictionary *)options
 {
     return [[[self alloc] initWithEAGLContext: context
@@ -139,7 +144,7 @@
 #endif
 
 /* *** methods *** */
-#ifdef ANDROID
+#if ANDROID || TARGET_OS_IPHONE
 - (id) initWithEAGLContext:(EAGLContext *)ctx options: (NSDictionary *)options
 #else
 - (id) initWithNSOpenGLContext: (NSOpenGLContext*)ctx

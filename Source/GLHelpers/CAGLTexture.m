@@ -80,7 +80,7 @@
 - (void) loadEmptyImageWithWidth: (GLuint)width
                           height: (GLuint)height
 {
-#if __APPLE__
+#if __APPLE__ && !TARGET_OS_IPHONE
   glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, GL_FALSE);
 #endif
     
@@ -127,7 +127,7 @@
     data);
 #else
 
-  #if !USE_RECT
+  #if !USE_RECT && !TARGET_OS_IPHONE
   /* On Apple, and not using rectangular textures?
      Client extension can't be used due to use of gluBuild2DMipmaps(), so
      ensure it's off. */
@@ -146,7 +146,11 @@
     width,
     height,
     GL_RGBA,
+#if TARGET_OS_IPHONE
+    GL_UNSIGNED_INT_24_8_OES,
+#else
     GL_UNSIGNED_INT_8_8_8_8_REV,
+#endif
     data);
 #endif
 
@@ -265,18 +269,18 @@
     glGetTexImage([self textureTarget], 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 #endif
     
-  CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
-  CGContextRef context = CGBitmapContextCreate(pixels, [self width], [self height], 8, [self width]*4, colorSpace, kCGImageAlphaPremultipliedLast);
-  CGImageRef image = CGBitmapContextCreateImage(context);
-  CGContextRelease(context);
-  CGColorSpaceRelease(colorSpace);
-  
-  NSMutableData * data = [NSMutableData data];
-  CGImageDestinationRef destination = CGImageDestinationCreateWithData((CFMutableDataRef)data, (CFStringRef)@"public.png", 1, NULL);
-  CGImageDestinationAddImage(destination, image, NULL);
-  CGImageDestinationFinalize(destination);
-  CGImageRelease(image);
-  
-  [data writeToFile:path atomically:YES];
+//  CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
+//  CGContextRef context = CGBitmapContextCreate(pixels, [self width], [self height], 8, [self width]*4, colorSpace, kCGImageAlphaPremultipliedLast);
+//  CGImageRef image = CGBitmapContextCreateImage(context);
+//  CGContextRelease(context);
+//  CGColorSpaceRelease(colorSpace);
+//  
+//  NSMutableData * data = [NSMutableData data];
+//  CGImageDestinationRef destination = CGImageDestinationCreateWithData((CFMutableDataRef)data, (CFStringRef)@"public.png", 1, NULL);
+//  CGImageDestinationAddImage(destination, image, NULL);
+//  CGImageDestinationFinalize(destination);
+//  CGImageRelease(image);
+//  
+//  [data writeToFile:path atomically:YES];
 }
 @end

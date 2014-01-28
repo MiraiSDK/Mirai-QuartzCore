@@ -25,18 +25,18 @@
    Boston, MA 02110-1301, USA.
 */
 
-#import "CABase.h"
+#import <QuartzCore/CABase.h>
 #if GNUSTEP
 #import <CoreGraphics/CoreGraphics.h>
 #endif
 
 @class CAAnimation;
 @class CALayer;
-#ifdef ANDROID
+//#ifdef ANDROID
 @class EAGLContext;
-#else
-@class NSOpenGLContext;
-#endif
+//#else
+//@class NSOpenGLContext;
+//#endif
 
 typedef struct _CVTimeStamp
 {
@@ -55,11 +55,11 @@ typedef struct _CVTimeStamp
 @class CAGLProgram;
 @interface CARenderer : NSObject
 {
-#ifdef ANDROID
+//#ifdef ANDROID
     EAGLContext * _GLContext;
-#else
-  NSOpenGLContext * _GLContext;
-#endif
+//#else
+//  NSOpenGLContext * _GLContext;
+//#endif
   CALayer * _layer;
   CGRect _bounds;
   CGRect _updateBounds;
@@ -79,12 +79,12 @@ typedef struct _CVTimeStamp
   CAGLProgram * _blurVertProgram;
 }
 
-#ifdef ANDROID
+//#ifdef ANDROID
 + (CARenderer *)rendererWithEAGLContext:(EAGLContext *)context options:(NSDictionary *)options;
-#else
-+ (CARenderer*)rendererWithNSOpenGLContext: (NSOpenGLContext *)context
-                                   options: (NSDictionary *)options;
-#endif
+//#else
+//+ (CARenderer*)rendererWithNSOpenGLContext: (NSOpenGLContext *)context
+//                                   options: (NSDictionary *)options;
+//#endif
 
 @property (retain) CALayer *layer; /* root layer */
 @property (nonatomic, assign) CGRect bounds;
