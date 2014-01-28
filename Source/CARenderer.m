@@ -39,8 +39,10 @@
 #import <OpenGL/gl.h>
 #import <OpenGL/glu.h>
 #elif defined(ANDROID)
-#import <GLES/gl.h>
-#import <GLES/glext.h>
+#import <GLES2/gl2.h>
+#import <GLES2/gl2ext.h>
+#import <OpenGLES/EAGL.h>
+#import <OpenGLES/EAGLDrawable.h>
 #else
 #define GL_GLEXT_PROTOTYPES 1
 #import <GL/gl.h>
@@ -122,7 +124,11 @@
       [self setGLContext: ctx];
       
       /* SHADER SETUP */
-      [ctx makeCurrentContext];
+#ifdef ANDROID
+        [EAGLContext setCurrentContext:ctx];
+#else
+        [ctx makeCurrentContext];
+#endif
 
       /* Simple, passthrough shader */
       CAGLVertexShader * simpleVS = [CAGLVertexShader alloc];
@@ -253,7 +259,11 @@
         isinf(updateBounds.origin.y))
         return;
 
+#ifdef ANDROID
+    [EAGLContext setCurrentContext:_GLContext];
+#else
     [_GLContext makeCurrentContext];
+#endif
 
 //    glMatrixMode(GL_MODELVIEW);
     
@@ -262,7 +272,9 @@
 //    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     
 //    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glClearColor(0, 0, 1, 1);
+    glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
 
     [self _rasterizeAll];
     
@@ -277,7 +289,7 @@
 //    glDisableClientState(GL_COLOR_ARRAY);
 //    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 //    glDisable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ZERO);
+//    glBlendFunc(GL_ONE, GL_ZERO);
 //    glLoadIdentity();
 }
 #else /* OPENGL */
@@ -399,12 +411,13 @@
 
     // apply transform and translate to position
 
-    glClearColor(1, 0, 0, 1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    glClearColor(0, 1, 0, 1);
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    /*
+    
     // if the layer was offscreen-rendered, render just the texture
     CAGLTexture * texture = [[layer backingStore] offscreenRenderTexture];
+    /*
     if (texture) {
         
     } else { // not offscreen-rendered
