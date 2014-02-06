@@ -75,7 +75,6 @@
 		43A9D0B8185D9B2E00720B81 /* blurhoriz.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 7F639EFD15D7C5AF007DFA18 /* blurhoriz.fsh */; };
 		43A9D0B9185D9B2E00720B81 /* blurvert.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 7F639EFF15D7C6EB007DFA18 /* blurvert.fsh */; };
 		43A9D0C6185D9C9400720B81 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43A9D0C5185D9C9400720B81 /* CoreGraphics.framework */; };
-		43BA695C185DA18E00526D8E /* libGLESv2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 43BA695B185DA18E00526D8E /* libGLESv2.dylib */; };
 		43DBF183185DA05A00BF9025 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F7751671594AE2A00F56E92 /* Foundation.framework */; };
 		43E112A2185EDB3400E771B4 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43A9D0C5185D9C9400720B81 /* CoreGraphics.framework */; };
 		43E112A4185EDBFF00E771B4 /* CAAction.h in Headers */ = {isa = PBXBuildFile; fileRef = 43E112A3185EDBFF00E771B4 /* CAAction.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -193,7 +192,6 @@
 		4398B9681897E8B900445C3A /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = ../MiraSDK/Products/android/Xcode/Platforms/MacOSX.platform/Developer/SDKs/FakeMacOSX10.9.sdk/System/Library/Frameworks/OpenGLES.framework; sourceTree = "<group>"; };
 		43A9D0BE185D9B2E00720B81 /* QuartzCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = QuartzCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		43A9D0C5185D9C9400720B81 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		43BA695B185DA18E00526D8E /* libGLESv2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGLESv2.dylib; path = usr/lib/libGLESv2.dylib; sourceTree = SDKROOT; };
 		43BA6965185DA26500526D8E /* GSQuartzCore-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GSQuartzCore-Prefix.pch"; sourceTree = "<group>"; };
 		43E112A3185EDBFF00E771B4 /* CAAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CAAction.h; sourceTree = "<group>"; };
 		43E112AB185EDCFF00E771B4 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
@@ -281,7 +279,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				4398B9691897E8B900445C3A /* OpenGLES.framework in Frameworks */,
-				43BA695C185DA18E00526D8E /* libGLESv2.dylib in Frameworks */,
 				43DBF183185DA05A00BF9025 /* Foundation.framework in Frameworks */,
 				43840647188167E5000D092C /* CoreFoundation.framework in Frameworks */,
 				43A9D0C6185D9C9400720B81 /* CoreGraphics.framework in Frameworks */,
@@ -397,7 +394,6 @@
 				43E112D1186032C800E771B4 /* QuartzCore.framework */,
 				7F74229D1594C2A400AEB117 /* OpenGL.framework */,
 				43E112AB185EDCFF00E771B4 /* ImageIO.framework */,
-				43BA695B185DA18E00526D8E /* libGLESv2.dylib */,
 				43A9D0C5185D9C9400720B81 /* CoreGraphics.framework */,
 				7F7751641594AE2A00F56E92 /* Other Frameworks */,
 			);
