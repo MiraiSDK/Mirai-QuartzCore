@@ -55,6 +55,7 @@
 
 - (id) initWithFile: (NSString*)file
              ofType: (NSString*)type;
+- (id) initWithSource: (NSString *)source;
 - (void) compile;
 - (void) printLog;
 - (GLint) compileStatus;

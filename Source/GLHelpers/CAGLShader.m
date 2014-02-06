@@ -60,6 +60,7 @@
                                          ofType: type];
   if (!filePath)
     {
+      NSLog(@"Can't find shader: %@.%@",file,type);
       [self release];
       return nil;
     }
@@ -75,6 +76,22 @@
     }
   [self setSource: source];
   
+  return self;
+}
+
+- (id) initWithSource: (NSString *)source
+{
+  self = [self init];
+  if (!self)
+    return nil;
+
+  if (!source)
+  {
+    [self release];
+    return nil;
+  }
+
+  [self setSource:source];
   return self;
 }
 
