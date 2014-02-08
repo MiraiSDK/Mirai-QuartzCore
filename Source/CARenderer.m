@@ -131,12 +131,44 @@
 #endif
 
       /* Simple, passthrough shader */
-      CAGLVertexShader * simpleVS = [CAGLVertexShader alloc];
-      simpleVS = [simpleVS initWithFile: @"simple"
-                                 ofType: @"vsh"];
-      CAGLFragmentShader * simpleFS = [CAGLFragmentShader alloc];
-      simpleFS = [simpleFS initWithFile: @"simple"
-                                 ofType: @"fsh"];
+      CAGLVertexShader * simpleVS = [[CAGLVertexShader alloc] initWithSource:@"\
+attribute vec4 position;\
+attribute vec4 color;\
+attribute vec3 normal;\
+attribute vec2 texturecoord_2d;\
+\
+uniform mat4 modelViewProjectionMatrix;\
+varying vec4 colorVarying;\
+varying vec2 fragmentTextureCoordinates;\
+\
+void main()\
+{\
+gl_Position = modelViewProjectionMatrix * position;\
+\
+colorVarying.xyz = normal;\
+colorVarying = color;\
+fragmentTextureCoordinates = texturecoord_2d;\
+}\
+"];
+        
+//      simpleVS = [simpleVS initWithFile: @"simple"
+//                                 ofType: @"vsh"];
+      CAGLFragmentShader * simpleFS = [[CAGLFragmentShader alloc] initWithSource:@"\
+precision highp float;\
+\
+uniform sampler2D texture_2d;\
+\
+varying vec4 colorVarying;\
+varying mediump vec2 fragmentTextureCoordinates;\
+\
+void main()\
+{\
+gl_FragColor = texture2D(texture_2d, fragmentTextureCoordinates);\
+gl_FragColor = colorVarying;\
+}\
+"];
+//      simpleFS = [simpleFS initWithFile: @"simple"
+//                                 ofType: @"fsh"];
       NSArray * objectsForSimpleShader = [NSArray arrayWithObjects: simpleVS, simpleFS, nil];
       [simpleVS release];
       [simpleFS release];
@@ -147,31 +179,30 @@
       _simpleProgram = simpleProgram;
       
       /* Horizontal and vertical blur shader */
-      CAGLVertexShader * blurBaseVS = [CAGLVertexShader alloc];
-      blurBaseVS = [blurBaseVS initWithFile: @"blurbase"
-                                     ofType: @"vsh"];
-      CAGLFragmentShader * blurHorizFS = [CAGLFragmentShader alloc];
-      blurHorizFS = [blurHorizFS initWithFile: @"blurhoriz"
-                                       ofType: @"fsh"];
-      CAGLFragmentShader * blurVertFS = [CAGLFragmentShader alloc];
-      blurVertFS = [blurVertFS initWithFile: @"blurvert"
-                                     ofType: @"fsh"];
-      NSArray * objectsForBlurHorizShader = [NSArray arrayWithObjects: blurBaseVS, blurHorizFS, nil];
-      NSArray * objectsForBlurVertShader = [NSArray arrayWithObjects: blurBaseVS, blurVertFS, nil];
-      [blurBaseVS release];
-      [blurHorizFS release];
-      [blurVertFS release];
+//      CAGLVertexShader * blurBaseVS = [CAGLVertexShader alloc];
+//      blurBaseVS = [blurBaseVS initWithFile: @"blurbase"
+//                                     ofType: @"vsh"];
+//      CAGLFragmentShader * blurHorizFS = [CAGLFragmentShader alloc];
+//      blurHorizFS = [blurHorizFS initWithFile: @"blurhoriz"
+//                                       ofType: @"fsh"];
+//      CAGLFragmentShader * blurVertFS = [CAGLFragmentShader alloc];
+//      blurVertFS = [blurVertFS initWithFile: @"blurvert"
+//                                     ofType: @"fsh"];
+//      NSArray * objectsForBlurHorizShader = [NSArray arrayWithObjects: blurBaseVS, blurHorizFS, nil];
+//      NSArray * objectsForBlurVertShader = [NSArray arrayWithObjects: blurBaseVS, blurVertFS, nil];
+//      [blurBaseVS release];
+//      [blurHorizFS release];
+//      [blurVertFS release];
       
-      CAGLProgram * blurHorizProgram = [CAGLProgram alloc];
-      blurHorizProgram = [blurHorizProgram initWithArrayOfShaders: objectsForBlurHorizShader];
-      [blurHorizProgram link];
-      _blurHorizProgram = blurHorizProgram;
-      
-      CAGLProgram * blurVertProgram = [CAGLProgram alloc];
-      blurVertProgram = [blurVertProgram initWithArrayOfShaders: objectsForBlurVertShader];
-      [blurVertProgram link];
-      _blurVertProgram = blurVertProgram;
-      
+//      CAGLProgram * blurHorizProgram = [CAGLProgram alloc];
+//      blurHorizProgram = [blurHorizProgram initWithArrayOfShaders: objectsForBlurHorizShader];
+//      [blurHorizProgram link];
+//      _blurHorizProgram = blurHorizProgram;
+//      
+//      CAGLProgram * blurVertProgram = [CAGLProgram alloc];
+//      blurVertProgram = [blurVertProgram initWithArrayOfShaders: objectsForBlurVertShader];
+//      [blurVertProgram link];
+//      _blurVertProgram = blurVertProgram;
     }
   return self;
 }
