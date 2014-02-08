@@ -29,6 +29,7 @@
 #import <Foundation/Foundation.h>
 #import "QuartzCore/CARenderer.h"
 #import "QuartzCore/CATransform3D.h"
+#import "QuartzCore/CATransform3D_Private.h"
 #import "QuartzCore/CALayer.h"
 #import "CALayer+FrameworkPrivate.h"
 #import "CATransaction+FrameworkPrivate.h"
@@ -86,7 +87,19 @@
         withTransform: (CATransform3D)transform;
 @end
 
-@implementation CARenderer
+@implementation CARenderer {
+    CATransform3D _modelViewProjectionMatrix;
+    CATransform3D _projectionMatrix;
+
+    GLuint _positionSlot;
+    GLuint _colorSlot;
+    GLuint _normalSolt;
+    GLuint _texturecoord2dSolt;
+    GLuint _projectionUniform;
+    
+    CGSize _screenSize;
+
+}
 @synthesize layer=_layer;
 @synthesize bounds=_bounds;
 
@@ -130,6 +143,9 @@
         [ctx makeCurrentContext];
 #endif
 
+        //FIXME: hardcode screensize
+        _screenSize = CGSizeMake(720, 1280);
+        
       /* Simple, passthrough shader */
       CAGLVertexShader * simpleVS = [[CAGLVertexShader alloc] initWithSource:@"\
 attribute vec4 position;\
@@ -203,6 +219,16 @@ gl_FragColor = colorVarying;\
 //      blurVertProgram = [blurVertProgram initWithArrayOfShaders: objectsForBlurVertShader];
 //      [blurVertProgram link];
 //      _blurVertProgram = blurVertProgram;
+        
+#if __OPENGL_ES__
+        
+        [simpleProgram use];
+        _positionSlot = [simpleProgram locationForAttribute:@"position"];
+        _colorSlot = [simpleProgram locationForAttribute:@"color"];
+        _texturecoord2dSolt = [simpleProgram locationForAttribute:@"texturecoord_2d"];
+        
+        _projectionUniform = [simpleProgram locationForUniform:@"modelViewProjectionMatrix"];
+#endif
     }
   return self;
 }
@@ -296,25 +322,32 @@ gl_FragColor = colorVarying;\
     [_GLContext makeCurrentContext];
 #endif
 
+    _projectionMatrix = CATransform3DMakeOrtho(0, _screenSize.width, 0, _screenSize.height, -1024, 1024);
 //    glMatrixMode(GL_MODELVIEW);
     
+//    CATransform3D modelViewMatrix = CATransform3DIdentity;
+//    _modelViewProjectionMatrix = CATransform3DMultiply(projectionMatrix, modelViewMatrix);
+
 //    glEnableClientState(GL_VERTEX_ARRAY);
 //    glEnableClientState(GL_COLOR_ARRAY);
 //    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     
 //    glEnable(GL_BLEND);
 //    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glClearColor(0, 0, 1, 1);
+    glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
-
     [self _rasterizeAll];
     
     /* Perform render */
+    CATransform3D transform = CATransform3DIdentity;
+    transform = CATransform3DTranslate(transform, _layer.bounds.size.width/2, _screenSize.height-_layer.bounds.size.height -_layer.bounds.size.height/2, 0);
     [self _renderLayer: [[self layer] presentationLayer]
-         withTransform: CATransform3DIdentity];
+         withTransform: transform];
+    
     
     /* Restore defaults */
 //    glMatrixMode(GL_MODELVIEW);
+    glUniformMatrix4fv(_projectionUniform, 1, 0, &_projectionMatrix);
     glClearColor(0.0, 0.0, 0.0, 0.0);
 //    glDisableClientState(GL_VERTEX_ARRAY);
 //    glDisableClientState(GL_COLOR_ARRAY);
@@ -437,20 +470,25 @@ gl_FragColor = colorVarying;\
 - (void) _renderLayer: (CALayer *)layer
         withTransform: (CATransform3D)transform
 {
+    NSLog(@"will render layer %@, position:{%.2f,%.2f} size:{%.2f,%.2f}",layer,layer.position.x,layer.position.y, layer.bounds.size.width,layer.bounds.size.height);
     if (![layer isPresentationLayer])
         layer = [layer presentationLayer];
 
     // apply transform and translate to position
-
-//    glClearColor(0, 1, 0, 1);
-//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    transform = CATransform3DTranslate(transform, [layer position].x, [layer position].y, 0);
+    transform = CATransform3DConcat([layer transform], transform);
+    
+    _modelViewProjectionMatrix = CATransform3DMultiply(_projectionMatrix, transform);
+    glUniformMatrix4fv(_projectionUniform, 1, 0, &_modelViewProjectionMatrix);
     
     
     // if the layer was offscreen-rendered, render just the texture
     CAGLTexture * texture = [[layer backingStore] offscreenRenderTexture];
-    /*
+    
     if (texture) {
-        
+//        glClearColor(0, 1, 0, 1);
+//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     } else { // not offscreen-rendered
         [layer displayIfNeeded];
         
@@ -492,14 +530,15 @@ gl_FragColor = colorVarying;\
             1.0, 1.0, 1.0, 1.0,
             1.0, 1.0, 1.0, 1.0,
         };
-        glVertexPointer(2, GL_FLOAT, 0, vertices);
-        glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
+#warning fix
+//        glVertexPointer(2, GL_FLOAT, 0, vertices);
+//        glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
         
         // apply anchor point
         for (int i = 0; i < 6; i++)
         {
             vertices[i*2 + 0] -= [layer anchorPoint].x * [layer bounds].size.width;
-            vertices[i*2 + 1] -= [layer anchorPoint].y * [layer bounds].size.height;
+            vertices[i*2 + 1] += [layer anchorPoint].y * [layer bounds].size.height;
         }
         
         // apply opacity to white color
@@ -508,9 +547,19 @@ gl_FragColor = colorVarying;\
             whiteColor[i*4 + 3] *= [layer opacity];
         }
         
+        NSLog(@"will draw arrays");
+
+        
+        glVertexAttribPointer(_positionSlot, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+        glEnableVertexAttribArray(_positionSlot);
+        
+        glVertexAttribPointer(_texturecoord2dSolt, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
+        glEnableVertexAttribArray(_texturecoord2dSolt);
+        
         // apply background color
         if ([layer backgroundColor] && CGColorGetAlpha([layer backgroundColor]) > 0)
         {
+            NSLog(@"render with background");
             const CGFloat * componentsCG = CGColorGetComponents([layer backgroundColor]);
             GLfloat components[4] = { 0, 0, 0, 1 };
             
@@ -533,12 +582,16 @@ gl_FragColor = colorVarying;\
             memcpy(backgroundColor + 3*4, components, sizeof(GLfloat)*4);
             memcpy(backgroundColor + 4*4, components, sizeof(GLfloat)*4);
             memcpy(backgroundColor + 5*4, components, sizeof(GLfloat)*4);
-            glColorPointer(4, GL_FLOAT, 0, backgroundColor);
+#warning fix
+//            glColorPointer(4, GL_FLOAT, 0, backgroundColor);
+            glVertexAttribPointer(_colorSlot, 4, GL_FLOAT, GL_FALSE, 0, backgroundColor);
+            glEnableVertexAttribArray(_colorSlot);
             
             glDrawArrays(GL_TRIANGLES, 0, 6);
             
         }
-        
+
+        /*
         // if there are some contents, draw them
         if ([layer contents])
         {
@@ -578,20 +631,24 @@ gl_FragColor = colorVarying;\
 #endif
             
             [texture bind];
-            glColorPointer(4, GL_FLOAT, 0, whiteColor);
+#warning fix
+//            glColorPointer(4, GL_FLOAT, 0, whiteColor);
             glDrawArrays(GL_TRIANGLES, 0, 6);
             [texture unbind];
             
         }
+         */
         
         transform = CATransform3DConcat ([layer sublayerTransform], transform);
-        transform = CATransform3DTranslate (transform, -[layer bounds].size.width/2, -[layer bounds].size.height/2, 0);
-
+//        transform = CATransform3DTranslate (transform, -[layer bounds].size.width/2, -[layer bounds].size.height/2, 0);
+        transform = CATransform3DTranslate(transform, -layer.bounds.size.width/2, 0, 0);
+        for (CALayer * sublayer in [layer sublayers])
+        {
+            [self _renderLayer: sublayer withTransform: transform];
+        }
     }
-    
-    */
-
 }
+
 #else
 - (void) _renderLayer: (CALayer *)layer
         withTransform: (CATransform3D)transform
