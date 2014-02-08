@@ -30,6 +30,17 @@ CFTimeInterval CACurrentMediaTime(void);
 # define CA_EXTERN extern
 #endif
 
+#ifndef ANDROID
+#define ANDROID 1
+#endif
+
+#ifdef ANDROID
+    #undef __APPLE__
+    #define __OPENGL_ES__ 1
+#else
+    #define __OPENGL_ES__ 0
+#endif
+
 
 #ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
 #define __OSX_AVAILABLE_STARTING(_osx, _ios) __AVAILABILITY_INTERNAL##_ios
