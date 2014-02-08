@@ -340,7 +340,7 @@ gl_FragColor = colorVarying;\
     
     /* Perform render */
     CATransform3D transform = CATransform3DIdentity;
-    transform = CATransform3DTranslate(transform, _layer.bounds.size.width/2, _screenSize.height-_layer.bounds.size.height -_layer.bounds.size.height/2, 0);
+    transform = CATransform3DTranslate(transform, 0, _screenSize.height -_layer.position.y * 2, 0);
     [self _renderLayer: [[self layer] presentationLayer]
          withTransform: transform];
     
@@ -470,7 +470,7 @@ gl_FragColor = colorVarying;\
 - (void) _renderLayer: (CALayer *)layer
         withTransform: (CATransform3D)transform
 {
-    NSLog(@"will render layer %@, position:{%.2f,%.2f} size:{%.2f,%.2f}",layer,layer.position.x,layer.position.y, layer.bounds.size.width,layer.bounds.size.height);
+    NSLog(@"will render layer %@, position:{%.2f,%.2f} size:{%.2f,%.2f} anchorPoint:{%.2f,%.2f} ",layer,layer.position.x,layer.position.y, layer.bounds.size.width,layer.bounds.size.height,layer.anchorPoint.x,layer.anchorPoint.y);
     if (![layer isPresentationLayer])
         layer = [layer presentationLayer];
 
@@ -538,7 +538,7 @@ gl_FragColor = colorVarying;\
         for (int i = 0; i < 6; i++)
         {
             vertices[i*2 + 0] -= [layer anchorPoint].x * [layer bounds].size.width;
-            vertices[i*2 + 1] += [layer anchorPoint].y * [layer bounds].size.height;
+            vertices[i*2 + 1] -= [layer anchorPoint].y * [layer bounds].size.height;
         }
         
         // apply opacity to white color
@@ -640,11 +640,11 @@ gl_FragColor = colorVarying;\
          */
         
         transform = CATransform3DConcat ([layer sublayerTransform], transform);
-//        transform = CATransform3DTranslate (transform, -[layer bounds].size.width/2, -[layer bounds].size.height/2, 0);
-        transform = CATransform3DTranslate(transform, -layer.bounds.size.width/2, 0, 0);
+        transform = CATransform3DTranslate (transform, -[layer bounds].size.width/2, -[layer bounds].size.height/2, 0);
         for (CALayer * sublayer in [layer sublayers])
         {
-            [self _renderLayer: sublayer withTransform: transform];
+            CATransform3D subTransform = CATransform3DTranslate(transform, 0, layer.bounds.size.height - sublayer.position.y * 2, 0);
+            [self _renderLayer: sublayer withTransform: subTransform];
         }
     }
 }
