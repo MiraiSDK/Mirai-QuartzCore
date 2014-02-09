@@ -96,6 +96,8 @@
     GLuint _normalSolt;
     GLuint _texturecoord2dSolt;
     GLuint _projectionUniform;
+    GLuint _texture_2dUniform;
+    GLuint _textureFlagUniform;
     
     CGSize _screenSize;
 
@@ -173,14 +175,14 @@ fragmentTextureCoordinates = texturecoord_2d;\
 precision highp float;\
 \
 uniform sampler2D texture_2d;\
+uniform lowp float textureFlag;\
 \
 varying vec4 colorVarying;\
 varying mediump vec2 fragmentTextureCoordinates;\
 \
 void main()\
 {\
-gl_FragColor = texture2D(texture_2d, fragmentTextureCoordinates);\
-gl_FragColor = colorVarying;\
+gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) * colorVarying + (1.0 - textureFlag) * colorVarying;\
 }\
 "];
 //      simpleFS = [simpleFS initWithFile: @"simple"
@@ -228,6 +230,8 @@ gl_FragColor = colorVarying;\
         _texturecoord2dSolt = [simpleProgram locationForAttribute:@"texturecoord_2d"];
         
         _projectionUniform = [simpleProgram locationForUniform:@"modelViewProjectionMatrix"];
+        _texture_2dUniform = [simpleProgram locationForUniform:@"texture_2d"];
+        _textureFlagUniform = [simpleProgram locationForUniform:@"textureFlag"];
 #endif
     }
   return self;
@@ -332,8 +336,8 @@ gl_FragColor = colorVarying;\
 //    glEnableClientState(GL_COLOR_ARRAY);
 //    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     
-//    glEnable(GL_BLEND);
-//    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     [self _rasterizeAll];
@@ -503,6 +507,19 @@ gl_FragColor = colorVarying;\
             0.0, 0.0,
         };
         CGRect cr = [layer contentsRect];
+#if __OPENGL_ES__
+        GLfloat texCoords[] = {
+            
+            cr.origin.x,                 (cr.origin.y),
+            cr.origin.x + cr.size.width, (cr.origin.y),
+            cr.origin.x + cr.size.width, (cr.origin.y + cr.size.height),
+
+            cr.origin.x + cr.size.width, (cr.origin.y + cr.size.height),
+            cr.origin.x,                 (cr.origin.y + cr.size.height),
+            cr.origin.x,                 (cr.origin.y),
+        
+        };
+#else
         GLfloat texCoords[] = {
             cr.origin.x,                 1.0 - (cr.origin.y),
             cr.origin.x + cr.size.width, 1.0 - (cr.origin.y),
@@ -512,6 +529,7 @@ gl_FragColor = colorVarying;\
             cr.origin.x,                 1.0 - (cr.origin.y + cr.size.height),
             cr.origin.x,                 1.0 - (cr.origin.y),
         };
+#endif
         GLfloat whiteColor[] = {
             1.0, 1.0, 1.0, 1.0,
             1.0, 1.0, 1.0, 1.0,
@@ -591,15 +609,20 @@ gl_FragColor = colorVarying;\
             
         }
 
-        /*
+        glUniform1f(_textureFlagUniform, 0);
+        
+        
         // if there are some contents, draw them
         if ([layer contents])
         {
+            NSLog(@"rendering contents");
+            glUniform1f(_textureFlagUniform, 1);
             CAGLTexture * texture = nil;
             id layerContents = [layer contents];
             
             if ([layerContents isKindOfClass: [CABackingStore class]])
             {
+                NSLog(@"contents is CABackingStore");
                 CABackingStore * backingStore = layerContents;
                 
                 texture = [backingStore contentsTexture];
@@ -611,6 +634,8 @@ gl_FragColor = colorVarying;\
                          CFGetTypeID(layerContents) == CGImageGetTypeID())
 #endif
                 {
+                    NSLog(@"contents is CGImageRef");
+
                     CGImageRef image = (CGImageRef)layerContents;
                     
                     texture = [CAGLTexture texture];
@@ -633,11 +658,11 @@ gl_FragColor = colorVarying;\
             [texture bind];
 #warning fix
 //            glColorPointer(4, GL_FLOAT, 0, whiteColor);
+            glVertexAttribPointer(_colorSlot, 4, GL_FLOAT, GL_FALSE, 0, whiteColor);
             glDrawArrays(GL_TRIANGLES, 0, 6);
             [texture unbind];
             
         }
-         */
         
         transform = CATransform3DConcat ([layer sublayerTransform], transform);
         transform = CATransform3DTranslate (transform, -[layer bounds].size.width/2, -[layer bounds].size.height/2, 0);
