@@ -327,19 +327,16 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
 #endif
 
     _projectionMatrix = CATransform3DMakeOrtho(0, _screenSize.width, 0, _screenSize.height, -1024, 1024);
-//    glMatrixMode(GL_MODELVIEW);
     
 //    CATransform3D modelViewMatrix = CATransform3DIdentity;
 //    _modelViewProjectionMatrix = CATransform3DMultiply(projectionMatrix, modelViewMatrix);
 
-//    glEnableClientState(GL_VERTEX_ARRAY);
-//    glEnableClientState(GL_COLOR_ARRAY);
-//    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glClearColor(0, 0, 0, 1);
-    glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     [self _rasterizeAll];
     
     /* Perform render */
@@ -350,15 +347,11 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
     
     
     /* Restore defaults */
-//    glMatrixMode(GL_MODELVIEW);
-    glUniformMatrix4fv(_projectionUniform, 1, 0, &_projectionMatrix);
     glClearColor(0.0, 0.0, 0.0, 0.0);
-//    glDisableClientState(GL_VERTEX_ARRAY);
-//    glDisableClientState(GL_COLOR_ARRAY);
-//    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-//    glDisable(GL_BLEND);
-//    glBlendFunc(GL_ONE, GL_ZERO);
-//    glLoadIdentity();
+    glDisable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ZERO);
+    glUniformMatrix4fv(_projectionUniform, 1, 0, &_projectionMatrix);
+
 }
 #else /* OPENGL */
 - (void) render
@@ -492,6 +485,7 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
     if (texture) {
 //        glClearColor(0, 1, 0, 1);
 //        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        NSLog(@"render texture");
 
     } else { // not offscreen-rendered
         [layer displayIfNeeded];
@@ -573,20 +567,34 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
         
         glVertexAttribPointer(_texturecoord2dSolt, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
         glEnableVertexAttribArray(_texturecoord2dSolt);
-        
+        glUniform1f(_textureFlagUniform, 0);
+
         // apply background color
         if ([layer backgroundColor] && CGColorGetAlpha([layer backgroundColor]) > 0)
         {
             NSLog(@"render with background");
+            size_t numberOfComponents = CGColorGetNumberOfComponents([layer backgroundColor]);
+            
             const CGFloat * componentsCG = CGColorGetComponents([layer backgroundColor]);
             GLfloat components[4] = { 0, 0, 0, 1 };
             
             // convert
-            components[0] = componentsCG[0];
-            components[1] = componentsCG[1];
-            components[2] = componentsCG[2];
-            if (CGColorGetNumberOfComponents([layer backgroundColor]) == 4)
+            if (numberOfComponents == 1) {
+                components[0] = componentsCG[0];
+                components[1] = componentsCG[0];
+                components[2] = componentsCG[0];
+            } else if (numberOfComponents == 3) {
+                components[0] = componentsCG[0];
+                components[1] = componentsCG[1];
+                components[2] = componentsCG[2];
+            } else if (numberOfComponents == 4) {
+                components[0] = componentsCG[0];
+                components[1] = componentsCG[1];
+                components[2] = componentsCG[2];
                 components[3] = componentsCG[3];
+            } else {
+                NSLog(@"Expection NumberOfComponents:%zu",numberOfComponents);
+            }
             
             // apply opacity
             components[3] *= [layer opacity];
@@ -609,7 +617,6 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
             
         }
 
-        glUniform1f(_textureFlagUniform, 0);
         
         
         // if there are some contents, draw them
