@@ -25,6 +25,7 @@
 */
 
 #import "QuartzCore/CATransform3D.h"
+#import "QuartzCore/CATransform3D_Private.h"
 
 const CATransform3D CATransform3DIdentity = {
   1, 0, 0, 0,
@@ -222,6 +223,86 @@ CATransform3D CATransform3DInvert(CATransform3D t)
       return t;
     }
 }
+
+CATransform3D CATransform3DMakePerspective(float fovyRadians, float aspect, float nearZ, float farZ)
+{
+    float cotan = 1.0f / tanf(fovyRadians / 2.0f);
+    
+    CATransform3D m = { cotan / aspect, 0.0f, 0.0f, 0.0f,
+        0.0f, cotan, 0.0f, 0.0f,
+        0.0f, 0.0f, (farZ + nearZ) / (nearZ - farZ), -1.0f,
+        0.0f, 0.0f, (2.0f * farZ * nearZ) / (nearZ - farZ), 0.0f };
+    
+    return m;
+}
+
+CATransform3D CATransform3DMakeFrustum(float left, float right,
+                                                 float bottom, float top,
+                                                 float nearZ, float farZ)
+{
+    float ral = right + left;
+    float rsl = right - left;
+    float tsb = top - bottom;
+    float tab = top + bottom;
+    float fan = farZ + nearZ;
+    float fsn = farZ - nearZ;
+    
+    CATransform3D m = { 2.0f * nearZ / rsl, 0.0f, 0.0f, 0.0f,
+        0.0f, 2.0f * nearZ / tsb, 0.0f, 0.0f,
+        ral / rsl, tab / tsb, -fan / fsn, -1.0f,
+        0.0f, 0.0f, (-2.0f * farZ * nearZ) / fsn, 0.0f };
+    
+    return m;
+}
+
+CATransform3D CATransform3DMultiply(CATransform3D matrixLeft, CATransform3D matrixRight)
+{
+    CATransform3D m;
+    
+    m.m11  = matrixLeft.m11 * matrixRight.m11  + matrixLeft.m21 * matrixRight.m12  + matrixLeft.m31 * matrixRight.m13   + matrixLeft.m41 * matrixRight.m14;
+	m.m21  = matrixLeft.m11 * matrixRight.m21  + matrixLeft.m21 * matrixRight.m22  + matrixLeft.m31 * matrixRight.m23   + matrixLeft.m41 * matrixRight.m24;
+	m.m31  = matrixLeft.m11 * matrixRight.m31  + matrixLeft.m21 * matrixRight.m32  + matrixLeft.m31 * matrixRight.m33  + matrixLeft.m41 * matrixRight.m34;
+	m.m41 = matrixLeft.m11 * matrixRight.m41 + matrixLeft.m21 * matrixRight.m42 + matrixLeft.m31 * matrixRight.m43  + matrixLeft.m41 * matrixRight.m44;
+    
+	m.m12  = matrixLeft.m12 * matrixRight.m11  + matrixLeft.m22 * matrixRight.m12  + matrixLeft.m32 * matrixRight.m13   + matrixLeft.m42 * matrixRight.m14;
+	m.m22  = matrixLeft.m12 * matrixRight.m21  + matrixLeft.m22 * matrixRight.m22  + matrixLeft.m32 * matrixRight.m23   + matrixLeft.m42 * matrixRight.m24;
+	m.m32  = matrixLeft.m12 * matrixRight.m31  + matrixLeft.m22 * matrixRight.m32  + matrixLeft.m32 * matrixRight.m33  + matrixLeft.m42 * matrixRight.m34;
+	m.m42 = matrixLeft.m12 * matrixRight.m41 + matrixLeft.m22 * matrixRight.m42 + matrixLeft.m32 * matrixRight.m43  + matrixLeft.m42 * matrixRight.m44;
+    
+	m.m13  = matrixLeft.m13 * matrixRight.m11  + matrixLeft.m23 * matrixRight.m12  + matrixLeft.m33 * matrixRight.m13  + matrixLeft.m43 * matrixRight.m14;
+	m.m23  = matrixLeft.m13 * matrixRight.m21  + matrixLeft.m23 * matrixRight.m22  + matrixLeft.m33 * matrixRight.m23  + matrixLeft.m43 * matrixRight.m24;
+	m.m33 = matrixLeft.m13 * matrixRight.m31  + matrixLeft.m23 * matrixRight.m32  + matrixLeft.m33 * matrixRight.m33 + matrixLeft.m43 * matrixRight.m34;
+	m.m43 = matrixLeft.m13 * matrixRight.m41 + matrixLeft.m23 * matrixRight.m42 + matrixLeft.m33 * matrixRight.m43 + matrixLeft.m43 * matrixRight.m44;
+    
+	m.m14  = matrixLeft.m14 * matrixRight.m11  + matrixLeft.m24 * matrixRight.m12  + matrixLeft.m34 * matrixRight.m13  + matrixLeft.m44 * matrixRight.m14;
+	m.m24  = matrixLeft.m14 * matrixRight.m21  + matrixLeft.m24 * matrixRight.m22  + matrixLeft.m34 * matrixRight.m23  + matrixLeft.m44 * matrixRight.m24;
+	m.m34 = matrixLeft.m14 * matrixRight.m31  + matrixLeft.m24 * matrixRight.m32  + matrixLeft.m34 * matrixRight.m33 + matrixLeft.m44 * matrixRight.m34;
+	m.m44 = matrixLeft.m14 * matrixRight.m41 + matrixLeft.m24 * matrixRight.m42 + matrixLeft.m34 * matrixRight.m43 + matrixLeft.m44 * matrixRight.m44;
+    
+    return m;
+    
+}
+
+CATransform3D CATransform3DMakeOrtho(float left, float right,
+                                               float bottom, float top,
+                                               float nearZ, float farZ)
+{
+    float ral = right + left;
+    float rsl = right - left;
+    float tab = top + bottom;
+    float tsb = top - bottom;
+    float fan = farZ + nearZ;
+    float fsn = farZ - nearZ;
+    
+    CATransform3D m = { 2.0f / rsl, 0.0f, 0.0f, 0.0f,
+        0.0f, 2.0f / tsb, 0.0f, 0.0f,
+        0.0f, 0.0f, -2.0f / fsn, 0.0f,
+        -ral / rsl, -tab / tsb, -fan / fsn, 1.0f };
+    
+    return m;
+}
+
+float CADegreesToRadians(float degrees) { return degrees * (M_PI / 180); };
 
 @implementation NSValue (CATransform3D)
 

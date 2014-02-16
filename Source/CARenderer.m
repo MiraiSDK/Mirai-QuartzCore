@@ -29,6 +29,7 @@
 #import <Foundation/Foundation.h>
 #import "QuartzCore/CARenderer.h"
 #import "QuartzCore/CATransform3D.h"
+#import "QuartzCore/CATransform3D_Private.h"
 #import "QuartzCore/CALayer.h"
 #import "CALayer+FrameworkPrivate.h"
 #import "CATransaction+FrameworkPrivate.h"
@@ -39,8 +40,10 @@
 #import <OpenGL/gl.h>
 #import <OpenGL/glu.h>
 #elif defined(ANDROID)
-#import <GLES/gl.h>
-#import <GLES/glext.h>
+#import <GLES2/gl2.h>
+#import <GLES2/gl2ext.h>
+#import <OpenGLES/EAGL.h>
+#import <OpenGLES/EAGLDrawable.h>
 #else
 #define GL_GLEXT_PROTOTYPES 1
 #import <GL/gl.h>
@@ -84,7 +87,21 @@
         withTransform: (CATransform3D)transform;
 @end
 
-@implementation CARenderer
+@implementation CARenderer {
+    CATransform3D _modelViewProjectionMatrix;
+    CATransform3D _projectionMatrix;
+
+    GLuint _positionSlot;
+    GLuint _colorSlot;
+    GLuint _normalSolt;
+    GLuint _texturecoord2dSolt;
+    GLuint _projectionUniform;
+    GLuint _texture_2dUniform;
+    GLuint _textureFlagUniform;
+    
+    CGSize _screenSize;
+
+}
 @synthesize layer=_layer;
 @synthesize bounds=_bounds;
 
@@ -122,15 +139,54 @@
       [self setGLContext: ctx];
       
       /* SHADER SETUP */
-      [ctx makeCurrentContext];
+#ifdef ANDROID
+        [EAGLContext setCurrentContext:ctx];
+#else
+        [ctx makeCurrentContext];
+#endif
 
+        //FIXME: hardcode screensize
+        _screenSize = CGSizeMake(720, 1280);
+        
       /* Simple, passthrough shader */
-      CAGLVertexShader * simpleVS = [CAGLVertexShader alloc];
-      simpleVS = [simpleVS initWithFile: @"simple"
-                                 ofType: @"vsh"];
-      CAGLFragmentShader * simpleFS = [CAGLFragmentShader alloc];
-      simpleFS = [simpleFS initWithFile: @"simple"
-                                 ofType: @"fsh"];
+      CAGLVertexShader * simpleVS = [[CAGLVertexShader alloc] initWithSource:@"\
+attribute vec4 position;\
+attribute vec4 color;\
+attribute vec3 normal;\
+attribute vec2 texturecoord_2d;\
+\
+uniform mat4 modelViewProjectionMatrix;\
+varying vec4 colorVarying;\
+varying vec2 fragmentTextureCoordinates;\
+\
+void main()\
+{\
+gl_Position = modelViewProjectionMatrix * position;\
+\
+colorVarying.xyz = normal;\
+colorVarying = color;\
+fragmentTextureCoordinates = texturecoord_2d;\
+}\
+"];
+        
+//      simpleVS = [simpleVS initWithFile: @"simple"
+//                                 ofType: @"vsh"];
+      CAGLFragmentShader * simpleFS = [[CAGLFragmentShader alloc] initWithSource:@"\
+precision highp float;\
+\
+uniform sampler2D texture_2d;\
+uniform lowp float textureFlag;\
+\
+varying vec4 colorVarying;\
+varying mediump vec2 fragmentTextureCoordinates;\
+\
+void main()\
+{\
+gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) * colorVarying + (1.0 - textureFlag) * colorVarying;\
+}\
+"];
+//      simpleFS = [simpleFS initWithFile: @"simple"
+//                                 ofType: @"fsh"];
       NSArray * objectsForSimpleShader = [NSArray arrayWithObjects: simpleVS, simpleFS, nil];
       [simpleVS release];
       [simpleFS release];
@@ -141,31 +197,42 @@
       _simpleProgram = simpleProgram;
       
       /* Horizontal and vertical blur shader */
-      CAGLVertexShader * blurBaseVS = [CAGLVertexShader alloc];
-      blurBaseVS = [blurBaseVS initWithFile: @"blurbase"
-                                     ofType: @"vsh"];
-      CAGLFragmentShader * blurHorizFS = [CAGLFragmentShader alloc];
-      blurHorizFS = [blurHorizFS initWithFile: @"blurhoriz"
-                                       ofType: @"fsh"];
-      CAGLFragmentShader * blurVertFS = [CAGLFragmentShader alloc];
-      blurVertFS = [blurVertFS initWithFile: @"blurvert"
-                                     ofType: @"fsh"];
-      NSArray * objectsForBlurHorizShader = [NSArray arrayWithObjects: blurBaseVS, blurHorizFS, nil];
-      NSArray * objectsForBlurVertShader = [NSArray arrayWithObjects: blurBaseVS, blurVertFS, nil];
-      [blurBaseVS release];
-      [blurHorizFS release];
-      [blurVertFS release];
+//      CAGLVertexShader * blurBaseVS = [CAGLVertexShader alloc];
+//      blurBaseVS = [blurBaseVS initWithFile: @"blurbase"
+//                                     ofType: @"vsh"];
+//      CAGLFragmentShader * blurHorizFS = [CAGLFragmentShader alloc];
+//      blurHorizFS = [blurHorizFS initWithFile: @"blurhoriz"
+//                                       ofType: @"fsh"];
+//      CAGLFragmentShader * blurVertFS = [CAGLFragmentShader alloc];
+//      blurVertFS = [blurVertFS initWithFile: @"blurvert"
+//                                     ofType: @"fsh"];
+//      NSArray * objectsForBlurHorizShader = [NSArray arrayWithObjects: blurBaseVS, blurHorizFS, nil];
+//      NSArray * objectsForBlurVertShader = [NSArray arrayWithObjects: blurBaseVS, blurVertFS, nil];
+//      [blurBaseVS release];
+//      [blurHorizFS release];
+//      [blurVertFS release];
       
-      CAGLProgram * blurHorizProgram = [CAGLProgram alloc];
-      blurHorizProgram = [blurHorizProgram initWithArrayOfShaders: objectsForBlurHorizShader];
-      [blurHorizProgram link];
-      _blurHorizProgram = blurHorizProgram;
-      
-      CAGLProgram * blurVertProgram = [CAGLProgram alloc];
-      blurVertProgram = [blurVertProgram initWithArrayOfShaders: objectsForBlurVertShader];
-      [blurVertProgram link];
-      _blurVertProgram = blurVertProgram;
-      
+//      CAGLProgram * blurHorizProgram = [CAGLProgram alloc];
+//      blurHorizProgram = [blurHorizProgram initWithArrayOfShaders: objectsForBlurHorizShader];
+//      [blurHorizProgram link];
+//      _blurHorizProgram = blurHorizProgram;
+//      
+//      CAGLProgram * blurVertProgram = [CAGLProgram alloc];
+//      blurVertProgram = [blurVertProgram initWithArrayOfShaders: objectsForBlurVertShader];
+//      [blurVertProgram link];
+//      _blurVertProgram = blurVertProgram;
+        
+#if __OPENGL_ES__
+        
+        [simpleProgram use];
+        _positionSlot = [simpleProgram locationForAttribute:@"position"];
+        _colorSlot = [simpleProgram locationForAttribute:@"color"];
+        _texturecoord2dSolt = [simpleProgram locationForAttribute:@"texturecoord_2d"];
+        
+        _projectionUniform = [simpleProgram locationForUniform:@"modelViewProjectionMatrix"];
+        _texture_2dUniform = [simpleProgram locationForUniform:@"texture_2d"];
+        _textureFlagUniform = [simpleProgram locationForUniform:@"textureFlag"];
+#endif
     }
   return self;
 }
@@ -253,32 +320,38 @@
         isinf(updateBounds.origin.y))
         return;
 
+#ifdef ANDROID
+    [EAGLContext setCurrentContext:_GLContext];
+#else
     [_GLContext makeCurrentContext];
+#endif
 
-//    glMatrixMode(GL_MODELVIEW);
+    _projectionMatrix = CATransform3DMakeOrtho(0, _screenSize.width, 0, _screenSize.height, -1024, 1024);
     
-//    glEnableClientState(GL_VERTEX_ARRAY);
-//    glEnableClientState(GL_COLOR_ARRAY);
-//    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+//    CATransform3D modelViewMatrix = CATransform3DIdentity;
+//    _modelViewProjectionMatrix = CATransform3DMultiply(projectionMatrix, modelViewMatrix);
+
     
-//    glEnable(GL_BLEND);
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
+    
+    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     [self _rasterizeAll];
     
     /* Perform render */
+    CATransform3D transform = CATransform3DIdentity;
+    transform = CATransform3DTranslate(transform, 0, _screenSize.height -_layer.position.y * 2, 0);
     [self _renderLayer: [[self layer] presentationLayer]
-         withTransform: CATransform3DIdentity];
+         withTransform: transform];
+    
     
     /* Restore defaults */
-//    glMatrixMode(GL_MODELVIEW);
     glClearColor(0.0, 0.0, 0.0, 0.0);
-//    glDisableClientState(GL_VERTEX_ARRAY);
-//    glDisableClientState(GL_COLOR_ARRAY);
-//    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-//    glDisable(GL_BLEND);
+    glDisable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ZERO);
-//    glLoadIdentity();
+    glUniformMatrix4fv(_projectionUniform, 1, 0, &_projectionMatrix);
+
 }
 #else /* OPENGL */
 - (void) render
@@ -394,19 +467,26 @@
 - (void) _renderLayer: (CALayer *)layer
         withTransform: (CATransform3D)transform
 {
+    NSLog(@"will render layer %@, position:{%.2f,%.2f} size:{%.2f,%.2f} anchorPoint:{%.2f,%.2f} ",layer,layer.position.x,layer.position.y, layer.bounds.size.width,layer.bounds.size.height,layer.anchorPoint.x,layer.anchorPoint.y);
     if (![layer isPresentationLayer])
         layer = [layer presentationLayer];
 
     // apply transform and translate to position
-
-    glClearColor(1, 0, 0, 1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    transform = CATransform3DTranslate(transform, [layer position].x, [layer position].y, 0);
+    transform = CATransform3DConcat([layer transform], transform);
     
-    /*
+    _modelViewProjectionMatrix = CATransform3DMultiply(_projectionMatrix, transform);
+    glUniformMatrix4fv(_projectionUniform, 1, 0, &_modelViewProjectionMatrix);
+    
+    
     // if the layer was offscreen-rendered, render just the texture
     CAGLTexture * texture = [[layer backingStore] offscreenRenderTexture];
+    
     if (texture) {
-        
+//        glClearColor(0, 1, 0, 1);
+//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        NSLog(@"render texture");
+
     } else { // not offscreen-rendered
         [layer displayIfNeeded];
         
@@ -421,6 +501,19 @@
             0.0, 0.0,
         };
         CGRect cr = [layer contentsRect];
+#if __OPENGL_ES__
+        GLfloat texCoords[] = {
+            
+            cr.origin.x,                 (cr.origin.y),
+            cr.origin.x + cr.size.width, (cr.origin.y),
+            cr.origin.x + cr.size.width, (cr.origin.y + cr.size.height),
+
+            cr.origin.x + cr.size.width, (cr.origin.y + cr.size.height),
+            cr.origin.x,                 (cr.origin.y + cr.size.height),
+            cr.origin.x,                 (cr.origin.y),
+        
+        };
+#else
         GLfloat texCoords[] = {
             cr.origin.x,                 1.0 - (cr.origin.y),
             cr.origin.x + cr.size.width, 1.0 - (cr.origin.y),
@@ -430,6 +523,7 @@
             cr.origin.x,                 1.0 - (cr.origin.y + cr.size.height),
             cr.origin.x,                 1.0 - (cr.origin.y),
         };
+#endif
         GLfloat whiteColor[] = {
             1.0, 1.0, 1.0, 1.0,
             1.0, 1.0, 1.0, 1.0,
@@ -448,8 +542,9 @@
             1.0, 1.0, 1.0, 1.0,
             1.0, 1.0, 1.0, 1.0,
         };
-        glVertexPointer(2, GL_FLOAT, 0, vertices);
-        glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
+#warning fix
+//        glVertexPointer(2, GL_FLOAT, 0, vertices);
+//        glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
         
         // apply anchor point
         for (int i = 0; i < 6; i++)
@@ -464,18 +559,42 @@
             whiteColor[i*4 + 3] *= [layer opacity];
         }
         
+        NSLog(@"will draw arrays");
+
+        
+        glVertexAttribPointer(_positionSlot, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+        glEnableVertexAttribArray(_positionSlot);
+        
+        glVertexAttribPointer(_texturecoord2dSolt, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
+        glEnableVertexAttribArray(_texturecoord2dSolt);
+        glUniform1f(_textureFlagUniform, 0);
+
         // apply background color
         if ([layer backgroundColor] && CGColorGetAlpha([layer backgroundColor]) > 0)
         {
+            NSLog(@"render with background");
+            size_t numberOfComponents = CGColorGetNumberOfComponents([layer backgroundColor]);
+            
             const CGFloat * componentsCG = CGColorGetComponents([layer backgroundColor]);
             GLfloat components[4] = { 0, 0, 0, 1 };
             
             // convert
-            components[0] = componentsCG[0];
-            components[1] = componentsCG[1];
-            components[2] = componentsCG[2];
-            if (CGColorGetNumberOfComponents([layer backgroundColor]) == 4)
+            if (numberOfComponents == 1) {
+                components[0] = componentsCG[0];
+                components[1] = componentsCG[0];
+                components[2] = componentsCG[0];
+            } else if (numberOfComponents == 3) {
+                components[0] = componentsCG[0];
+                components[1] = componentsCG[1];
+                components[2] = componentsCG[2];
+            } else if (numberOfComponents == 4) {
+                components[0] = componentsCG[0];
+                components[1] = componentsCG[1];
+                components[2] = componentsCG[2];
                 components[3] = componentsCG[3];
+            } else {
+                NSLog(@"Expection NumberOfComponents:%zu",numberOfComponents);
+            }
             
             // apply opacity
             components[3] *= [layer opacity];
@@ -489,20 +608,28 @@
             memcpy(backgroundColor + 3*4, components, sizeof(GLfloat)*4);
             memcpy(backgroundColor + 4*4, components, sizeof(GLfloat)*4);
             memcpy(backgroundColor + 5*4, components, sizeof(GLfloat)*4);
-            glColorPointer(4, GL_FLOAT, 0, backgroundColor);
+#warning fix
+//            glColorPointer(4, GL_FLOAT, 0, backgroundColor);
+            glVertexAttribPointer(_colorSlot, 4, GL_FLOAT, GL_FALSE, 0, backgroundColor);
+            glEnableVertexAttribArray(_colorSlot);
             
             glDrawArrays(GL_TRIANGLES, 0, 6);
             
         }
+
+        
         
         // if there are some contents, draw them
         if ([layer contents])
         {
+            NSLog(@"rendering contents");
+            glUniform1f(_textureFlagUniform, 1);
             CAGLTexture * texture = nil;
             id layerContents = [layer contents];
             
             if ([layerContents isKindOfClass: [CABackingStore class]])
             {
+                NSLog(@"contents is CABackingStore");
                 CABackingStore * backingStore = layerContents;
                 
                 texture = [backingStore contentsTexture];
@@ -514,6 +641,8 @@
                          CFGetTypeID(layerContents) == CGImageGetTypeID())
 #endif
                 {
+                    NSLog(@"contents is CGImageRef");
+
                     CGImageRef image = (CGImageRef)layerContents;
                     
                     texture = [CAGLTexture texture];
@@ -534,7 +663,9 @@
 #endif
             
             [texture bind];
-            glColorPointer(4, GL_FLOAT, 0, whiteColor);
+#warning fix
+//            glColorPointer(4, GL_FLOAT, 0, whiteColor);
+            glVertexAttribPointer(_colorSlot, 4, GL_FLOAT, GL_FALSE, 0, whiteColor);
             glDrawArrays(GL_TRIANGLES, 0, 6);
             [texture unbind];
             
@@ -542,12 +673,14 @@
         
         transform = CATransform3DConcat ([layer sublayerTransform], transform);
         transform = CATransform3DTranslate (transform, -[layer bounds].size.width/2, -[layer bounds].size.height/2, 0);
-
+        for (CALayer * sublayer in [layer sublayers])
+        {
+            CATransform3D subTransform = CATransform3DTranslate(transform, 0, layer.bounds.size.height - sublayer.position.y * 2, 0);
+            [self _renderLayer: sublayer withTransform: subTransform];
+        }
     }
-    
-    */
-
 }
+
 #else
 - (void) _renderLayer: (CALayer *)layer
         withTransform: (CATransform3D)transform

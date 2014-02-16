@@ -171,6 +171,15 @@
   return nil;
 }
 
+- (GLint) locationForAttribute: (NSString *)attribute
+{
+    GLint loc = glGetAttribLocation(_programID, [attribute UTF8String]);
+    if (loc == -1) {
+        NSLog(@"CAGLProgram: Nonexistent attrib: %@", attribute);
+    }
+    return loc;
+}
+
 - (GLint) locationForUniform: (NSString *)uniform
 {
   GLint loc = glGetUniformLocation(_programID, [uniform UTF8String]);

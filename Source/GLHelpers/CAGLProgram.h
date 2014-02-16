@@ -67,6 +67,7 @@
                      toFloat4v: (GLfloat *)array;
 
 - (GLint) locationForUniform: (NSString *)uniform;
+- (GLint) locationForAttribute: (NSString *)attribute;
 - (void) use;
 
 @end
