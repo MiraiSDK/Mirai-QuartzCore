@@ -423,6 +423,22 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 
 
 #endif
+- (CGRect)frame
+{
+    
+    return CGRectMake(_position.x - (_bounds.size.width * _anchorPoint.x),
+                      _position.y - (_bounds.size.height * _anchorPoint.y),
+                      _bounds.size.width,
+                      _bounds.size.height);
+}
+
+- (void)setFrame:(CGRect)frame
+{
+    _bounds.size = frame.size;
+    _position = CGPointMake(frame.origin.x + (frame.size.width * _anchorPoint.x),
+                            frame.origin.x + (frame.size.width * _anchorPoint.x));
+}
+
 - (void) setBounds: (CGRect)bounds
 {
   if (CGRectEqualToRect(bounds, _bounds))
@@ -838,6 +854,21 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
   return nil;
 }
 
+- (CALayer *)lowestCommonAncestorOfLayer:(CALayer *)layer
+{
+    NSArray *allAncestor = [self allAncestorLayers];
+    allAncestor = [allAncestor arrayByAddingObject:self];
+    
+    CALayer *superLayer = layer;
+    while (superLayer) {
+        if ([allAncestor containsObject:superLayer]) {
+            return superLayer;
+        }
+        superLayer = [superLayer superlayer];
+    }
+    return nil;
+}
+
 /* ************ */
 /* MARK: - Time */
 + (void) setCurrentFrameBeginTime: (CFTimeInterval)frameTime
@@ -1082,12 +1113,78 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
   [super setValue: value forUndefinedKey: key];
 }
 
+- (CGPoint) convertPoint: (CGPoint)p fromLayer: (CALayer *)l
+{
+    if (l == nil || self == l) {
+        return p;
+    } else {
+        CGPoint result = p;
+        CALayer *commonAncestor = [self lowestCommonAncestorOfLayer:l];
+        
+        CALayer *from = l;
+        while (from != commonAncestor) {
+            CGRect fRect = from.frame;
+            result.x += fRect.origin.x;
+            result.y += fRect.origin.y;
+            from = [from superlayer];
+        }
+        
+        CALayer *to = self;
+        
+        while (to != commonAncestor) {
+            CGRect toRect = to.frame;
+            result.x -= toRect.origin.y;
+            result.y -= toRect.origin.y;
+            to = [to superlayer];
+        }
+        return result;
+    }
+}
+
+- (CGPoint) convertPoint: (CGPoint)p toLayer: (CALayer *)l
+{
+    if (l == nil || self == l) {
+        return p;
+    } else {
+        CGPoint result = p;
+        CALayer *commonAncestor = [self lowestCommonAncestorOfLayer:l];
+        
+        CALayer *from = self;
+        while (from != commonAncestor) {
+            CGRect fRect = from.frame;
+            result.x += fRect.origin.x;
+            result.y += fRect.origin.y;
+            from = [from superlayer];
+        }
+        
+        CALayer *to = l;
+        
+        while (to != commonAncestor) {
+            CGRect toRect = to.frame;
+            result.x -= toRect.origin.y;
+            result.y -= toRect.origin.y;
+            to = [to superlayer];
+        }
+        return result;
+    }
+}
+
+- (CGRect) convertRect: (CGRect)p fromLayer: (CALayer *)l
+{
+    CGRect rect = p;
+    rect.origin = [self convertPoint:rect.origin fromLayer:l];
+    return rect;
+}
+
+- (CGRect) convertRect: (CGRect)p toLayer: (CALayer *)l
+{
+    CGRect rect = p;
+    rect.origin = [self convertPoint:rect.origin toLayer:l];
+    return rect;
+}
+
 /* Unimplemented functions: */
 #if 0
-- (CGPoint) convertPoint: (CGPoint)p fromLayer: (CALayer *)l;
-- (CGPoint) convertPoint: (CGPoint)p toLayer: (CALayer *)l;
-- (CGRect) convertRect: (CGRect)p fromLayer: (CALayer *)l;
-- (CGRect) convertRect: (CGRect)p toLayer: (CALayer *)l;
 - (void)setNeedsLayout;
 - (void)layoutIfNeeded;
 
