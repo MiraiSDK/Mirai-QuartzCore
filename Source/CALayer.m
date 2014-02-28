@@ -566,17 +566,39 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 
 /* ********************** */
 /* MARK: - Layout methods */
+- (CGSize)preferredFrameSize
+{
+    if (self.layoutManager && [self.layoutManager respondsToSelector:@selector(preferredSizeOfLayer:)]) {
+        return [self.layoutManager preferredSizeOfLayer:self];
+    }
+    
+    return self.bounds.size;
+}
+
 - (void) layoutIfNeeded
-{ 
+{
+    if (_needsLayout) {
+        [self layoutSublayers];
+    }
+    
+    _needsLayout = NO;
 }
 
 - (void) layoutSublayers
 {
+    if (self.layoutManager && [self.layoutManager respondsToSelector:@selector(layoutSublayersOfLayer:)]) {
+        [self.layoutManager layoutSublayersOfLayer:self];
+    }
 }
 
 - (void) setNeedsLayout
 {
   _needsLayout = YES;
+}
+
+- (BOOL)needsLayout
+{
+    return _needsLayout;
 }
 
 /* ************************************* */
@@ -1182,13 +1204,6 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
     rect.origin = [self convertPoint:rect.origin toLayer:l];
     return rect;
 }
-
-/* Unimplemented functions: */
-#if 0
-- (void)setNeedsLayout;
-- (void)layoutIfNeeded;
-
-#endif
 
 /* TODO:
  * -setSublayers: needs to correctly unset superlayer from old values and set new superlayer for new values.

@@ -194,6 +194,8 @@ NSString *const kCATransition;
 - (void) setNeedsDisplay;
 - (void) setNeedsDisplayInRect: (CGRect)r;
 - (void) drawInContext: (CGContextRef)context;
+
+- (CGSize)preferredFrameSize;
 - (BOOL) needsLayout;
 - (void) setNeedsLayout;
 - (void) layoutIfNeeded;
@@ -214,6 +216,7 @@ NSString *const kCATransition;
 
 @interface NSObject (CALayerLayoutManager)
 - (void) layoutSublayersOfLayer: (CALayer*)layer;
+- (CGSize)preferredSizeOfLayer:(CALayer *)layer;
 @end
 
 /* vim: set cindent cinoptions=>4,n-2,{2,^-2,:2,=2,g0,h2,p5,t0,+2,(0,u0,w1,m1 expandtabs shiftwidth=2 tabstop=8: */
