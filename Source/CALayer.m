@@ -362,6 +362,8 @@ NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
       /* private or publicly read-only properties */
       [self setAnimations: [layer animations]];
       [self setAnimationKeys: [layer animationKeys]];
+        
+        _needsLayout = layer.needsLayout;
     }
   return self;
 }
@@ -437,6 +439,7 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
     _bounds.size = frame.size;
     _position = CGPointMake(frame.origin.x + (frame.size.width * _anchorPoint.x),
                             frame.origin.x + (frame.size.width * _anchorPoint.x));
+    [self setNeedsLayout];
 }
 
 - (void) setBounds: (CGRect)bounds
@@ -586,7 +589,9 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 
 - (void) layoutSublayers
 {
-    if (self.layoutManager && [self.layoutManager respondsToSelector:@selector(layoutSublayersOfLayer:)]) {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(layoutSublayersOfLayer:)]) {
+        [self.delegate layoutSublayersOfLayer:self];
+    } else if (self.layoutManager && [self.layoutManager respondsToSelector:@selector(layoutSublayersOfLayer:)]) {
         [self.layoutManager layoutSublayersOfLayer:self];
     }
 }
@@ -799,6 +804,8 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
   
   [mutableSublayers addObject: layer];
   [layer setSuperlayer: self];
+    
+    [self setNeedsLayout];
 }
 
 - (void)removeFromSuperlayer

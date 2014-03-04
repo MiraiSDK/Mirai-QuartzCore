@@ -309,6 +309,15 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
   return _nextFrameTime;
 }
 
+- (void)recursionLayoutLayerIfNeeded:(CALayer *)layer
+{
+    [layer layoutIfNeeded];
+    
+    for (CALayer *sublayer in layer.sublayers) {
+        [self recursionLayoutLayerIfNeeded:sublayer];
+    }
+}
+
 /* Renders a frame to the target context. Best case scenario, it 
    should be rendering the update region only. */
 #if __OPENGL_ES__
@@ -319,6 +328,8 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
     if (isinf(updateBounds.origin.x) &&
         isinf(updateBounds.origin.y))
         return;
+    
+    [self recursionLayoutLayerIfNeeded:_layer];
 
 #ifdef ANDROID
     [EAGLContext setCurrentContext:_GLContext];
@@ -485,7 +496,7 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
     if (texture) {
 //        glClearColor(0, 1, 0, 1);
 //        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        NSLog(@"render texture");
+        NSLog(@"[WARNING]render texture unimplemented!!");
 
     } else { // not offscreen-rendered
         [layer displayIfNeeded];
