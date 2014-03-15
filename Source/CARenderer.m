@@ -512,19 +512,7 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
             0.0, 0.0,
         };
         CGRect cr = [layer contentsRect];
-#if __OPENGL_ES__
-        GLfloat texCoords[] = {
-            
-            cr.origin.x,                 (cr.origin.y),
-            cr.origin.x + cr.size.width, (cr.origin.y),
-            cr.origin.x + cr.size.width, (cr.origin.y + cr.size.height),
 
-            cr.origin.x + cr.size.width, (cr.origin.y + cr.size.height),
-            cr.origin.x,                 (cr.origin.y + cr.size.height),
-            cr.origin.x,                 (cr.origin.y),
-        
-        };
-#else
         GLfloat texCoords[] = {
             cr.origin.x,                 1.0 - (cr.origin.y),
             cr.origin.x + cr.size.width, 1.0 - (cr.origin.y),
@@ -534,7 +522,6 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
             cr.origin.x,                 1.0 - (cr.origin.y + cr.size.height),
             cr.origin.x,                 1.0 - (cr.origin.y),
         };
-#endif
         GLfloat whiteColor[] = {
             1.0, 1.0, 1.0, 1.0,
             1.0, 1.0, 1.0, 1.0,
