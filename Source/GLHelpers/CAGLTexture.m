@@ -176,7 +176,7 @@
     bitsPerComponent, 
     bytesPerRow,
     space,
-#if !GNUSTEP
+#if !GNUSTEP || (__OPENGL_ES__)
     kCGImageAlphaPremultipliedLast
 #else
 #warning GNUstep: forced to pass kCGImageAlphaPremultipliedFirst although we end up with ...Last
