@@ -303,18 +303,12 @@ NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
   /* Used when creating shadow copies of 'layer', e.g. when creating 
      presentation layer. Not to be used by app developer for copying existing
      layers. */
-
-  if ((self = [self init]) != nil)
+  if ((self = [super init]) != nil)
     {
-#if 1
-      // REMOVE THIS
-      for(id i in _observedKeyPaths)
-        {
-          [self removeObserver: [CAImplicitAnimationObserver sharedObserver] forKeyPath: i];
-        }
-      [_observedKeyPaths release];
-      _observedKeyPaths = nil;
-#endif
+        _animations = [[NSMutableDictionary alloc] init];
+        _animationKeys = [[NSMutableArray alloc] init];
+        _sublayers = [[NSMutableArray alloc] init];
+        _observedKeyPaths = [[NSMutableArray alloc] init];
 
       [self setDelegate: [layer delegate]];
       [self setLayoutManager: [layer layoutManager]];
