@@ -484,7 +484,7 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
 - (void) _renderLayer: (CALayer *)layer
         withTransform: (CATransform3D)transform
 {
-    NSLog(@"will render layer %@, position:{%.2f,%.2f} size:{%.2f,%.2f} anchorPoint:{%.2f,%.2f} ",layer,layer.position.x,layer.position.y, layer.bounds.size.width,layer.bounds.size.height,layer.anchorPoint.x,layer.anchorPoint.y);
+//    NSLog(@"will render layer %@, position:{%.2f,%.2f} size:{%.2f,%.2f} anchorPoint:{%.2f,%.2f} ",layer,layer.position.x,layer.position.y, layer.bounds.size.width,layer.bounds.size.height,layer.anchorPoint.x,layer.anchorPoint.y);
     if (![layer isPresentationLayer])
         layer = [layer presentationLayer];
 
@@ -563,7 +563,7 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
             whiteColor[i*4 + 3] *= [layer opacity];
         }
         
-        NSLog(@"will draw arrays");
+//        NSLog(@"will draw arrays");
 
         
         glVertexAttribPointer(_positionSlot, 2, GL_FLOAT, GL_FALSE, 0, vertices);
@@ -576,7 +576,7 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
         // apply background color
         if ([layer backgroundColor] && CGColorGetAlpha([layer backgroundColor]) > 0)
         {
-            NSLog(@"render with background");
+//            NSLog(@"render with background");
             size_t numberOfComponents = CGColorGetNumberOfComponents([layer backgroundColor]);
             
             const CGFloat * componentsCG = CGColorGetComponents([layer backgroundColor]);
@@ -626,14 +626,14 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
         // if there are some contents, draw them
         if ([layer contents])
         {
-            NSLog(@"rendering contents");
+//            NSLog(@"rendering contents");
             glUniform1f(_textureFlagUniform, 1);
             CAGLTexture * texture = nil;
             id layerContents = [layer contents];
             
             if ([layerContents isKindOfClass: [CABackingStore class]])
             {
-                NSLog(@"contents is CABackingStore");
+//                NSLog(@"contents is CABackingStore");
                 CABackingStore * backingStore = layerContents;
                 
                 texture = [backingStore contentsTexture];
