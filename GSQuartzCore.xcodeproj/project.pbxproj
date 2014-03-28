@@ -75,6 +75,8 @@
 		43A9D0B8185D9B2E00720B81 /* blurhoriz.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 7F639EFD15D7C5AF007DFA18 /* blurhoriz.fsh */; };
 		43A9D0B9185D9B2E00720B81 /* blurvert.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 7F639EFF15D7C6EB007DFA18 /* blurvert.fsh */; };
 		43A9D0C6185D9C9400720B81 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43A9D0C5185D9C9400720B81 /* CoreGraphics.framework */; };
+		43B819FC18E5522F0020624F /* CALayer+Texture.h in Headers */ = {isa = PBXBuildFile; fileRef = 43B819FA18E5522F0020624F /* CALayer+Texture.h */; };
+		43B81A0318E558460020624F /* CALayer+Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = 43B819FB18E5522F0020624F /* CALayer+Texture.m */; };
 		43DBF183185DA05A00BF9025 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F7751671594AE2A00F56E92 /* Foundation.framework */; };
 		43E112A2185EDB3400E771B4 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43A9D0C5185D9C9400720B81 /* CoreGraphics.framework */; };
 		43E112A4185EDBFF00E771B4 /* CAAction.h in Headers */ = {isa = PBXBuildFile; fileRef = 43E112A3185EDBFF00E771B4 /* CAAction.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -193,6 +195,8 @@
 		43A9D0BE185D9B2E00720B81 /* QuartzCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = QuartzCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		43A9D0C5185D9C9400720B81 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		43AF1DAF18A6206E002BC090 /* CATransform3D_Private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CATransform3D_Private.h; sourceTree = "<group>"; };
+		43B819FA18E5522F0020624F /* CALayer+Texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CALayer+Texture.h"; sourceTree = "<group>"; };
+		43B819FB18E5522F0020624F /* CALayer+Texture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CALayer+Texture.m"; sourceTree = "<group>"; };
 		43BA6965185DA26500526D8E /* GSQuartzCore-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GSQuartzCore-Prefix.pch"; sourceTree = "<group>"; };
 		43E112A3185EDBFF00E771B4 /* CAAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CAAction.h; sourceTree = "<group>"; };
 		43E112AB185EDCFF00E771B4 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
@@ -349,6 +353,8 @@
 				7F1DE5A315D6EBAC00C2AE2A /* CAGLShader.m */,
 				7F1DE5A615D6F35D00C2AE2A /* CAGLProgram.h */,
 				7F1DE5A715D6F35D00C2AE2A /* CAGLProgram.m */,
+				43B819FA18E5522F0020624F /* CALayer+Texture.h */,
+				43B819FB18E5522F0020624F /* CALayer+Texture.m */,
 			);
 			path = GLHelpers;
 			sourceTree = "<group>";
@@ -564,6 +570,7 @@
 				7F7751BD1594AF3A00F56E92 /* CALayer.h in Headers */,
 				7F7751BE1594AF3A00F56E92 /* CAMediaTiming.h in Headers */,
 				7F7751BF1594AF3A00F56E92 /* CAMediaTimingFunction.h in Headers */,
+				43B819FC18E5522F0020624F /* CALayer+Texture.h in Headers */,
 				7F7751C01594AF3A00F56E92 /* CARenderer.h in Headers */,
 				7F7751C11594AF3A00F56E92 /* CAReplicatorLayer.h in Headers */,
 				7F7751C21594AF3A00F56E92 /* CAScrollLayer.h in Headers */,
@@ -752,6 +759,7 @@
 				43A9D07D185D9B2E00720B81 /* CAReplicatorLayer.m in Sources */,
 				43A9D07E185D9B2E00720B81 /* CAScrollLayer.m in Sources */,
 				43A9D07F185D9B2E00720B81 /* CAShapeLayer.m in Sources */,
+				43B81A0318E558460020624F /* CALayer+Texture.m in Sources */,
 				43A9D080185D9B2E00720B81 /* CATextLayer.m in Sources */,
 				43A9D081185D9B2E00720B81 /* CATiledLayer.m in Sources */,
 				43A9D082185D9B2E00720B81 /* CATransaction.m in Sources */,

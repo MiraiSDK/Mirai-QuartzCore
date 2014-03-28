@@ -34,6 +34,7 @@
 #import "CALayer+FrameworkPrivate.h"
 #import "CATransaction+FrameworkPrivate.h"
 #import "CABackingStore.h"
+#import "CALayer+Texture.h"
 
 #if defined(__APPLE__)
 #import <OpenGL/OpenGL.h>
@@ -639,12 +640,19 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
                          CFGetTypeID(layerContents) == CGImageGetTypeID())
 #endif
                 {
-                    NSLog(@"contents is CGImageRef");
+//                    NSLog(@"contents is CGImageRef, load it");
 
                     CGImageRef image = (CGImageRef)layerContents;
-                    
-                    texture = [CAGLTexture texture];
-                    [texture loadImage: image];
+                    layer.texture;
+                    if (!layer.texture || layer.texture.contents != layer.contents) {
+                        texture = [CAGLTexture texture];
+                        NSLog(@"Texture:load image");
+                        [texture loadImage: image];
+                        texture.contents = layerContents;
+                        layer.texture = texture;
+                    } else {
+                        texture = layer.texture;
+                    }
                 }
             
 #if !__OPENGL_ES__

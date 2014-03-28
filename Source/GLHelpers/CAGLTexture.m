@@ -52,6 +52,7 @@
 @synthesize textureID=_textureID;
 @synthesize width=_width;
 @synthesize height=_height;
+@synthesize contents = _contents;
 
 + (CAGLTexture *) texture
 {

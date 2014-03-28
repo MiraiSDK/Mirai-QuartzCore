@@ -64,4 +64,7 @@
 - (void) unbind;
 
 - (GLenum) textureTarget;
+
+@property (nonatomic, assign) id contents;
+
 @end
