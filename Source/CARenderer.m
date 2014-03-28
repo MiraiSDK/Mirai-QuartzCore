@@ -440,9 +440,14 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
 
   [CALayer setCurrentFrameBeginTime: theTime];
   
+    
+    // FIEME: discard and recreate presentation is expensive.
+    // It cause a huge drop of fps
+    // Needs find a efficiency way to reset values
   /* Destroy and then recreate the presentation layer.
      This is the easiest way to reset it to default values. */
-  [layer discardPresentationLayer];
+//  [layer discardPresentationLayer];
+    
   CALayer * presentationLayer = [layer presentationLayer];
   
   /* Tell the presentation layer to apply animations. */
