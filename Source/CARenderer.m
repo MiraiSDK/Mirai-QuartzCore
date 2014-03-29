@@ -682,7 +682,7 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
         }
         
         transform = CATransform3DConcat ([layer sublayerTransform], transform);
-        transform = CATransform3DTranslate (transform, -[layer bounds].origin.x, -[layer bounds].origin.y, 0);
+        transform = CATransform3DTranslate (transform, -[layer bounds].origin.x, [layer bounds].origin.y, 0);
         transform = CATransform3DTranslate (transform, -[layer bounds].size.width/2, -[layer bounds].size.height/2, 0);
         for (CALayer * sublayer in [layer sublayers])
         {
