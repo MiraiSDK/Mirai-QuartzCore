@@ -52,7 +52,8 @@ static CGContextRef createCGBitmapContext (int pixelsWide,
                                    8,      // bits per component
                                    bitmapBytesPerRow,
                                    colorSpace,
-#if !GNUSTEP
+#if !GNUSTEP || (__OPENGL_ES__)
+
                                    kCGImageAlphaPremultipliedLast);
 #else
   // Opal only supports kCGImageAlphaPremultipliedFirst.
