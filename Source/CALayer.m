@@ -512,6 +512,7 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
           [_backingStore height] != bounds.size.height)
       {
         [self setBackingStore: [CABackingStore backingStoreWithWidth: bounds.size.width height: bounds.size.height]];
+        [self setContents:nil];
       }
       
       CGContextSaveGState ([_backingStore context]);
