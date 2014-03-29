@@ -175,6 +175,10 @@ static CGContextRef createCGBitmapContext (int pixelsWide,
 
 }
 
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"[%@ <%p>: width:%.2f, height:%.2f]",NSStringFromClass([self class]),self, self.width,self.height];
+}
 @end
 
 /* vim: set cindent cinoptions=>4,n-2,{2,^-2,:2,=2,g0,h2,p5,t0,+2,(0,u0,w1,m1 expandtabs shiftwidth=2 tabstop=8: */
