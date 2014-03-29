@@ -648,7 +648,6 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
 //                    NSLog(@"contents is CGImageRef, load it");
 
                     CGImageRef image = (CGImageRef)layerContents;
-                    layer.texture;
                     if (!layer.texture || layer.texture.contents != layer.contents) {
                         texture = [CAGLTexture texture];
                         NSLog(@"Texture:load image");
