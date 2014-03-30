@@ -1157,7 +1157,7 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
         
         while (to != commonAncestor) {
             CGRect toRect = to.frame;
-            result.x -= toRect.origin.y;
+            result.x -= toRect.origin.x;
             result.y -= toRect.origin.y;
             to = [to superlayer];
         }
@@ -1185,7 +1185,7 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
         
         while (to != commonAncestor) {
             CGRect toRect = to.frame;
-            result.x -= toRect.origin.y;
+            result.x -= toRect.origin.x;
             result.y -= toRect.origin.y;
             to = [to superlayer];
         }
