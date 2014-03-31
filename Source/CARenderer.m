@@ -99,8 +99,6 @@
     GLuint _projectionUniform;
     GLuint _texture_2dUniform;
     GLuint _textureFlagUniform;
-    
-    CGSize _screenSize;
 
 }
 @synthesize layer=_layer;
@@ -145,9 +143,6 @@
 #else
         [ctx makeCurrentContext];
 #endif
-
-        //FIXME: hardcode screensize
-        _screenSize = CGSizeMake(720, 1280);
         
       /* Simple, passthrough shader */
       CAGLVertexShader * simpleVS = [[CAGLVertexShader alloc] initWithSource:@"\
@@ -338,7 +333,7 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
     [_GLContext makeCurrentContext];
 #endif
 
-    _projectionMatrix = CATransform3DMakeOrtho(0, _screenSize.width, 0, _screenSize.height, -1024, 1024);
+    _projectionMatrix = CATransform3DMakeOrtho(0, _bounds.size.width, 0, _bounds.size.height, -1024, 1024);
     
 //    CATransform3D modelViewMatrix = CATransform3DIdentity;
 //    _modelViewProjectionMatrix = CATransform3DMultiply(projectionMatrix, modelViewMatrix);
@@ -353,7 +348,7 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
     
     /* Perform render */
     CATransform3D transform = CATransform3DIdentity;
-    transform = CATransform3DTranslate(transform, 0, _screenSize.height -_layer.position.y * 2, 0);
+    transform = CATransform3DTranslate(transform, 0, _bounds.size.height -_layer.position.y * 2, 0);
     [self _renderLayer: [[self layer] presentationLayer]
          withTransform: transform];
     
