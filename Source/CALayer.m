@@ -506,6 +506,10 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
       /* By default, uses -drawInContext: to update the 'contents' property. */
     
       CGRect bounds = [self bounds];
+      if (CGRectIsEmpty(bounds))
+      {
+        return;
+      }
       
       if (!_backingStore ||
           [_backingStore width] != bounds.size.width ||
