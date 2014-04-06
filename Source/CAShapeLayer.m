@@ -22,3 +22,20 @@
    Free Software Foundation, 51 Franklin Street, Fifth Floor,
    Boston, MA 02110-1301, USA.
 */
+
+#import "CAShapeLayer.h"
+@implementation CAShapeLayer
+
+
+@end
+
+NSString *const kCAFillRuleNonZero = @"non-zero";
+NSString *const kCAFillRuleEvenOdd = @"even-odd";
+
+NSString *const kCALineJoinMiter = @"miter";
+NSString *const kCALineJoinRound = @"round";
+NSString *const kCALineJoinBevel = @"bevel";
+
+NSString *const kCALineCapButt = @"butt";
+NSString *const kCALineCapRound = @"round";
+NSString *const kCALineCapSquare = @"square";
