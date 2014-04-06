@@ -107,6 +107,12 @@
 @property(copy) NSString* calculationMode;
 @property(copy) NSArray* values;
 
+@property CGPathRef path;
+@property(copy) NSArray *keyTimes;
+@property(copy) NSArray *timingFunctions;
+@property(copy) NSArray *tensionValues, *continuityValues, *biasValues;
+@property(copy) NSString *rotationMode;
+
 @end
 
 /* calculationMode constants */
