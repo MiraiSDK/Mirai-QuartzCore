@@ -206,6 +206,15 @@ NSString *const kCATransition;
 - (CGAffineTransform) affineTransform;
 - (void) setAffineTransform: (CGAffineTransform)affineTransform;
 
+- (void)renderInContext:(CGContextRef)ctx;
+
+@property CGFloat cornerRadius;
+@property CGFloat borderWidth;
+@property CGColorRef borderColor;
+@property(retain) CALayer *mask;
+@property CGFloat rasterizationScale;
+@property(copy) NSString *name;
+
 @end
 
 @interface NSObject (CALayerActions)

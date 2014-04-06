@@ -1210,6 +1210,20 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 /* TODO:
  * -setSublayers: needs to correctly unset superlayer from old values and set new superlayer for new values.
  */
+- (void)renderInContext:(CGContextRef)ctx
+{
+    
+}
+
+- (CGAffineTransform)affineTransform
+{
+    return CGAffineTransformIdentity;
+}
+
+- (void)setAffineTransform:(CGAffineTransform)m
+{
+    
+}
 
 @end
 
