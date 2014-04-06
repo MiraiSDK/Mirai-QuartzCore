@@ -19,6 +19,8 @@
 		7F19ECFE15E2826D00D53ED8 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F19ECFD15E2826D00D53ED8 /* OpenGL.framework */; };
 		7F19ED0315E292B000D53ED8 /* TextLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F19ED0215E292B000D53ED8 /* TextLayer.m */; };
 		7F19ED0715E2A21900D53ED8 /* GradientLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F19ED0615E2A21800D53ED8 /* GradientLayer.m */; };
+		BD0324A1186D3D1F00E344CC /* LayerTestView.m in Sources */ = {isa = PBXBuildFile; fileRef = BD0324A0186D3D1F00E344CC /* LayerTestView.m */; };
+		BD049AC218644A1D00C94CA5 /* CAGradientLayerTestView.m in Sources */ = {isa = PBXBuildFile; fileRef = BD049AC118644A1D00C94CA5 /* CAGradientLayerTestView.m */; };
 		BD0D61FB186149CB00BD348A /* CATextLayerTestView.m in Sources */ = {isa = PBXBuildFile; fileRef = BD0D61FA186149CB00BD348A /* CATextLayerTestView.m */; };
 /* End PBXBuildFile section */
 
@@ -46,6 +48,10 @@
 		7F19ED0415E292BB00D53ED8 /* GNUmakefile */ = {isa = PBXFileReference; lastKnownFileType = text; path = GNUmakefile; sourceTree = "<group>"; };
 		7F19ED0515E2A21800D53ED8 /* GradientLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GradientLayer.h; sourceTree = "<group>"; };
 		7F19ED0615E2A21800D53ED8 /* GradientLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GradientLayer.m; sourceTree = "<group>"; };
+		BD03249F186D3D1F00E344CC /* LayerTestView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LayerTestView.h; sourceTree = "<group>"; };
+		BD0324A0186D3D1F00E344CC /* LayerTestView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LayerTestView.m; sourceTree = "<group>"; };
+		BD049AC018644A1D00C94CA5 /* CAGradientLayerTestView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CAGradientLayerTestView.h; sourceTree = "<group>"; };
+		BD049AC118644A1D00C94CA5 /* CAGradientLayerTestView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CAGradientLayerTestView.m; sourceTree = "<group>"; };
 		BD0D61F9186149CB00BD348A /* CATextLayerTestView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CATextLayerTestView.h; sourceTree = "<group>"; };
 		BD0D61FA186149CB00BD348A /* CATextLayerTestView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CATextLayerTestView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -106,12 +112,11 @@
 		7F19ECAF15E27FCA00D53ED8 /* QuartzCoreDemo */ = {
 			isa = PBXGroup;
 			children = (
+				BD03249E186D3CE400E344CC /* TestViews */,
 				7F19ECCB15E2807000D53ED8 /* AppController.h */,
 				7F19ECCC15E2807000D53ED8 /* AppController.m */,
 				7F19ECCD15E2807000D53ED8 /* DemoOpenGLView.h */,
 				7F19ECCE15E2807000D53ED8 /* DemoOpenGLView.m */,
-				BD0D61F9186149CB00BD348A /* CATextLayerTestView.h */,
-				BD0D61FA186149CB00BD348A /* CATextLayerTestView.m */,
 				7F19ED0115E292B000D53ED8 /* TextLayer.h */,
 				7F19ED0215E292B000D53ED8 /* TextLayer.m */,
 				7F19ED0515E2A21800D53ED8 /* GradientLayer.h */,
@@ -133,6 +138,19 @@
 				7F19ECB515E27FCA00D53ED8 /* main.m */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		BD03249E186D3CE400E344CC /* TestViews */ = {
+			isa = PBXGroup;
+			children = (
+				BD03249F186D3D1F00E344CC /* LayerTestView.h */,
+				BD0324A0186D3D1F00E344CC /* LayerTestView.m */,
+				BD0D61F9186149CB00BD348A /* CATextLayerTestView.h */,
+				BD0D61FA186149CB00BD348A /* CATextLayerTestView.m */,
+				BD049AC018644A1D00C94CA5 /* CAGradientLayerTestView.h */,
+				BD049AC118644A1D00C94CA5 /* CAGradientLayerTestView.m */,
+			);
+			name = TestViews;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -202,9 +220,11 @@
 			files = (
 				7F19ECB615E27FCA00D53ED8 /* main.m in Sources */,
 				7F19ECD115E2807000D53ED8 /* AppController.m in Sources */,
+				BD0324A1186D3D1F00E344CC /* LayerTestView.m in Sources */,
 				7F19ECD215E2807000D53ED8 /* DemoOpenGLView.m in Sources */,
 				BD0D61FB186149CB00BD348A /* CATextLayerTestView.m in Sources */,
 				7F19ED0315E292B000D53ED8 /* TextLayer.m in Sources */,
+				BD049AC218644A1D00C94CA5 /* CAGradientLayerTestView.m in Sources */,
 				7F19ED0715E2A21900D53ED8 /* GradientLayer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

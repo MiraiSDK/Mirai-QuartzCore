@@ -33,13 +33,22 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CGGeometry.h>
-#import "LayerTestView.h"
 
 @class CARenderer;
 @class CALayer;
 
-@interface CATextLayerTestView : LayerTestView
+@interface LayerTestView : NSOpenGLView
 {
+  NSTimer * _timer;
+  BOOL _isAnimating;
+
+  CARenderer * _renderer;
+  CALayer * _rootLayer;
 }
 
+- (void) startAnimation;
+- (void) stopAnimation;
+- (void) timerAnimation: (NSTimer *)aTimer;
+- (void) clearBounds: (CGRect) bounds;
+- (void) doTest;
 @end

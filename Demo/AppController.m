@@ -32,6 +32,7 @@
 #import "DemoOpenGLView.h"
 #import "AppController.h"
 #import "CATextLayerTestView.h"
+#import "CAGradientLayerTestView.h"
 
 @implementation AppController
 -(void)applicationDidFinishLaunching: (NSNotification*)aNote
@@ -68,26 +69,44 @@
     
     
     [self testCATextLayer];
-
+    [self testCAGradientLayer];
 }
 
 -(void)testCATextLayer {
 
-    NSWindow* CATextLayerTestWindow = [[NSWindow alloc] initWithContentRect: NSMakeRect(0,0,800,600)
+    NSWindow* testWin = [[NSWindow alloc] initWithContentRect: NSMakeRect(0,0,800,600)
                                                  styleMask: NSTitledWindowMask | NSClosableWindowMask
                                                    backing: NSBackingStoreBuffered
                                                      defer: NO];
     
     CATextLayerTestView * testView;
-    testView = [[CATextLayerTestView alloc] initWithFrame: [[CATextLayerTestWindow contentView] frame]
+    testView = [[CATextLayerTestView alloc] initWithFrame: [[testWin contentView] frame]
                                             pixelFormat: [CATextLayerTestView defaultPixelFormat]];
-    [CATextLayerTestWindow setContentView: testView];
-    [testView startAnimation];
+    [testWin setContentView: testView];
+    //[testView startAnimation];
     [testView release];
     
-    [CATextLayerTestWindow setTitle: @"testCATextLayer"];
+    [testWin setTitle: @"testCATextLayer"];
     
-    [CATextLayerTestWindow makeKeyAndOrderFront: nil];
+    [testWin makeKeyAndOrderFront: nil];
+}
+
+-(void)testCAGradientLayer {
+    
+    NSWindow* testWin = [[NSWindow alloc] initWithContentRect: NSMakeRect(0,0,800,600)
+                                                                  styleMask: NSTitledWindowMask | NSClosableWindowMask
+                                                                    backing: NSBackingStoreBuffered
+                                                                      defer: NO];
+    
+    CAGradientLayerTestView * testView;
+    testView = [[CAGradientLayerTestView alloc] initWithFrame: [[testWin contentView] frame]
+                                              pixelFormat: [CAGradientLayerTestView defaultPixelFormat]];
+    [testWin setContentView: testView];
+    [testView release];
+    
+    [testWin setTitle: @"testCAGradientLayer"];
+    
+    [testWin makeKeyAndOrderFront: nil];
 }
 
 -(BOOL)applicationShouldTerminateAfterLastWindowClosed:(id)sender 
