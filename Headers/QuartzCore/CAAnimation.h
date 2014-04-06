@@ -143,4 +143,14 @@ NSString *const kCATransitionFromRight;
 
 @end
 
+@interface CAAnimationGroup : CAAnimation
+
+/* An array of CAAnimation objects. Each member of the array will run
+ * concurrently in the time space of the parent animation using the
+ * normal rules. */
+
+@property(copy) NSArray *animations;
+
+@end
+
 /* vim: set cindent cinoptions=>4,n-2,{2,^-2,:2,=2,g0,h2,p5,t0,+2,(0,u0,w1,m1 expandtabs shiftwidth=2 tabstop=8: */
