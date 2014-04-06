@@ -451,7 +451,8 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
   _nextFrameTime = MAX(_nextFrameTime, theTime);
   
   /* Tell all children to update themselves. */
-  for (CALayer * sublayer in [layer sublayers])
+    NSArray *sublayers = [[layer sublayers] copy];
+  for (CALayer * sublayer in sublayers)
     {
       [self _updateLayer: sublayer
                   atTime: theTime];
@@ -679,7 +680,8 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
         transform = CATransform3DConcat ([layer sublayerTransform], transform);
         transform = CATransform3DTranslate (transform, -[layer bounds].origin.x, [layer bounds].origin.y, 0);
         transform = CATransform3DTranslate (transform, -[layer bounds].size.width/2, -[layer bounds].size.height/2, 0);
-        for (CALayer * sublayer in [layer sublayers])
+        CALayer *subLayers = [[layer sublayers] copy];
+        for (CALayer * sublayer in subLayers)
         {
             CATransform3D subTransform = CATransform3DTranslate(transform, 0, layer.bounds.size.height - sublayer.position.y * 2, 0);
             [self _renderLayer: sublayer withTransform: subTransform];
