@@ -302,6 +302,11 @@ CATransform3D CATransform3DMakeOrtho(float left, float right,
     return m;
 }
 
+CATransform3D CATransform3DMakeAffineTransform (CGAffineTransform m)
+{
+    return CATransform3DIdentity;
+}
+
 float CADegreesToRadians(float degrees) { return degrees * (M_PI / 180); };
 
 @implementation NSValue (CATransform3D)
