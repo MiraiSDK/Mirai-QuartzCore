@@ -196,3 +196,18 @@
  */
 
 @end
+
+
+NSString * const kCATruncationNone = @"none";
+NSString * const kCATruncationStart = @"start";
+NSString * const kCATruncationEnd = @"middle";
+NSString * const kCATruncationMiddle = @"end";
+
+/* Alignment modes. */
+
+NSString * const kCAAlignmentNatural = @"natural";
+NSString * const kCAAlignmentLeft = @"left";
+NSString * const kCAAlignmentRight = @"right";
+NSString * const kCAAlignmentCenter = @"center";
+NSString * const kCAAlignmentJustified = @"justified";
+
