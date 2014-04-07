@@ -484,6 +484,9 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
 //    NSLog(@"will render layer %@, position:{%.2f,%.2f} size:{%.2f,%.2f} anchorPoint:{%.2f,%.2f} ",layer,layer.position.x,layer.position.y, layer.bounds.size.width,layer.bounds.size.height,layer.anchorPoint.x,layer.anchorPoint.y);
     if (![layer isPresentationLayer])
         layer = [layer presentationLayer];
+    if (layer.isHidden || layer.opacity == 0) {
+        return;
+    }
 
     // apply transform and translate to position
     transform = CATransform3DTranslate(transform, [layer position].x, [layer position].y, 0);
