@@ -457,6 +457,7 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
       [self _updateLayer: sublayer
                   atTime: theTime];
     }
+    [sublayers release];
 
   /* Now that children have had a chance to determine
      whether they need to be rendered offscreen, the layer itself
@@ -686,6 +687,7 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
             CATransform3D subTransform = CATransform3DTranslate(transform, 0, layer.bounds.size.height - sublayer.position.y * 2, 0);
             [self _renderLayer: sublayer withTransform: subTransform];
         }
+        [subLayers release];
     }
 }
 
