@@ -1183,8 +1183,8 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
             toRect.origin.x -= to.bounds.origin.x;
             toRect.origin.y -= to.bounds.origin.y;
             
-            result.x -= toRect.origin.x-to.bounds.origin.x;
-            result.y -= toRect.origin.y-to.bounds.origin.y;
+            result.x -= toRect.origin.x;
+            result.y -= toRect.origin.y;
             to = [to superlayer];
         }
         return result;
