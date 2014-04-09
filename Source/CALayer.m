@@ -646,7 +646,7 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 
 - (BOOL) isPresentationLayer
 {
-  return !_presentationLayer;
+  return !_presentationLayer && _modelLayer;
 }
 
 - (CALayer *) superlayer
