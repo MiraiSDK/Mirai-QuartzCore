@@ -1150,30 +1150,7 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 
 - (CGPoint) convertPoint: (CGPoint)p fromLayer: (CALayer *)l
 {
-    if (l == nil || self == l) {
-        return p;
-    } else {
-        CGPoint result = p;
-        CALayer *commonAncestor = [self lowestCommonAncestorOfLayer:l];
-        
-        CALayer *from = l;
-        while (from != commonAncestor) {
-            CGRect fRect = from.frame;
-            result.x += fRect.origin.x;
-            result.y += fRect.origin.y;
-            from = [from superlayer];
-        }
-        
-        CALayer *to = self;
-        
-        while (to != commonAncestor) {
-            CGRect toRect = to.frame;
-            result.x -= toRect.origin.x;
-            result.y -= toRect.origin.y;
-            to = [to superlayer];
-        }
-        return result;
-    }
+    return [l convertPoint:p toLayer:self];
 }
 
 - (CGPoint) convertPoint: (CGPoint)p toLayer: (CALayer *)l
@@ -1187,6 +1164,11 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
         CALayer *from = self;
         while (from != commonAncestor) {
             CGRect fRect = from.frame;
+            
+            // apply bounds origin
+            fRect.origin.x -= from.bounds.origin.x;
+            fRect.origin.y -= from.bounds.origin.y;
+            
             result.x += fRect.origin.x;
             result.y += fRect.origin.y;
             from = [from superlayer];
@@ -1196,8 +1178,13 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
         
         while (to != commonAncestor) {
             CGRect toRect = to.frame;
-            result.x -= toRect.origin.x;
-            result.y -= toRect.origin.y;
+            
+            // apply bounds origin
+            toRect.origin.x -= to.bounds.origin.x;
+            toRect.origin.y -= to.bounds.origin.y;
+            
+            result.x -= toRect.origin.x-to.bounds.origin.x;
+            result.y -= toRect.origin.y-to.bounds.origin.y;
             to = [to superlayer];
         }
         return result;
