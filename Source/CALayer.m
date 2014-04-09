@@ -388,10 +388,17 @@ NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
 
 - (NSString *)description
 {
-  return [NSString stringWithFormat: @"<%@: %p; position: %g,%g>",
-          [self class],
-          self,
-          [self position].x, [self position].y];
+    NSMutableString *str = [NSMutableString stringWithFormat: @"<%@:%p; position = CGPoint (%g %g); bounds = CGRect (%g %g; %g %g);",
+                            [self class],
+                            self,
+                            [self position].x, [self position].y,
+                            [self bounds].origin.x,[self bounds].origin.y,[self bounds].size.width,[self bounds].size.height];
+
+    if (self.delegate) {
+        [str appendFormat:@"delegate = <%@:%p>;",[self.delegate class],self.delegate];
+    }
+    [str appendString:@">"];
+    return str;
 }
 
 /* *** properties *** */
