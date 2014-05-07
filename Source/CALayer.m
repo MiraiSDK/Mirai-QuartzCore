@@ -620,7 +620,7 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
     {
       [self displayIfNeeded];
 
-      _presentationLayer = [[CALayer alloc] initWithLayer: self];
+      _presentationLayer = [[[self class] alloc] initWithLayer: self];
       [_presentationLayer setModelLayer: self];
       assert([_presentationLayer isPresentationLayer]);
       
