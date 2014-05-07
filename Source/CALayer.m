@@ -446,7 +446,7 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 {
     _bounds.size = frame.size;
     _position = CGPointMake(frame.origin.x + (frame.size.width * _anchorPoint.x),
-                            frame.origin.x + (frame.size.width * _anchorPoint.x));
+                            frame.origin.y + (frame.size.width * _anchorPoint.y));
     [self setNeedsLayout];
 }
 
