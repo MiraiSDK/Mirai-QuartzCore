@@ -357,6 +357,8 @@ NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
       [self setAnimations: [layer animations]];
       [self setAnimationKeys: [layer animationKeys]];
         
+        self.name = layer.name;
+        
         _needsLayout = layer.needsLayout;
     }
   return self;
@@ -395,8 +397,13 @@ NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
                             [self bounds].origin.x,[self bounds].origin.y,[self bounds].size.width,[self bounds].size.height];
 
     if (self.delegate) {
-        [str appendFormat:@"delegate = <%@:%p>;",[self.delegate class],self.delegate];
+        [str appendFormat:@"delegate = <%@:%p>",[self.delegate class],self.delegate];
     }
+    
+    if (self.name) {
+        [str appendFormat:@"name = %@",self.name];
+    }
+
     [str appendString:@">"];
     return str;
 }
