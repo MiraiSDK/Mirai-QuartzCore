@@ -100,11 +100,24 @@
     GLuint _texture_2dUniform;
     GLuint _textureFlagUniform;
 
+    NSMutableArray *_callTimeArray;
 }
 @synthesize layer=_layer;
 @synthesize bounds=_bounds;
 
 @synthesize GLContext=_GLContext;
+
+#define PROFILE_ENABLE 0
+#if PROFILE_ENABLE
+#define PROFILE_METHOD_INIT clock_t start,end;double usage=0.0f
+#define PROFILE_BEGIN start = clock()
+#define PROFILE_END(x) end = clock();usage = (end-start)/(double)CLOCKS_PER_SEC;[_callTimeArray addObject:@[(x),@(usage)]]
+#else
+#define PROFILE_METHOD_INIT do {} while(0)
+#define PROFILE_BEGIN do {} while(0)
+#define PROFILE_END(x) do {} while(0)
+
+#endif
 
 /* *** class methods *** */
 /* Creates a renderer which renders into an OpenGL context. */
@@ -269,6 +282,12 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
 - (void) beginFrameAtTime: (CFTimeInterval)timeInterval
                 timeStamp: (CVTimeStamp *)timeStamp
 {
+#if PROFILE_ENABLE
+    _callTimeArray = [[NSMutableArray alloc] init];
+#endif
+    PROFILE_METHOD_INIT;
+    
+    PROFILE_BEGIN;
   if (!_firstRender)
     {
       _firstRender = timeInterval;
@@ -282,9 +301,11 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
   /* Prepare for rasterization */
   [_rasterizationSchedule release];
   _rasterizationSchedule = [[NSMutableArray alloc] init];
-  
+    PROFILE_END(@"beginFrame Init");
+    PROFILE_BEGIN;
   /* Update layers (including determining and scheduling rasterization) */
   [self _updateLayer: _layer atTime: timeInterval];
+    PROFILE_END(@"beginFrame Update");
   
 }
 
@@ -295,6 +316,46 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
   _updateBounds = CGRectMake(__builtin_inf(), __builtin_inf(), 0, 0);
 
   _previousFrameWasANoop = isinf(_nextFrameTime);
+    
+#if PROFILE_ENABLE
+    NSMutableDictionary *result = [NSMutableDictionary dictionary];
+    for (NSArray *record in _callTimeArray) {
+        NSString *name = record[0];
+        NSNumber *time = record[1];
+        NSNumber *value = result[name];
+        if (value) {
+            value = @([value doubleValue] + [time doubleValue]);
+        } else {
+            value = time;
+        }
+        
+        result[name] = value;
+    }
+    
+    NSMutableDictionary *count = [NSMutableDictionary dictionary];
+    for (NSArray *record in _callTimeArray) {
+        NSString *name = record[0];
+        NSNumber *value = count[name];
+        if (value) {
+            value = @([value integerValue] + 1);
+        } else {
+            value = @1;
+        }
+        
+        count[name] = value;
+    }
+    
+    
+    NSArray *keys = [result keysSortedByValueUsingSelector:@selector(compare:)];
+    for (NSString *key in keys) {
+        double funcUsage = [result[key] doubleValue];
+        NSInteger funcCount = [count[key] integerValue];
+        NSLog(@"func: %@, time:%.8fs count:%d funcAvgUsage:%.8f",key ,funcUsage,funcCount,funcUsage/funcCount);
+    }
+
+    [_callTimeArray release];
+    _callTimeArray = nil;
+#endif
 }
 /* Returns time at which next update should be performed.
    Current time denotes continuous animation and next update
@@ -319,6 +380,10 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
 #if __OPENGL_ES__
 - (void)render
 {
+#if PROFILE_ENABLE
+    NSDate *begin = [NSDate date];
+#endif
+    
     /* If we have nothing to render, just skip rendering */
     CGRect updateBounds = [self updateBounds];
     if (isinf(updateBounds.origin.x) &&
@@ -349,9 +414,15 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
     /* Perform render */
     CATransform3D transform = CATransform3DIdentity;
     transform = CATransform3DTranslate(transform, 0, _bounds.size.height -_layer.position.y * 2, 0);
+    
+#if PROFILE_ENABLE
+    NSDate *callBegin = [NSDate date];
+#endif
     [self _renderLayer: [[self layer] presentationLayer]
          withTransform: transform];
-    
+#if PROFILE_ENABLE
+    NSTimeInterval callUsage = -[callBegin timeIntervalSinceNow];
+#endif
     
     /* Restore defaults */
     glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -359,6 +430,11 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
     glBlendFunc(GL_ONE, GL_ZERO);
     glUniformMatrix4fv(_projectionUniform, 1, 0, &_projectionMatrix);
 
+#if PROFILE_ENABLE
+    NSTimeInterval usage = -[begin timeIntervalSinceNow];
+    
+    NSLog(@"Frame Usage: %.2fs _renderLayer %.2f%%",usage, callUsage/usage*100.0);
+#endif
 }
 #else /* OPENGL */
 - (void) render
@@ -430,28 +506,41 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
 - (void) _updateLayer: (CALayer *)layer
                atTime: (CFTimeInterval)theTime
 {
+    PROFILE_METHOD_INIT;
+    
+    PROFILE_BEGIN;
   if ([layer modelLayer])
     layer = [layer modelLayer];
 
   [CALayer setCurrentFrameBeginTime: theTime];
-  
+    PROFILE_END(@"_updateLayer modelLayer");
+
   /* Destroy and then recreate the presentation layer.
      This is the easiest way to reset it to default values. */
-  CALayer *prevPresentationLayer = layer.presentationLayer;
-    CAGLTexture *prevTexture = [prevPresentationLayer.texture retain];
-  [layer discardPresentationLayer];
+
+    PROFILE_BEGIN;
+    CALayer *presentationLayer = layer.presentationLayer;
+    if (layer.isDirty || [layer hasAnimations]) {
+        CAGLTexture *prevTexture = [presentationLayer.texture retain];
+        [layer discardPresentationLayer];
+        
+        presentationLayer = [layer presentationLayer];
+        presentationLayer.texture = prevTexture;
+        [prevTexture release];
+    }
+    PROFILE_END(@"_updateLayer update presentationLayer");
     
-  CALayer * presentationLayer = [layer presentationLayer];
-    presentationLayer.texture = prevTexture;
-    [prevTexture release];
-  
+    PROFILE_BEGIN;
   /* Tell the presentation layer to apply animations. */
   /* Also, determine nextFrameTime */
   _nextFrameTime = MIN(_nextFrameTime, [presentationLayer applyAnimationsAtTime: theTime]);
   _nextFrameTime = MAX(_nextFrameTime, theTime);
-  
+    PROFILE_END(@"_updateLayer calcuate nextFrameTime");
+    
   /* Tell all children to update themselves. */
+    PROFILE_BEGIN;
     NSArray *sublayers = [[layer sublayers] copy];
+    PROFILE_END(@"_updateLayer sublayers copy");
   for (CALayer * sublayer in sublayers)
     {
       [self _updateLayer: sublayer
@@ -471,9 +560,10 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
   #if 0
   [self _determineAndScheduleRasterizationForLayer: [layer mask]];
   #endif
-  
+    PROFILE_BEGIN;
   /* Then permit current layer to determine rasterization */
   [self _determineAndScheduleRasterizationForLayer: layer];
+    PROFILE_END(@"_updateLayer determineRasterization");
 }
 /* Internal method that renders a single layer and then proceeds by recursing, rendering its children. */
 
@@ -482,22 +572,53 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
         withTransform: (CATransform3D)transform
 {
 //    NSLog(@"will render layer %@, position:{%.2f,%.2f} size:{%.2f,%.2f} anchorPoint:{%.2f,%.2f} ",layer,layer.position.x,layer.position.y, layer.bounds.size.width,layer.bounds.size.height,layer.anchorPoint.x,layer.anchorPoint.y);
-    if (![layer isPresentationLayer])
+//    if (!layer.opaque) {
+//        glEnable(GL_BLEND);
+//        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//    } else {
+//        glDisable(GL_BLEND);
+//        glBlendFunc(GL_ONE, GL_ZERO);
+//    }
+    
+    
+//    NSDate *allBegin = [NSDate date];
+    
+//    NSDate *begin = nil;
+//    NSTimeInterval usage = 0;
+    
+//    clock_t start,end;
+//    double usage = 0.0f;
+
+    PROFILE_BEGIN;
+    PROFILE_END(@"empty profile");
+
+    PROFILE_BEGIN;
+    if (![layer isPresentationLayer]) {
         layer = [layer presentationLayer];
+    }
+    PROFILE_END(@"presentationLayer");
+    
+    PROFILE_BEGIN;
     if (layer.isHidden || layer.opacity == 0) {
         return;
     }
+    PROFILE_END(@"visible checking");
 
+    PROFILE_BEGIN;
     // apply transform and translate to position
-    transform = CATransform3DTranslate(transform, [layer position].x, [layer position].y, 0);
+    CGPoint layerPosition = [layer position];
+    
+    transform = CATransform3DTranslate(transform, layerPosition.x, layerPosition.y, 0);
     transform = CATransform3DConcat([layer transform], transform);
     
     _modelViewProjectionMatrix = CATransform3DMultiply(_projectionMatrix, transform);
     glUniformMatrix4fv(_projectionUniform, 1, 0, &_modelViewProjectionMatrix);
+    PROFILE_END(@"mvp calcuate");
     
-    
+    PROFILE_BEGIN;
     // if the layer was offscreen-rendered, render just the texture
     CAGLTexture * texture = [[layer backingStore] offscreenRenderTexture];
+    PROFILE_END(@"offscreenRenderTexture");
     
     if (texture) {
 //        glClearColor(0, 1, 0, 1);
@@ -505,8 +626,11 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
         NSLog(@"[WARNING]render texture unimplemented!!");
 
     } else { // not offscreen-rendered
+        PROFILE_BEGIN;
         [layer displayIfNeeded];
+        PROFILE_END(@"displayIfNeeded");
         
+        PROFILE_BEGIN;
         // fill vertex arrays
         GLfloat vertices[] = {
             0.0, 0.0,
@@ -573,6 +697,9 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
         glEnableVertexAttribArray(_texturecoord2dSolt);
         glUniform1f(_textureFlagUniform, 0);
 
+        PROFILE_END(@"vertex prepare");
+        
+        PROFILE_BEGIN;
         // apply background color
         if ([layer backgroundColor] && CGColorGetAlpha([layer backgroundColor]) > 0)
         {
@@ -618,14 +745,16 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
             glEnableVertexAttribArray(_colorSlot);
             
             glDrawArrays(GL_TRIANGLES, 0, 6);
-            
         }
+        PROFILE_END(@"draw background");
 
         
         
+        PROFILE_BEGIN;
         // if there are some contents, draw them
         if ([layer contents])
         {
+            
 //            NSLog(@"rendering contents");
             glUniform1f(_textureFlagUniform, 1);
             CAGLTexture * texture = nil;
@@ -680,11 +809,27 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
             [texture unbind];
             
         }
+        PROFILE_END(@"layer contents rendering");
         
+        PROFILE_BEGIN;
+        CGRect layerBounds = [layer bounds];
         transform = CATransform3DConcat ([layer sublayerTransform], transform);
-        transform = CATransform3DTranslate (transform, -[layer bounds].origin.x, [layer bounds].origin.y, 0);
-        transform = CATransform3DTranslate (transform, -[layer bounds].size.width/2, -[layer bounds].size.height/2, 0);
-        CALayer *subLayers = [[layer sublayers] copy];
+        transform = CATransform3DTranslate (transform, -layerBounds.origin.x, layerBounds.origin.y, 0);
+        transform = CATransform3DTranslate (transform, -layerBounds.size.width/2, -layerBounds.size.height/2, 0);
+        PROFILE_END(@"sublayer transform perpare");
+        
+        PROFILE_BEGIN;
+        NSArray *subLayers = [layer sublayers];
+        PROFILE_END(@"subLayers getting");
+//        PROFILE_BEGIN;
+//        subLayers = [subLayers copy];
+//        PROFILE_END(@"subLayers copy");
+        
+#if PROFILE_ENABLE
+        NSTimeInterval allTime = -[allBegin timeIntervalSinceNow];
+        [_callTimeArray addObject:@[@"RenderLayerWIthTransform",@(allTime)]];
+#endif
+
         for (CALayer * sublayer in subLayers)
         {
             CATransform3D subTransform = CATransform3DTranslate(transform, 0, layer.bounds.size.height - sublayer.position.y * 2, 0);

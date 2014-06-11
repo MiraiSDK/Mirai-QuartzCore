@@ -64,6 +64,7 @@ NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
 @property (nonatomic, retain) NSMutableDictionary * animations;
 @property (retain) NSMutableArray * animationKeys;
 @property (retain) CABackingStore * backingStore;
+@property (assign,getter = isDirty) BOOL dirty;
 
 - (void)setModelLayer: (id)modelLayer;
 @end
@@ -115,6 +116,8 @@ NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
 @synthesize animations=_animations;
 @synthesize animationKeys=_animationKeys;
 @synthesize backingStore=_backingStore;
+
+@synthesize dirty = _dirty;
 
 /* *** dynamic synthesis of properties *** */
 #if 0
@@ -305,11 +308,8 @@ NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
      layers. */
   if ((self = [super init]) != nil)
     {
-        _animations = [[NSMutableDictionary alloc] init];
-        _animationKeys = [[NSMutableArray alloc] init];
-        _sublayers = [[NSMutableArray alloc] init];
         _observedKeyPaths = [[NSMutableArray alloc] init];
-
+        
       [self setDelegate: [layer delegate]];
       [self setLayoutManager: [layer layoutManager]];
       [self setSuperlayer: [layer superlayer]]; /* if copied for use in presentation layer, then ignored */
@@ -529,6 +529,7 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
           [_backingStore width] != bounds.size.width ||
           [_backingStore height] != bounds.size.height)
       {
+          //TODO: taking account the opaque property, should create a bitmap without alpha channel while opaque is YES.
         [self setBackingStore: [CABackingStore backingStoreWithWidth: bounds.size.width height: bounds.size.height]];
         [self setContents:nil];
       }
@@ -565,6 +566,8 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 {
   /* TODO: schedule redraw of the scene */
   _needsDisplay = YES;
+    
+    [self markDirty];
 }
 
 - (void) setNeedsDisplayInRect: (CGRect)r
@@ -612,6 +615,7 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 - (void) setNeedsLayout
 {
   _needsLayout = YES;
+    self.dirty = YES;
 }
 
 - (BOOL)needsLayout
@@ -623,6 +627,10 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 /* MARK: - Model and presentation layers */
 - (id) presentationLayer
 {
+    if (self.isDirty && _presentationLayer) {
+        [self discardPresentationLayer];
+    }
+    
   if (!_modelLayer && !_presentationLayer)
     {
       [self displayIfNeeded];
@@ -630,6 +638,7 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
       _presentationLayer = [[[self class] alloc] initWithLayer: self];
       [_presentationLayer setModelLayer: self];
       assert([_presentationLayer isPresentationLayer]);
+        self.dirty = NO;
       
     }
   return _presentationLayer;
@@ -827,6 +836,8 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
   
   [mutableSublayersOfSuperlayer removeObject: self];
   [self setSuperlayer: nil];
+    
+    [self setNeedsLayout];
 }
 
 - (void) insertSublayer: (CALayer *)layer atIndex: (unsigned)index
@@ -835,6 +846,8 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
   
   [mutableSublayers insertObject: layer atIndex: index];
   [layer setSuperlayer: self];
+    
+    [self setNeedsLayout];
 }
 
 - (void) insertSublayer: (CALayer *)layer below: (CALayer *)sibling;
@@ -844,6 +857,8 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
   NSInteger siblingIndex = [mutableSublayers indexOfObject: sibling];
   [mutableSublayers insertObject: layer atIndex:siblingIndex];
   [layer setSuperlayer: self];
+    
+    [self setNeedsLayout];
 }
 
 - (void) insertSublayer: (CALayer *)layer above: (CALayer *)sibling;
@@ -853,6 +868,8 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
   NSInteger siblingIndex = [mutableSublayers indexOfObject: sibling];
   [mutableSublayers insertObject: layer atIndex:siblingIndex+1];
   [layer setSuperlayer: self];
+    
+    [self setNeedsLayout];
 }
 
 - (CALayer *) rootLayer
@@ -1230,6 +1247,22 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
     
 }
 
+- (void)markDirty
+{
+    self.dirty = YES;
+}
+
+- (BOOL)hasAnimations
+{
+    return (self.animations.count > 0);
+}
+
+- (void)resetPresentationLayerIfNeeds
+{
+    if ([self hasAnimations]) {
+        [self discardPresentationLayer];
+    }
+}
 @end
 
 /* vim: set cindent cinoptions=>4,n-2,{2,^-2,:2,=2,g0,h2,p5,t0,+2,(0,u0,w1,m1 expandtabs shiftwidth=2 tabstop=8: */

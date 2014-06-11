@@ -39,6 +39,11 @@
 - (BOOL)isPresentationLayer;
 
 - (void) discardPresentationLayer;
+//- (void)resetPresentationLayerIfNeeds;
+@property (assign,getter = isDirty) BOOL dirty;
+- (void)markDirty;
+
+- (BOOL)hasAnimations;
 - (CFTimeInterval) applyAnimationsAtTime: (CFTimeInterval)time;
 
 - (CFTimeInterval) activeTime;

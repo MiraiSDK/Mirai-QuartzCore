@@ -85,6 +85,7 @@ static CAImplicitAnimationObserver * sharedObserver;
   [[CATransaction topTransaction] registerAction: action
                                         onObject: object
                                          keyPath: keyPath];
+    [object markDirty];
 }
 
 @end
