@@ -636,6 +636,7 @@ static GSQuartzCoreQuaternion linearInterpolationQuaternion(GSQuartzCoreQuaterni
       NSValue *from = fromValue;
       NSValue *to = toValue;
 
+#if !TARGET_OS_IPHONE
       if (!strcmp([from objCType], @encode(NSPoint)))
         {
           /* Just convert to CGPoint. Core Animation doesn't deal with NSPoints! */
@@ -647,6 +648,7 @@ static GSQuartzCoreQuaternion linearInterpolationQuaternion(GSQuartzCoreQuaterni
           from = [NSValue valueWithBytes: &fromPt objCType: @encode(CGPoint)];
           to = [NSValue valueWithBytes: &toPt objCType: @encode(CGPoint)];
         }
+#endif
 #if GNUSTEP
       if (!strcmp([from objCType], @encode(NSPoint)))
         {
@@ -683,6 +685,7 @@ static GSQuartzCoreQuaternion linearInterpolationQuaternion(GSQuartzCoreQuaterni
         }
         
       //////////////////////////////////
+#if !TARGET_OS_IPHONE
       if (!strcmp([from objCType], @encode(NSRect)))
         {
           /* Just convert to CGRect. Core Animation doesn't deal with NSRects! */
@@ -696,6 +699,7 @@ static GSQuartzCoreQuaternion linearInterpolationQuaternion(GSQuartzCoreQuaterni
           from = [NSValue valueWithBytes:&fromRect objCType:@encode(CGRect)];
           to = [NSValue valueWithBytes:&toRect objCType:@encode(CGRect)];
         }
+#endif
 #if GNUSTEP
       if (!strcmp([from objCType], @encode(NSRect)))
         {

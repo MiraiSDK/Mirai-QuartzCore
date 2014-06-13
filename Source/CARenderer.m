@@ -840,7 +840,7 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
             CATransform3D subTransform = CATransform3DTranslate(transform, 0, layer.bounds.size.height - sublayer.position.y * 2, 0);
             [self _renderLayer: sublayer withTransform: subTransform];
         }
-        [subLayers release];
+//        [subLayers release];
     }
 }
 

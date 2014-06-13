@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		43840645188167B2000D092C /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43840644188167B2000D092C /* CoreText.framework */; };
 		43840647188167E5000D092C /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43840646188167E5000D092C /* CoreFoundation.framework */; };
+<<<<<<< HEAD
+		4398B9691897E8B900445C3A /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4398B9681897E8B900445C3A /* OpenGLES.framework */; };
+=======
 		4398B9231897D5D500445C3A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4398B9221897D5D500445C3A /* Foundation.framework */; };
 		4398B94E1897D63300445C3A /* CABackingStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F43F22D1594ECD800F1C5EB /* CABackingStore.m */; };
 		4398B94F1897D63300445C3A /* CABase.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F77517D1594AF2900F56E92 /* CABase.m */; };
@@ -33,9 +36,7 @@
 		4398B9631897D63B00445C3A /* CAGLTexture.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F5026B015BC685900184772 /* CAGLTexture.m */; };
 		4398B9641897D63B00445C3A /* CAGLShader.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F1DE5A315D6EBAC00C2AE2A /* CAGLShader.m */; };
 		4398B9651897D63B00445C3A /* CAGLProgram.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F1DE5A715D6F35D00C2AE2A /* CAGLProgram.m */; };
-		4398B9691897E8B900445C3A /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4398B9681897E8B900445C3A /* OpenGLES.framework */; };
-		43A48F8C19498DA000BEF21C /* CAAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F77517C1594AF2900F56E92 /* CAAnimation.m */; };
-		43A48FDA19499D7900BEF21C /* CALayer+Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = 43B819FB18E5522F0020624F /* CALayer+Texture.m */; };
+>>>>>>> working on iOS target
 		43A9D075185D9B2E00720B81 /* CAAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F77517C1594AF2900F56E92 /* CAAnimation.m */; };
 		43A9D076185D9B2E00720B81 /* CABase.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F77517D1594AF2900F56E92 /* CABase.m */; };
 		43A9D077185D9B2E00720B81 /* CADisplayLink.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F77517E1594AF2900F56E92 /* CADisplayLink.m */; };
@@ -229,12 +230,15 @@
 /* Begin PBXFileReference section */
 		43840644188167B2000D092C /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = ../MiraSDK/Products/android/Xcode/Platforms/MacOSX.platform/Developer/SDKs/FakeMacOSX10.9.sdk/System/Library/Frameworks/CoreText.framework; sourceTree = "<group>"; };
 		43840646188167E5000D092C /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = ../MiraSDK/Products/android/Xcode/Platforms/MacOSX.platform/Developer/SDKs/FakeMacOSX10.9.sdk/System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<group>"; };
+<<<<<<< HEAD
+		4398B9681897E8B900445C3A /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = ../MiraSDK/Products/android/Xcode/Platforms/MacOSX.platform/Developer/SDKs/FakeMacOSX10.9.sdk/System/Library/Frameworks/OpenGLES.framework; sourceTree = "<group>"; };
+=======
 		4398B9211897D5D500445C3A /* libGSQuartzCore-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libGSQuartzCore-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4398B9221897D5D500445C3A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		4398B9261897D5D500445C3A /* GSQuartzCore-iOS-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GSQuartzCore-iOS-Prefix.pch"; sourceTree = "<group>"; };
 		4398B9301897D5D500445C3A /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		4398B9331897D5D500445C3A /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
-		4398B9681897E8B900445C3A /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = ../MiraSDK/Products/android/Xcode/Platforms/MacOSX.platform/Developer/SDKs/FakeMacOSX10.9.sdk/System/Library/Frameworks/OpenGLES.framework; sourceTree = "<group>"; };
+>>>>>>> working on iOS target
 		43A9D0BE185D9B2E00720B81 /* QuartzCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = QuartzCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		43A9D0C5185D9C9400720B81 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		43AF1DAF18A6206E002BC090 /* CATransform3D_Private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CATransform3D_Private.h; sourceTree = "<group>"; };
@@ -846,12 +850,10 @@
 				4398B9631897D63B00445C3A /* CAGLTexture.m in Sources */,
 				4398B95B1897D63300445C3A /* CAShapeLayer.m in Sources */,
 				4398B9501897D63300445C3A /* CADisplayLink.m in Sources */,
-				43A48FDA19499D7900BEF21C /* CALayer+Texture.m in Sources */,
 				4398B94E1897D63300445C3A /* CABackingStore.m in Sources */,
 				4398B9541897D63300445C3A /* CALayer.m in Sources */,
 				4398B9561897D63300445C3A /* CAMediaTiming.m in Sources */,
 				4398B9651897D63B00445C3A /* CAGLProgram.m in Sources */,
-				43A48F8C19498DA000BEF21C /* CAAnimation.m in Sources */,
 				4398B9621897D63B00445C3A /* CAGLSimpleFramebuffer.m in Sources */,
 				4398B9591897D63300445C3A /* CAReplicatorLayer.m in Sources */,
 				4398B9511897D63300445C3A /* CAEAGLLayer.m in Sources */,
@@ -949,7 +951,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD)";
+				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = NO;
@@ -982,7 +984,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD)";
+				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = NO;
@@ -1013,7 +1015,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD)";
+				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = NO;
@@ -1227,7 +1229,6 @@
 				4398B9421897D5D500445C3A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
 		};
 		43A9D0BA185D9B2E00720B81 /* Build configuration list for PBXNativeTarget "GSQuartzCore-Android" */ = {
 			isa = XCConfigurationList;

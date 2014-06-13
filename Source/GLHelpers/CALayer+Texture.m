@@ -7,7 +7,12 @@
 //
 
 #import "CALayer+Texture.h"
+
 #import <objc/objc.h>
+
+#if TARGET_OS_IPHONE
+#import <objc/runtime.h>
+#endif
 
 @implementation CALayer (Texture)
 static char *TextureKey = "textureKey";

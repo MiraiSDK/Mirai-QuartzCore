@@ -6,7 +6,12 @@
 
 #ifdef __OBJC__
     #import <Foundation/Foundation.h>
+    #import "AppleSupport.h"
     #import <CoreGraphics/CoreGraphics.h>
+    #import "QuartzCore/QuartzCore.h"
 #endif
 
+#ifndef __APPLE__
+#define __APPLE__ 1
+#endif
 #define __OPENGL_ES__ 1

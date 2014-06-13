@@ -73,8 +73,11 @@
     
     if (!_colors) {
         
-        CGColorRef c1 = CGColorCreateGenericRGB(0.0, 0.0 , 0.0, 1);
-        CGColorRef c2 = CGColorCreateGenericRGB(1.0, 1.0, 1.0, 1);
+        const CGFloat c1Components[] = {0.0,0.0,0.0,1.0};
+        const CGFloat c2Components[] = {1.0,1.0,1.0,1.0};
+
+        CGColorRef c1 = CGColorCreate(colorSpace, c1Components); // CGColorCreateGenericRGB(0.0, 0.0 , 0.0, 1);
+        CGColorRef c2 = CGColorCreate(colorSpace, c2Components); //CGColorCreateGenericRGB(1.0, 1.0, 1.0, 1);
         _colors = [NSArray arrayWithObjects:(id)c1,(id)c2,nil];
     }
     
