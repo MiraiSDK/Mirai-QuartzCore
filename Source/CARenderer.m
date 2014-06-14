@@ -72,6 +72,34 @@
 #import <CoreGraphics/CoreGraphics.h>
 #endif
 
+#define BUFFER_OFFSET(i) ((char *)NULL + (i))
+
+// Uniform index.
+enum
+{
+    UNIFORM_MODELVIEWPROJECTION_MATRIX,
+    UNIFORM_NORMAL_MATRIX,
+    NUM_UNIFORMS
+};
+GLint uniforms[NUM_UNIFORMS];
+
+// Attribute index.
+enum
+{
+    ATTRIB_VERTEX,
+    ATTRIB_NORMAL,
+    NUM_ATTRIBUTES
+};
+
+typedef NS_ENUM(GLint, CAVertexAttrib)
+{
+    CAVertexAttribPosition,
+    CAVertexAttribNormal,
+    CAVertexAttribColor,
+    CAVertexAttribTexCoord0,
+    CAVertexAttribTexCoord1
+};
+
 
 @interface CARenderer()
 #if ANDROID || TARGET_OS_IPHONE
@@ -97,10 +125,7 @@
     CATransform3D _modelViewProjectionMatrix;
     CATransform3D _projectionMatrix;
 
-    GLuint _positionSlot;
-    GLuint _colorSlot;
     GLuint _normalSolt;
-    GLuint _texturecoord2dSolt;
     GLuint _projectionUniform;
     GLuint _texture_2dUniform;
     GLuint _textureFlagUniform;
@@ -162,90 +187,11 @@
         [ctx makeCurrentContext];
 #endif
         
-      /* Simple, passthrough shader */
-      CAGLVertexShader * simpleVS = [[CAGLVertexShader alloc] initWithSource:@"\
-attribute vec4 position;\
-attribute vec4 color;\
-attribute vec3 normal;\
-attribute vec2 texturecoord_2d;\
-\
-uniform mat4 modelViewProjectionMatrix;\
-varying vec4 colorVarying;\
-varying vec2 fragmentTextureCoordinates;\
-\
-void main()\
-{\
-gl_Position = modelViewProjectionMatrix * position;\
-\
-colorVarying.xyz = normal;\
-colorVarying = color;\
-fragmentTextureCoordinates = texturecoord_2d;\
-}\
-"];
-        
-//      simpleVS = [simpleVS initWithFile: @"simple"
-//                                 ofType: @"vsh"];
-      CAGLFragmentShader * simpleFS = [[CAGLFragmentShader alloc] initWithSource:@"\
-precision highp float;\
-\
-uniform sampler2D texture_2d;\
-uniform lowp float textureFlag;\
-\
-varying vec4 colorVarying;\
-varying mediump vec2 fragmentTextureCoordinates;\
-\
-void main()\
-{\
-gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) * colorVarying + (1.0 - textureFlag) * colorVarying;\
-}\
-"];
-//      simpleFS = [simpleFS initWithFile: @"simple"
-//                                 ofType: @"fsh"];
-      NSArray * objectsForSimpleShader = [NSArray arrayWithObjects: simpleVS, simpleFS, nil];
-      [simpleVS release];
-      [simpleFS release];
-
-      CAGLProgram * simpleProgram = [CAGLProgram alloc];
-      simpleProgram = [simpleProgram initWithArrayOfShaders: objectsForSimpleShader];
-      [simpleProgram link];
-      _simpleProgram = simpleProgram;
-      
-      /* Horizontal and vertical blur shader */
-//      CAGLVertexShader * blurBaseVS = [CAGLVertexShader alloc];
-//      blurBaseVS = [blurBaseVS initWithFile: @"blurbase"
-//                                     ofType: @"vsh"];
-//      CAGLFragmentShader * blurHorizFS = [CAGLFragmentShader alloc];
-//      blurHorizFS = [blurHorizFS initWithFile: @"blurhoriz"
-//                                       ofType: @"fsh"];
-//      CAGLFragmentShader * blurVertFS = [CAGLFragmentShader alloc];
-//      blurVertFS = [blurVertFS initWithFile: @"blurvert"
-//                                     ofType: @"fsh"];
-//      NSArray * objectsForBlurHorizShader = [NSArray arrayWithObjects: blurBaseVS, blurHorizFS, nil];
-//      NSArray * objectsForBlurVertShader = [NSArray arrayWithObjects: blurBaseVS, blurVertFS, nil];
-//      [blurBaseVS release];
-//      [blurHorizFS release];
-//      [blurVertFS release];
-      
-//      CAGLProgram * blurHorizProgram = [CAGLProgram alloc];
-//      blurHorizProgram = [blurHorizProgram initWithArrayOfShaders: objectsForBlurHorizShader];
-//      [blurHorizProgram link];
-//      _blurHorizProgram = blurHorizProgram;
-//      
-//      CAGLProgram * blurVertProgram = [CAGLProgram alloc];
-//      blurVertProgram = [blurVertProgram initWithArrayOfShaders: objectsForBlurVertShader];
-//      [blurVertProgram link];
-//      _blurVertProgram = blurVertProgram;
+        [self _setupGL];
         
 #if __OPENGL_ES__
         
-        [simpleProgram use];
-        _positionSlot = [simpleProgram locationForAttribute:@"position"];
-        _colorSlot = [simpleProgram locationForAttribute:@"color"];
-        _texturecoord2dSolt = [simpleProgram locationForAttribute:@"texturecoord_2d"];
         
-        _projectionUniform = [simpleProgram locationForUniform:@"modelViewProjectionMatrix"];
-        _texture_2dUniform = [simpleProgram locationForUniform:@"texture_2d"];
-        _textureFlagUniform = [simpleProgram locationForUniform:@"textureFlag"];
 #endif
     }
   return self;
@@ -262,6 +208,125 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
   [_blurVertProgram release];
   
   [super dealloc];
+}
+
+#pragma mark - 
+- (void)_setupGL
+{
+    [self loadShaders];
+    
+#if __OPENGL_ES__
+    glEnableVertexAttribArray(CAVertexAttribPosition);
+//    glEnableVertexAttribArray(CAVertexAttribNormal);
+//    glVertexAttribPointer(CAVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, 24, BUFFER_OFFSET(12));
+    glEnableVertexAttribArray(CAVertexAttribColor);
+    glEnableVertexAttribArray(CAVertexAttribTexCoord0);
+#endif
+}
+
+#pragma mark Shaders
+- (void)loadShaders
+{
+    // Create programs
+    // simple program
+    CAGLProgram * simpleProgram = [[CAGLProgram alloc] initWithArrayOfShaders: [self _basicShaders]];
+    [simpleProgram bindAttrib:@"position" toLocation:CAVertexAttribPosition];
+    [simpleProgram bindAttrib:@"color" toLocation:CAVertexAttribColor];
+    [simpleProgram bindAttrib:@"texturecoord_2d" toLocation:CAVertexAttribTexCoord0];
+    [simpleProgram link];
+    _simpleProgram = simpleProgram;
+    
+    // blur program
+    //    NSArray *blurShaders = [self _blurShaders];
+    //    CAGLProgram * blurHorizProgram = [CAGLProgram alloc];
+    //    blurHorizProgram = [blurHorizProgram initWithArrayOfShaders: blurShaders[0]];
+    //    [blurHorizProgram link];
+    //    _blurHorizProgram = blurHorizProgram;
+    //
+    //    CAGLProgram * blurVertProgram = [CAGLProgram alloc];
+    //    blurVertProgram = [blurVertProgram initWithArrayOfShaders: blurShaders[1]];
+    //    [blurVertProgram link];
+    //    _blurVertProgram = blurVertProgram;
+    
+#if __OPENGL_ES__
+
+    [_simpleProgram use];
+    
+    // Get uniform locations.
+    _projectionUniform = [_simpleProgram locationForUniform:@"modelViewProjectionMatrix"];
+    _texture_2dUniform = [_simpleProgram locationForUniform:@"texture_2d"];
+    _textureFlagUniform = [_simpleProgram locationForUniform:@"textureFlag"];
+#endif
+    
+}
+
+- (NSArray *)_basicShaders
+{
+    // Shader
+    
+    /* Simple, passthrough shader */
+    CAGLVertexShader * simpleVS = [[CAGLVertexShader alloc] initWithSource:@"\
+                                   attribute vec4 position;\
+                                   attribute vec4 color;\
+                                   attribute vec3 normal;\
+                                   attribute vec2 texturecoord_2d;\
+                                   \
+                                   uniform mat4 modelViewProjectionMatrix;\
+                                   varying vec4 colorVarying;\
+                                   varying vec2 fragmentTextureCoordinates;\
+                                   \
+                                   void main()\
+                                   {\
+                                   gl_Position = modelViewProjectionMatrix * position;\
+                                   \
+                                   colorVarying.xyz = normal;\
+                                   colorVarying = color;\
+                                   fragmentTextureCoordinates = texturecoord_2d;\
+                                   }\
+                                   "];
+    
+    CAGLFragmentShader * simpleFS = [[CAGLFragmentShader alloc] initWithSource:@"\
+                                     precision highp float;\
+                                     \
+                                     uniform sampler2D texture_2d;\
+                                     uniform lowp float textureFlag;\
+                                     \
+                                     varying vec4 colorVarying;\
+                                     varying mediump vec2 fragmentTextureCoordinates;\
+                                     \
+                                     void main()\
+                                     {\
+                                     gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) * colorVarying + (1.0 - textureFlag) * colorVarying;\
+                                     }\
+                                     "];
+    
+    NSArray * objectsForSimpleShader = [NSArray arrayWithObjects: simpleVS, simpleFS, nil];
+    [simpleVS release];
+    [simpleFS release];
+    
+    return objectsForSimpleShader;
+}
+
+- (NSArray *)_blurShaders
+{
+/* Horizontal and vertical blur shader */
+//    CAGLVertexShader * blurBaseVS = [CAGLVertexShader alloc];
+//    blurBaseVS = [blurBaseVS initWithFile: @"blurbase"
+//                                   ofType: @"vsh"];
+//    CAGLFragmentShader * blurHorizFS = [CAGLFragmentShader alloc];
+//    blurHorizFS = [blurHorizFS initWithFile: @"blurhoriz"
+//                                     ofType: @"fsh"];
+//    CAGLFragmentShader * blurVertFS = [CAGLFragmentShader alloc];
+//    blurVertFS = [blurVertFS initWithFile: @"blurvert"
+//                                   ofType: @"fsh"];
+//    NSArray * objectsForBlurHorizShader = [NSArray arrayWithObjects: blurBaseVS, blurHorizFS, nil];
+//    NSArray * objectsForBlurVertShader = [NSArray arrayWithObjects: blurBaseVS, blurVertFS, nil];
+//    [blurBaseVS release];
+//    [blurHorizFS release];
+//    [blurVertFS release];
+//    return @[objectsForBlurHorizShader,objectsForBlurVertShader]
+
+    return @[];
 }
 
 - (void)setBounds: (CGRect)bounds
@@ -640,28 +705,19 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
         GLfloat vertices[] = {
             0.0, 0.0,
             [layer bounds].size.width, 0.0,
-            [layer bounds].size.width, [layer bounds].size.height,
-            
-            [layer bounds].size.width, [layer bounds].size.height,
             0.0, [layer bounds].size.height,
-            0.0, 0.0,
+            [layer bounds].size.width, [layer bounds].size.height,            
         };
         CGRect cr = [layer contentsRect];
 
         GLfloat texCoords[] = {
             cr.origin.x,                 1.0 - (cr.origin.y),
             cr.origin.x + cr.size.width, 1.0 - (cr.origin.y),
-            cr.origin.x + cr.size.width, 1.0 - (cr.origin.y + cr.size.height),
-            
-            cr.origin.x + cr.size.width, 1.0 - (cr.origin.y + cr.size.height),
             cr.origin.x,                 1.0 - (cr.origin.y + cr.size.height),
-            cr.origin.x,                 1.0 - (cr.origin.y),
+            cr.origin.x + cr.size.width, 1.0 - (cr.origin.y + cr.size.height),
         };
         GLfloat whiteColor[] = {
             1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0,
-            
             1.0, 1.0, 1.0, 1.0,
             1.0, 1.0, 1.0, 1.0,
             1.0, 1.0, 1.0, 1.0,
@@ -670,17 +726,11 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
             1.0, 1.0, 1.0, 1.0,
             1.0, 1.0, 1.0, 1.0,
             1.0, 1.0, 1.0, 1.0,
-            
-            1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0,
             1.0, 1.0, 1.0, 1.0,
         };
-#warning fix
-//        glVertexPointer(2, GL_FLOAT, 0, vertices);
-//        glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
         
         // apply anchor point
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < 4; i++)
         {
             vertices[i*2 + 0] -= [layer anchorPoint].x * [layer bounds].size.width;
             vertices[i*2 + 1] -= [layer anchorPoint].y * [layer bounds].size.height;
@@ -695,11 +745,8 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
 //        NSLog(@"will draw arrays");
 
         
-        glVertexAttribPointer(_positionSlot, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-        glEnableVertexAttribArray(_positionSlot);
-        
-        glVertexAttribPointer(_texturecoord2dSolt, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
-        glEnableVertexAttribArray(_texturecoord2dSolt);
+        glVertexAttribPointer(CAVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+        glVertexAttribPointer(CAVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
         glUniform1f(_textureFlagUniform, 0);
 
         PROFILE_END(@"vertex prepare");
@@ -742,14 +789,9 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
             memcpy(backgroundColor + 1*4, components, sizeof(GLfloat)*4);
             memcpy(backgroundColor + 2*4, components, sizeof(GLfloat)*4);
             memcpy(backgroundColor + 3*4, components, sizeof(GLfloat)*4);
-            memcpy(backgroundColor + 4*4, components, sizeof(GLfloat)*4);
-            memcpy(backgroundColor + 5*4, components, sizeof(GLfloat)*4);
-#warning fix
-//            glColorPointer(4, GL_FLOAT, 0, backgroundColor);
-            glVertexAttribPointer(_colorSlot, 4, GL_FLOAT, GL_FALSE, 0, backgroundColor);
-            glEnableVertexAttribArray(_colorSlot);
+            glVertexAttribPointer(CAVertexAttribColor, 4, GL_FLOAT, GL_FALSE, 0, backgroundColor);
             
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         }
         PROFILE_END(@"draw background");
 
@@ -798,7 +840,7 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
             {
                 // Rectangle textures use non-normalized coordinates.
                 
-                for (int i = 0; i < 6; i++)
+                for (int i = 0; i < 4; i++)
                 {
                     texCoords[i*2 + 0] *= [texture width];
                     texCoords[i*2 + 1] *= [texture height];
@@ -807,10 +849,8 @@ gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) *
 #endif
             
             [texture bind];
-#warning fix
-//            glColorPointer(4, GL_FLOAT, 0, whiteColor);
-            glVertexAttribPointer(_colorSlot, 4, GL_FLOAT, GL_FALSE, 0, whiteColor);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            glVertexAttribPointer(CAVertexAttribColor, 4, GL_FLOAT, GL_FALSE, 0, whiteColor);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
             [texture unbind];
             
         }
