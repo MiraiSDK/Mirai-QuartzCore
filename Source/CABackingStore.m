@@ -41,7 +41,7 @@ static CGContextRef createCGBitmapContext (int pixelsWide,
   bitmapByteCount     = (bitmapBytesPerRow * pixelsHigh);
   
 #if TARGET_OS_IPHONE
-    colorSpace = CGColorSpaceCreateDeviceRGB;
+    colorSpace = CGColorSpaceCreateDeviceRGB();
 #else
   colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);// 2
 #endif
