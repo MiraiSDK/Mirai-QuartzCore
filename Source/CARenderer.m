@@ -370,11 +370,11 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
   /* Prepare for rasterization */
   [_rasterizationSchedule release];
   _rasterizationSchedule = [[NSMutableArray alloc] init];
-    PROFILE_END(@"beginFrame Init");
+    PROFILE_END(@"beginFrameAtTime:timeStamp: Init");
     PROFILE_BEGIN;
   /* Update layers (including determining and scheduling rasterization) */
   [self _updateLayer: _layer atTime: timeInterval];
-    PROFILE_END(@"beginFrame Update");
+    PROFILE_END(@"beginFrameAtTime:timeStamp: Update");
   
 }
 
@@ -582,7 +582,7 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
     layer = [layer modelLayer];
 
   [CALayer setCurrentFrameBeginTime: theTime];
-    PROFILE_END(@"_updateLayer modelLayer");
+    PROFILE_END(@"_updateLayer:atTime: modelLayer");
 
   /* Destroy and then recreate the presentation layer.
      This is the easiest way to reset it to default values. */
@@ -597,19 +597,19 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
         presentationLayer.texture = prevTexture;
         [prevTexture release];
     }
-    PROFILE_END(@"_updateLayer update presentationLayer");
+    PROFILE_END(@"_updateLayer:atTime: update presentationLayer");
     
     PROFILE_BEGIN;
   /* Tell the presentation layer to apply animations. */
   /* Also, determine nextFrameTime */
   _nextFrameTime = MIN(_nextFrameTime, [presentationLayer applyAnimationsAtTime: theTime]);
   _nextFrameTime = MAX(_nextFrameTime, theTime);
-    PROFILE_END(@"_updateLayer calcuate nextFrameTime");
+    PROFILE_END(@"_updateLayer:atTime: calcuate nextFrameTime");
     
   /* Tell all children to update themselves. */
     PROFILE_BEGIN;
     NSArray *sublayers = [[layer sublayers] copy];
-    PROFILE_END(@"_updateLayer sublayers copy");
+    PROFILE_END(@"_updateLayer:atTime: sublayers copy");
   for (CALayer * sublayer in sublayers)
     {
       [self _updateLayer: sublayer
@@ -632,7 +632,7 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
     PROFILE_BEGIN;
   /* Then permit current layer to determine rasterization */
   [self _determineAndScheduleRasterizationForLayer: layer];
-    PROFILE_END(@"_updateLayer determineRasterization");
+    PROFILE_END(@"_updateLayer:atTime: determineRasterization");
 }
 /* Internal method that renders a single layer and then proceeds by recursing, rendering its children. */
 
@@ -655,23 +655,23 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
 //    NSDate *begin = nil;
 //    NSTimeInterval usage = 0;
     
-//    clock_t start,end;
-//    double usage = 0.0f;
+    clock_t start,end;
+    double usage = 0.0f;
 
     PROFILE_BEGIN;
-    PROFILE_END(@"empty profile");
+    PROFILE_END(@"_renderLayer:withTransform: empty profile");
 
     PROFILE_BEGIN;
     if (![layer isPresentationLayer]) {
         layer = [layer presentationLayer];
     }
-    PROFILE_END(@"presentationLayer");
+    PROFILE_END(@"_renderLayer:withTransform: presentationLayer");
     
     PROFILE_BEGIN;
     if (layer.isHidden || layer.opacity == 0) {
         return;
     }
-    PROFILE_END(@"visible checking");
+    PROFILE_END(@"_renderLayer:withTransform: visible checking");
 
     PROFILE_BEGIN;
     // apply transform and translate to position
@@ -682,12 +682,12 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
     
     _modelViewProjectionMatrix = CATransform3DMultiply(_projectionMatrix, transform);
     glUniformMatrix4fv(_projectionUniform, 1, 0, &_modelViewProjectionMatrix);
-    PROFILE_END(@"mvp calcuate");
+    PROFILE_END(@"_renderLayer:withTransform: mvp calcuate");
     
     PROFILE_BEGIN;
     // if the layer was offscreen-rendered, render just the texture
     CAGLTexture * texture = [[layer backingStore] offscreenRenderTexture];
-    PROFILE_END(@"offscreenRenderTexture");
+    PROFILE_END(@"_renderLayer:withTransform: offscreenRenderTexture");
     
     if (texture) {
 //        glClearColor(0, 1, 0, 1);
@@ -697,7 +697,7 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
     } else { // not offscreen-rendered
         PROFILE_BEGIN;
         [layer displayIfNeeded];
-        PROFILE_END(@"displayIfNeeded");
+        PROFILE_END(@"_renderLayer:withTransform: displayIfNeeded");
         
 
         PROFILE_BEGIN;
@@ -721,7 +721,7 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
         glVertexAttribPointer(CAVertexAttribColor, 4, GL_FLOAT, GL_FALSE, stride, (void *)offsetof(_CALayerVertex, color));
         glUniform1f(_textureFlagUniform, 0);
 
-        PROFILE_END(@"vertex prepare");
+        PROFILE_END(@"_renderLayer:withTransform: vertex prepare");
         
         PROFILE_BEGIN;
         // if there are some contents, draw them
@@ -783,25 +783,25 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
             glDisableVertexAttribArray(CAVertexAttribTexCoord0);
         }
         
-        PROFILE_END(@"layer contents rendering");
+        PROFILE_END(@"_renderLayer:withTransform: layer contents rendering");
         
         PROFILE_BEGIN;
         CGRect layerBounds = [layer bounds];
         transform = CATransform3DConcat ([layer sublayerTransform], transform);
         transform = CATransform3DTranslate (transform, -layerBounds.origin.x, layerBounds.origin.y, 0);
         transform = CATransform3DTranslate (transform, -layerBounds.size.width/2, -layerBounds.size.height/2, 0);
-        PROFILE_END(@"sublayer transform perpare");
+        PROFILE_END(@"_renderLayer:withTransform: sublayer transform perpare");
         
         PROFILE_BEGIN;
         NSArray *subLayers = [layer sublayers];
-        PROFILE_END(@"subLayers getting");
+        PROFILE_END(@"_renderLayer:withTransform: subLayers getting");
 //        PROFILE_BEGIN;
 //        subLayers = [subLayers copy];
 //        PROFILE_END(@"subLayers copy");
         
 #if PROFILE_ENABLE
-        NSTimeInterval allTime = -[allBegin timeIntervalSinceNow];
-        [_callTimeArray addObject:@[@"RenderLayerWIthTransform",@(allTime)]];
+//        NSTimeInterval allTime = -[allBegin timeIntervalSinceNow];
+//        [_callTimeArray addObject:@[@"RenderLayerWIthTransform",@(allTime)]];
 #endif
 
         for (CALayer * sublayer in subLayers)
