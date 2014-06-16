@@ -131,6 +131,8 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
     GLuint _textureFlagUniform;
 
     NSMutableArray *_callTimeArray;
+    GLuint _vertexBuffer;
+
 }
 @synthesize layer=_layer;
 @synthesize bounds=_bounds;
@@ -217,10 +219,7 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
     
 #if __OPENGL_ES__
     glEnableVertexAttribArray(CAVertexAttribPosition);
-//    glEnableVertexAttribArray(CAVertexAttribNormal);
-//    glVertexAttribPointer(CAVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, 24, BUFFER_OFFSET(12));
     glEnableVertexAttribArray(CAVertexAttribColor);
-    glEnableVertexAttribArray(CAVertexAttribTexCoord0);
 #endif
 }
 
@@ -700,116 +699,40 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
         [layer displayIfNeeded];
         PROFILE_END(@"displayIfNeeded");
         
+
         PROFILE_BEGIN;
-        // fill vertex arrays
-        GLfloat vertices[] = {
-            0.0, 0.0,
-            [layer bounds].size.width, 0.0,
-            0.0, [layer bounds].size.height,
-            [layer bounds].size.width, [layer bounds].size.height,            
-        };
-        CGRect cr = [layer contentsRect];
-
-        GLfloat texCoords[] = {
-            cr.origin.x,                 1.0 - (cr.origin.y),
-            cr.origin.x + cr.size.width, 1.0 - (cr.origin.y),
-            cr.origin.x,                 1.0 - (cr.origin.y + cr.size.height),
-            cr.origin.x + cr.size.width, 1.0 - (cr.origin.y + cr.size.height),
-        };
-        GLfloat whiteColor[] = {
-            1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0,
-        };
-        GLfloat backgroundColor[] = {
-            1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0,
-        };
         
-        // apply anchor point
-        for (int i = 0; i < 4; i++)
-        {
-            vertices[i*2 + 0] -= [layer anchorPoint].x * [layer bounds].size.width;
-            vertices[i*2 + 1] -= [layer anchorPoint].y * [layer bounds].size.height;
+        GLuint vbo = [layer vbo];
+        
+        // VBO
+        _CALayerQuad quad = [layer quad];
+        if (vbo == 0) {
+            glGenBuffers(1, &vbo);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(quad), &quad, GL_DYNAMIC_DRAW);
+            [[layer modelLayer] setVbo:vbo];
+        } else {
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
         }
         
-        // apply opacity to white color
-        for (int i = 0; i < 6; i++)
-        {
-            whiteColor[i*4 + 3] *= [layer opacity];
-        }
         
-//        NSLog(@"will draw arrays");
-
-        
-        glVertexAttribPointer(CAVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-        glVertexAttribPointer(CAVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
+        GLsizei stride = sizeof(_CALayerVertex);
+        glVertexAttribPointer(CAVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, stride, (void *)offsetof(_CALayerVertex, position));
+        glVertexAttribPointer(CAVertexAttribColor, 4, GL_FLOAT, GL_FALSE, stride, (void *)offsetof(_CALayerVertex, color));
         glUniform1f(_textureFlagUniform, 0);
 
         PROFILE_END(@"vertex prepare");
         
         PROFILE_BEGIN;
-        // apply background color
-        if ([layer backgroundColor] && CGColorGetAlpha([layer backgroundColor]) > 0)
-        {
-//            NSLog(@"render with background");
-            size_t numberOfComponents = CGColorGetNumberOfComponents([layer backgroundColor]);
-            
-            const CGFloat * componentsCG = CGColorGetComponents([layer backgroundColor]);
-            GLfloat components[4] = { 0, 0, 0, 1 };
-            
-            // convert
-            if (numberOfComponents == 1) {
-                components[0] = componentsCG[0];
-                components[1] = componentsCG[0];
-                components[2] = componentsCG[0];
-            } else if (numberOfComponents == 3) {
-                components[0] = componentsCG[0];
-                components[1] = componentsCG[1];
-                components[2] = componentsCG[2];
-            } else if (numberOfComponents == 4) {
-                components[0] = componentsCG[0];
-                components[1] = componentsCG[1];
-                components[2] = componentsCG[2];
-                components[3] = componentsCG[3];
-            } else {
-                NSLog(@"Expection NumberOfComponents:%zu",numberOfComponents);
-            }
-            
-            // apply opacity
-            components[3] *= [layer opacity];
-            
-            
-            // FIXME: here we presume that color contains RGBA channels.
-            // However this may depend on colorspace, number of components et al
-            memcpy(backgroundColor + 0*4, components, sizeof(GLfloat)*4);
-            memcpy(backgroundColor + 1*4, components, sizeof(GLfloat)*4);
-            memcpy(backgroundColor + 2*4, components, sizeof(GLfloat)*4);
-            memcpy(backgroundColor + 3*4, components, sizeof(GLfloat)*4);
-            glVertexAttribPointer(CAVertexAttribColor, 4, GL_FLOAT, GL_FALSE, 0, backgroundColor);
-            
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        }
-        PROFILE_END(@"draw background");
-
-        
-        
-        PROFILE_BEGIN;
         // if there are some contents, draw them
         if ([layer contents])
         {
-            
-//            NSLog(@"rendering contents");
             glUniform1f(_textureFlagUniform, 1);
             CAGLTexture * texture = nil;
             id layerContents = [layer contents];
             
             if ([layerContents isKindOfClass: [CABackingStore class]])
             {
-//                NSLog(@"contents is CABackingStore");
                 CABackingStore * backingStore = layerContents;
                 
                 texture = [backingStore contentsTexture];
@@ -849,11 +772,17 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
 #endif
             
             [texture bind];
-            glVertexAttribPointer(CAVertexAttribColor, 4, GL_FLOAT, GL_FALSE, 0, whiteColor);
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-            [texture unbind];
-            
+            glEnableVertexAttribArray(CAVertexAttribTexCoord0);
+            glVertexAttribPointer(CAVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, stride, (void *)offsetof(_CALayerVertex, texcoord));
         }
+        
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        
+        if ([layer contents]) {
+            [texture unbind];
+            glDisableVertexAttribArray(CAVertexAttribTexCoord0);
+        }
+        
         PROFILE_END(@"layer contents rendering");
         
         PROFILE_BEGIN;

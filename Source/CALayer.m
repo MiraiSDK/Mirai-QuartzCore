@@ -67,6 +67,10 @@ NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
 @property (assign,getter = isDirty) BOOL dirty;
 
 - (void)setModelLayer: (id)modelLayer;
+
+/* Vertex */
+@property (nonatomic, assign) _CALayerQuad quad;
+@property (assign) GLuint vbo;
 @end
 
 @implementation CALayer
@@ -118,6 +122,10 @@ NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
 @synthesize backingStore=_backingStore;
 
 @synthesize dirty = _dirty;
+
+/* Vertex */
+@synthesize quad = _quad;
+@synthesize vbo = _vbo;
 
 /* *** dynamic synthesis of properties *** */
 #if 0
@@ -644,9 +652,105 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
       [_presentationLayer setModelLayer: self];
       assert([_presentationLayer isPresentationLayer]);
         self.dirty = NO;
+        
+        [_presentationLayer prepareQuad];
       
     }
   return _presentationLayer;
+}
+
+- (void)prepareQuad
+{
+    _CALayerQuad quad;
+    
+    _CALayerVertexColor color;
+    color.a = 1;
+
+    if ([self contents]) {
+        color.r = 1; color.g = 1; color.b = 1;
+    } else if ([self backgroundColor] && CGColorGetAlpha([self backgroundColor]) > 0) {
+        size_t numberOfComponents = CGColorGetNumberOfComponents([self backgroundColor]);
+        const CGFloat * componentsCG = CGColorGetComponents([self backgroundColor]);
+        
+        // convert
+        if (numberOfComponents == 1) {
+            color.r = componentsCG[0];
+            color.g = componentsCG[0];
+            color.b = componentsCG[0];
+        } else if (numberOfComponents == 3) {
+            color.r = componentsCG[0];
+            color.g = componentsCG[1];
+            color.b = componentsCG[2];
+        } else if (numberOfComponents == 4) {
+            color.r = componentsCG[0];
+            color.g = componentsCG[1];
+            color.b = componentsCG[2];
+            color.a = componentsCG[3];
+        } else {
+            NSLog(@"Expection NumberOfComponents:%zu",numberOfComponents);
+        }
+    }
+    
+    
+    // apply opacity
+    color.a *= [self opacity];
+    
+    CGRect cr = [self contentsRect];
+
+    CGPoint anchorOffset = CGPointMake(self.anchorPoint.x * self.bounds.size.width,
+                                       self.anchorPoint.y * self.bounds.size.height);
+    
+    // quad
+    quad.bl.position = _CALayerVertexPositionMake(0-anchorOffset.x, 0-anchorOffset.y);
+    quad.bl.color = color;
+    quad.bl.texcoord = _CALayerVertexTexcoordMake(cr.origin.x, 1.0-cr.origin.y);
+    
+    quad.br.position = _CALayerVertexPositionMake(self.bounds.size.width-anchorOffset.x, 0.0-anchorOffset.y);
+    quad.br.color = color;
+    quad.br.texcoord = _CALayerVertexTexcoordMake(cr.origin.x + cr.size.width, 1.0 - cr.origin.y);
+    
+    quad.tl.position = _CALayerVertexPositionMake(0.0-anchorOffset.x, self.bounds.size.height-anchorOffset.y);
+    quad.tl.color = color;
+    quad.tl.texcoord = _CALayerVertexTexcoordMake(cr.origin.x, 1.0 - (cr.origin.y + cr.size.height));
+
+    quad.tr.position = _CALayerVertexPositionMake(self.bounds.size.width-anchorOffset.x, self.bounds.size.height-anchorOffset.y);
+    quad.tr.color = color;
+    quad.tr.texcoord = _CALayerVertexTexcoordMake(cr.origin.x + cr.size.width, 1.0 - (cr.origin.y + cr.size.height));
+    
+    
+    
+    [(CALayer *)self setQuad:quad];
+
+    // VBO
+    GLuint vbo = [[self modelLayer] vbo];
+    if (vbo != 0) {
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(_quad), &_quad);
+    }
+}
+
+- (void)setVbo:(GLuint)vbo
+{
+    @synchronized(self) {
+        _vbo = vbo;
+    }
+}
+
+- (GLuint)vbo
+{
+    @synchronized(self) {
+        if ([self isPresentationLayer]) {
+            return [[self modelLayer] vbo];
+        }
+        
+        return _vbo;
+    }
+
+}
+
+- (void)drawOpenGLES
+{
+    
 }
 
 - (void) discardPresentationLayer

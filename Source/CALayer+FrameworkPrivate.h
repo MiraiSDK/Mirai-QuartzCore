@@ -26,6 +26,59 @@
 
 #import "QuartzCore/CALayer.h"
 
+#if TARGET_OS_IPHONE
+#import <OpenGLES/ES2/gl.h>
+#else
+#import <GLES2/gl2.h>
+#endif
+
+typedef struct {
+    GLfloat x;
+    GLfloat y;
+} _CALayerVertexPosition;
+
+typedef struct {
+    GLfloat	r;
+	GLfloat	g;
+	GLfloat	b;
+	GLfloat a;
+} _CALayerVertexColor;
+
+typedef struct {
+    GLfloat u;
+    GLfloat v;
+} _CALayerVertexTexcoord;
+
+static inline _CALayerVertexPosition _CALayerVertexPositionMake(GLfloat x, GLfloat y) {
+    _CALayerVertexPosition p; p.x = x;p.y = y; return p;
+}
+
+static inline _CALayerVertexColor _CALayerVertexColorMake(GLubyte r, GLubyte g, GLubyte b, GLubyte a) {
+    _CALayerVertexColor c; c.r = r; c.g = g; c.b = b; c.a = a; return c;
+}
+
+static inline _CALayerVertexTexcoord _CALayerVertexTexcoordMake(GLfloat u, GLfloat v) {
+    _CALayerVertexTexcoord p; p.u = u;p.v = v; return p;
+}
+
+typedef struct {
+    //vertex
+    _CALayerVertexPosition position;
+    
+    //color
+    _CALayerVertexColor color;
+    
+    // texcoord
+    _CALayerVertexTexcoord texcoord;
+} _CALayerVertex;
+
+typedef struct {
+    _CALayerVertex bl;
+    _CALayerVertex br;
+    _CALayerVertex tl;
+    _CALayerVertex tr;
+} _CALayerQuad;
+
 @interface CALayer (FrameworkPrivate)
 /* sets value passed into -[CARenderer beginFrameAtTime:...]
    used as "time of object superior to root layer" (that is,
@@ -50,4 +103,11 @@
 - (CFTimeInterval) localTime;
 
 @property (retain) CABackingStore * backingStore;
+
+/* Vertex */
+@property (nonatomic, assign) _CALayerQuad quad;
+
+- (void)drawOpenGLES;
+@property (assign) GLuint vbo;
+- (void)prepareQuad;
 @end
