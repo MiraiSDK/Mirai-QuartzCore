@@ -79,6 +79,7 @@
 /* CAEAGLLayer.h */
 
 /* CAGradientLayer.h */
+#define CAGradientLayer GSCAGradientLayer
 
 /* CAImplicitAnimationObserver.h */
 #define CAImplicitAnimationObserver GSCAImplicitAnimationObserver
@@ -128,16 +129,21 @@
 /* CAScrollLayer.h */
 
 /* CAShapeLayer.h */
+#define CAShapeLayer GSCAShapeLayer
 
 /* CATextLayer.h */
-
+#define CATextLayer GSCATextLayer
 /* CATiledLayer.h */
 
 /* CATransaction.h */
 #define CATransaction GSCATransaction
+#define kCATransactionAnimationDuration kGSCATransactionAnimationDuration
+#define kCATransactionAnimationTimingFunction kGSCATransactionAnimationTimingFunction
+#define kCATransactionDisableActions kGSCATransactionDisableActions
 
 /* CATransform3D.h */
 #define CATransform3D GSCATransform3D
+#define CATransform3DIdentity GSCATransform3DIdentity
 #define CATransform3DIsIdentity GSCATransform3DIsIdentity
 #define CATransform3DEqualToTransform GSCATransform3DEqualToTransform
 #define CATransform3DMakeTranslation GSCATransform3DMakeTranslation
@@ -148,6 +154,7 @@
 #define CATransform3DRotate GSCATransform3DRotate
 #define CATransform3DConcat GSCATransform3DConcat
 #define CATransform3DInvert GSCATransform3DInvert
+#define CATransform3DMakeAffineTransform GSCATransform3DMakeAffineTransform
 
 /* CATransformLayer.h */
 
@@ -155,6 +162,7 @@
 #define CAValueFunction GSCAValueFunction
 
 /* CoreAnimation.h */
+#define CAAnimationGroup GSCAAnimationGroup
 
 /* QuartzCore.h */
 

@@ -40,7 +40,11 @@ static CGContextRef createCGBitmapContext (int pixelsWide,
   bitmapBytesPerRow   = (pixelsWide * 4);
   bitmapByteCount     = (bitmapBytesPerRow * pixelsHigh);
   
+#if TARGET_OS_IPHONE
+    colorSpace = CGColorSpaceCreateDeviceRGB();
+#else
   colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);// 2
+#endif
 
   // Let CGBitmapContextCreate() allocate the memory.
   // This should be good under Cocoa too.
@@ -160,7 +164,7 @@ static CGContextRef createCGBitmapContext (int pixelsWide,
   if (!_context)
     return;
   
-#if __APPLE__
+#if __APPLE__ && !TARGET_OS_IPHONE
   /* Since we retain contents in the CGContext, we can use the
      client storage extension to avoid a copy. */
   glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, GL_TRUE);
@@ -170,7 +174,7 @@ static CGContextRef createCGBitmapContext (int pixelsWide,
                                width: (GLuint)CGBitmapContextGetWidth(_context)
                               height: (GLuint)CGBitmapContextGetHeight(_context)];
                       
-#if __APPLE__
+#if __APPLE__ && !TARGET_OS_IPHONE
   glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, GL_FALSE);
 #endif
 

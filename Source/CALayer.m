@@ -202,7 +202,12 @@ NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
       /* note: under Cocoa this is an opaque Core Foundation type.
          these types are nonetheless retainable, releasable, autoreleasable,
          just like Opal's Objective-C class instances */
-      return [(id)CGColorCreateGenericRGB(0.0, 0.0, 0.0, 1.0) autorelease];
+        const CGFloat components[] = {0.0,0.0,0.0,1.0};
+        CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
+        CGColorRef color = CGColorCreate(space, components);
+        CGColorSpaceRelease(space);
+        
+      return [(id)color autorelease];
     }
   if ([key isEqualToString: @"shadowOffset"])
     {
@@ -446,7 +451,7 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 {
     _bounds.size = frame.size;
     _position = CGPointMake(frame.origin.x + (frame.size.width * _anchorPoint.x),
-                            frame.origin.y + (frame.size.width * _anchorPoint.y));
+                            frame.origin.y + (frame.size.height * _anchorPoint.y));
     [self setNeedsLayout];
 }
 

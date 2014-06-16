@@ -26,9 +26,14 @@
 
 #import <Foundation/Foundation.h>
 #if defined (__APPLE__)
+#   if TARGET_OS_IPHONE
+#   import <OpenGLES/ES2/gl.h>
+#   import <OpenGLES/ES2/glext.h>
+#   else
 #   import <OpenGL/OpenGL.h>
 #   import <OpenGL/gl.h>
 #   import <OpenGL/glu.h>
+#   endif
 #elif defined(ANDROID)
 #   import <GLES2/gl2.h>
 #   import <GLES2/gl2ext.h>
