@@ -147,18 +147,27 @@
     height,
     GL_RGBA,
 #if TARGET_OS_IPHONE
-    GL_UNSIGNED_INT_24_8_OES,
+    GL_UNSIGNED_BYTE,
 #else
     GL_UNSIGNED_INT_8_8_8_8_REV,
 #endif
     data);
 #endif
 
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR) {
+        NSLog(@"Got error %04x for TexImage %d x %d\n", err, width, height);
+    }
 
 #if !(USE_RECT) && !(USE_BUILDMIPMAPS)
   /* Use of non-power-of-two textures seems to require GL_NEAREST filter */
   glTexParameteri(TEXTURE_TARGET, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(TEXTURE_TARGET, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    
+#if TARGET_OS_IPHONE
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+#endif
 #endif
 }
 
@@ -244,14 +253,18 @@
 
 - (void) bind
 {
+#if !__OPENGL_ES__
   glEnable(TEXTURE_TARGET);
+#endif
   glBindTexture(TEXTURE_TARGET, _textureID);
 }
 
 - (void) unbind
 {
   glBindTexture(TEXTURE_TARGET, 0);
+#if !__OPENGL_ES__
   glDisable(TEXTURE_TARGET);
+#endif
 }
 
 - (GLenum) textureTarget
