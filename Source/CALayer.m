@@ -827,7 +827,12 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 /* MARK: - Sublayers */
 - (void) addSublayer: (CALayer *)layer
 {
+    if (layer == nil) {return;}
+    
   NSMutableArray * mutableSublayers = (NSMutableArray*)_sublayers;
+    if ([mutableSublayers containsObject:layer]) {
+        [mutableSublayers removeObject:layer];
+    }
   
   [mutableSublayers addObject: layer];
   [layer setSuperlayer: self];
@@ -847,9 +852,19 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 
 - (void) insertSublayer: (CALayer *)layer atIndex: (unsigned)index
 {
+    if (layer == nil) {return;}
+    
   NSMutableArray * mutableSublayers = (NSMutableArray*)_sublayers;
+    
+    if ([mutableSublayers containsObject:layer]) {
+        [mutableSublayers removeObject:layer];
+    }
   
-  [mutableSublayers insertObject: layer atIndex: index];
+    if (index > mutableSublayers.count) {
+        [mutableSublayers addObject:layer];
+    } else {
+        [mutableSublayers insertObject: layer atIndex: index];
+    }
   [layer setSuperlayer: self];
     
     [self setNeedsLayout];
@@ -857,10 +872,19 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 
 - (void) insertSublayer: (CALayer *)layer below: (CALayer *)sibling;
 {
+    if (layer == nil) {return;}
+    
   NSMutableArray * mutableSublayers = (NSMutableArray*)_sublayers;
-  
-  NSInteger siblingIndex = [mutableSublayers indexOfObject: sibling];
-  [mutableSublayers insertObject: layer atIndex:siblingIndex];
+    if ([mutableSublayers containsObject:layer]) {
+        [mutableSublayers removeObject:layer];
+    }
+
+  NSUInteger siblingIndex = [mutableSublayers indexOfObject: sibling];
+    if (siblingIndex == NSNotFound) {
+        [mutableSublayers addObject:layer];
+    } else {
+        [mutableSublayers insertObject: layer atIndex:siblingIndex];
+    }
   [layer setSuperlayer: self];
     
     [self setNeedsLayout];
@@ -868,10 +892,19 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 
 - (void) insertSublayer: (CALayer *)layer above: (CALayer *)sibling;
 {
+    if (layer == nil) {return;}
+    
   NSMutableArray * mutableSublayers = (NSMutableArray*)_sublayers;
-  
-  NSInteger siblingIndex = [mutableSublayers indexOfObject: sibling];
-  [mutableSublayers insertObject: layer atIndex:siblingIndex+1];
+    if ([mutableSublayers containsObject:layer]) {
+        [mutableSublayers removeObject:layer];
+    }
+
+  NSUInteger siblingIndex = [mutableSublayers indexOfObject: sibling];
+    if (siblingIndex == NSNotFound) {
+        [mutableSublayers addObject:layer];
+    } else {
+        [mutableSublayers insertObject: layer atIndex:siblingIndex+1];
+    }
   [layer setSuperlayer: self];
     
     [self setNeedsLayout];
