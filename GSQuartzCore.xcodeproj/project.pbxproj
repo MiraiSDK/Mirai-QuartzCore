@@ -108,6 +108,11 @@
 		43E112A4185EDBFF00E771B4 /* CAAction.h in Headers */ = {isa = PBXBuildFile; fileRef = 43E112A3185EDBFF00E771B4 /* CAAction.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		43E112A5185EDBFF00E771B4 /* CAAction.h in Headers */ = {isa = PBXBuildFile; fileRef = 43E112A3185EDBFF00E771B4 /* CAAction.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		43E112AC185EDCFF00E771B4 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43E112AB185EDCFF00E771B4 /* ImageIO.framework */; };
+		43EE874D1953266A00CFB759 /* CATextureLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 43EE874B1953266A00CFB759 /* CATextureLoader.h */; };
+		43EE874E1953266A00CFB759 /* CATextureLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 43EE874B1953266A00CFB759 /* CATextureLoader.h */; };
+		43EE874F1953266A00CFB759 /* CATextureLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 43EE874C1953266A00CFB759 /* CATextureLoader.m */; };
+		43EE87501953266A00CFB759 /* CATextureLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 43EE874C1953266A00CFB759 /* CATextureLoader.m */; };
+		43EE87511953266A00CFB759 /* CATextureLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 43EE874C1953266A00CFB759 /* CATextureLoader.m */; };
 		7F1DE5A415D6EBAC00C2AE2A /* CAGLShader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7F1DE5A215D6EBAC00C2AE2A /* CAGLShader.h */; };
 		7F1DE5A515D6EBAC00C2AE2A /* CAGLShader.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F1DE5A315D6EBAC00C2AE2A /* CAGLShader.m */; };
 		7F1DE5A815D6F35D00C2AE2A /* CAGLProgram.h in Headers */ = {isa = PBXBuildFile; fileRef = 7F1DE5A615D6F35D00C2AE2A /* CAGLProgram.h */; };
@@ -245,6 +250,8 @@
 		43E112AB185EDCFF00E771B4 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
 		43E112C31860304600E771B4 /* Android.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Android.xcconfig; sourceTree = "<group>"; };
 		43E112D1186032C800E771B4 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		43EE874B1953266A00CFB759 /* CATextureLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CATextureLoader.h; sourceTree = "<group>"; };
+		43EE874C1953266A00CFB759 /* CATextureLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CATextureLoader.m; sourceTree = "<group>"; };
 		7F19ECE015E2813200D53ED8 /* QuartzCoreDemo.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = QuartzCoreDemo.xcodeproj; path = Demo/QuartzCoreDemo.xcodeproj; sourceTree = "<group>"; };
 		7F1DE5A215D6EBAC00C2AE2A /* CAGLShader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CAGLShader.h; sourceTree = "<group>"; };
 		7F1DE5A315D6EBAC00C2AE2A /* CAGLShader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CAGLShader.m; sourceTree = "<group>"; };
@@ -542,6 +549,8 @@
 				7F77518A1594AF2900F56E92 /* CATransform3D.m */,
 				7F77518B1594AF2900F56E92 /* CATransformLayer.m */,
 				7F77518C1594AF2900F56E92 /* CAValueFunction.m */,
+				43EE874B1953266A00CFB759 /* CATextureLoader.h */,
+				43EE874C1953266A00CFB759 /* CATextureLoader.m */,
 				7F1DE5AA15D6FD4C00C2AE2A /* Shaders */,
 			);
 			path = Source;
@@ -607,6 +616,7 @@
 				43A9D09D185D9B2E00720B81 /* CAShapeLayer.h in Headers */,
 				43A9D09E185D9B2E00720B81 /* CATextLayer.h in Headers */,
 				43A9D09F185D9B2E00720B81 /* CATiledLayer.h in Headers */,
+				43EE874E1953266A00CFB759 /* CATextureLoader.h in Headers */,
 				43A9D0A0185D9B2E00720B81 /* CATransaction.h in Headers */,
 				43A9D0A1185D9B2E00720B81 /* CATransform3D.h in Headers */,
 				43A9D0A2185D9B2E00720B81 /* CATransformLayer.h in Headers */,
@@ -645,6 +655,7 @@
 				43B819FC18E5522F0020624F /* CALayer+Texture.h in Headers */,
 				7F7751C01594AF3A00F56E92 /* CARenderer.h in Headers */,
 				7F7751C11594AF3A00F56E92 /* CAReplicatorLayer.h in Headers */,
+				43EE874D1953266A00CFB759 /* CATextureLoader.h in Headers */,
 				7F7751C21594AF3A00F56E92 /* CAScrollLayer.h in Headers */,
 				7F7751C31594AF3A00F56E92 /* CAShapeLayer.h in Headers */,
 				7F7751C41594AF3A00F56E92 /* CATextLayer.h in Headers */,
@@ -852,6 +863,7 @@
 				4398B9561897D63300445C3A /* CAMediaTiming.m in Sources */,
 				4398B9651897D63B00445C3A /* CAGLProgram.m in Sources */,
 				43A48F8C19498DA000BEF21C /* CAAnimation.m in Sources */,
+				43EE87511953266A00CFB759 /* CATextureLoader.m in Sources */,
 				4398B9621897D63B00445C3A /* CAGLSimpleFramebuffer.m in Sources */,
 				4398B9591897D63300445C3A /* CAReplicatorLayer.m in Sources */,
 				4398B9511897D63300445C3A /* CAEAGLLayer.m in Sources */,
@@ -875,6 +887,7 @@
 				43A9D077185D9B2E00720B81 /* CADisplayLink.m in Sources */,
 				43A9D078185D9B2E00720B81 /* CAEAGLLayer.m in Sources */,
 				43A9D079185D9B2E00720B81 /* CAGradientLayer.m in Sources */,
+				43EE87501953266A00CFB759 /* CATextureLoader.m in Sources */,
 				43A9D07A185D9B2E00720B81 /* CALayer.m in Sources */,
 				43A9D07B185D9B2E00720B81 /* CAMediaTimingFunction.m in Sources */,
 				43A9D07C185D9B2E00720B81 /* CARenderer.m in Sources */,
@@ -917,6 +930,7 @@
 				7F77519A1594AF2900F56E92 /* CATextLayer.m in Sources */,
 				7F77519B1594AF2900F56E92 /* CATiledLayer.m in Sources */,
 				7F77519C1594AF2900F56E92 /* CATransaction.m in Sources */,
+				43EE874F1953266A00CFB759 /* CATextureLoader.m in Sources */,
 				7F77519D1594AF2900F56E92 /* CATransform3D.m in Sources */,
 				7F77519E1594AF2900F56E92 /* CATransformLayer.m in Sources */,
 				7F77519F1594AF2900F56E92 /* CAValueFunction.m in Sources */,

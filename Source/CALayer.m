@@ -67,6 +67,10 @@ NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
 @property (assign,getter = isDirty) BOOL dirty;
 
 - (void)setModelLayer: (id)modelLayer;
+
+// commit
+@property (assign) BOOL needsCommit;
+
 @end
 
 @implementation CALayer
@@ -548,7 +552,8 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
       if (![self contents])
         [self setContents: [self backingStore]];
       
-      [self.backingStore refresh];
+        self.backingStore.refreshed = NO;
+        //[self.backingStore refresh];
     }
 }
 
@@ -628,6 +633,15 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
     return _needsLayout;
 }
 
+- (void)_recursionLayoutAndDisplayIfNeeds
+{
+    [self layoutIfNeeded];
+    [self displayIfNeeded];
+    
+    for (CALayer *layer in self.sublayers) {
+        [layer _recursionLayoutAndDisplayIfNeeds];
+    }
+}
 /* ************************************* */
 /* MARK: - Model and presentation layers */
 - (id) presentationLayer
@@ -684,19 +698,19 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 
 - (NSArray *) sublayers
 {
-  if (![self isPresentationLayer])
-    {
-      return _sublayers;
-    }
-  else
-    {
-      NSMutableArray * presentationSublayers = [NSMutableArray arrayWithCapacity:[[[self modelLayer] sublayers] count]];
-      for (id modelSublayer in [[self modelLayer] sublayers])
-        {
-          [presentationSublayers addObject: [modelSublayer presentationLayer]];
-        }
-      return presentationSublayers;
-    }
+    return _sublayers;
+//  if (![self isPresentationLayer])
+//    {
+//    }
+//  else
+//    {
+//      NSMutableArray * presentationSublayers = [NSMutableArray arrayWithCapacity:[[[self modelLayer] sublayers] count]];
+//      for (id modelSublayer in [[self modelLayer] sublayers])
+//        {
+//          [presentationSublayers addObject: [modelSublayer presentationLayer]];
+//        }
+//      return presentationSublayers;
+//    }
 }
 
 /* **************** */
@@ -1300,6 +1314,29 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
     if ([self hasAnimations]) {
         [self discardPresentationLayer];
     }
+}
+
+#pragma mark - commit
+- (CALayer *)copyRenderLayer:(CATransaction *)transaction
+{
+    CALayer *copy = [[[self class] alloc] initWithLayer:self];
+    [copy setModelLayer:self];
+    
+    NSArray *subLayers = [self.sublayers copy];
+    NSMutableArray *subRenderLayers = [NSMutableArray array];
+    for (CALayer *subLayer in subLayers) {
+        CALayer *subRenderLayer = [subLayer copyRenderLayer:transaction];
+        [subRenderLayers addObject:subRenderLayer];
+    }
+    
+    copy.sublayers = subRenderLayers;
+    
+    return copy;
+}
+
+- (void)commitIfNeeds:(CATransaction *)transaction
+{
+    
 }
 @end
 

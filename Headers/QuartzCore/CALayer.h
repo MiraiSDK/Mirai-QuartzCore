@@ -49,6 +49,7 @@ NSString *const kCAGravityBottomRight;
 NSString *const kCATransition;
 
 @class CAAnimation;
+@class CATransaction;
 
 #import "QuartzCore/CAAction.h"
 
@@ -214,6 +215,11 @@ NSString *const kCATransition;
 @property(retain) CALayer *mask;
 @property CGFloat rasterizationScale;
 @property(copy) NSString *name;
+
+// TODO: should call from CATransaction commit
+- (void)_recursionLayoutAndDisplayIfNeeds;
+- (CALayer *)copyRenderLayer:(CATransaction *)transaction;
+- (void)commitIfNeeds:(CATransaction *)transaction;
 
 @end
 
