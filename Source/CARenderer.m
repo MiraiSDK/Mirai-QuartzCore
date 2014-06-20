@@ -368,10 +368,6 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
     {
       _firstRender = timeInterval;
     }
-//  if([[CATransaction topTransaction] isImplicit])
-//    {
-//      [CATransaction commit];
-//    }
   _nextFrameTime = __builtin_inf();
   
   /* Prepare for rasterization */
@@ -465,8 +461,6 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
     if (isinf(updateBounds.origin.x) &&
         isinf(updateBounds.origin.y))
         return;
-    
-    [self recursionLayoutLayerIfNeeded:_layer];
 
 #ifdef ANDROID
     [EAGLContext setCurrentContext:_GLContext];
@@ -585,26 +579,9 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
     PROFILE_METHOD_INIT;
     
     PROFILE_BEGIN;
-//  if ([layer modelLayer])
-//    layer = [layer modelLayer];
 
   [CALayer setCurrentFrameBeginTime: theTime];
     PROFILE_END(@"_updateLayer modelLayer");
-
-  /* Destroy and then recreate the presentation layer.
-     This is the easiest way to reset it to default values. */
-
-    PROFILE_BEGIN;
-//    CALayer *presentationLayer = layer.presentationLayer;
-//    if (layer.isDirty || [layer hasAnimations]) {
-//    CAGLTexture *prevTexture = [presentationLayer.texture retain];
-//    [layer discardPresentationLayer];
-//    
-//    presentationLayer = [layer presentationLayer];
-//    presentationLayer.texture = prevTexture;
-//    [prevTexture release];
-//    }
-    PROFILE_END(@"_updateLayer update presentationLayer");
     
     PROFILE_BEGIN;
   /* Tell the presentation layer to apply animations. */
@@ -668,12 +645,6 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
 
     PROFILE_BEGIN;
     PROFILE_END(@"empty profile");
-
-    PROFILE_BEGIN;
-//    if (![layer isPresentationLayer]) {
-//        layer = [layer presentationLayer];
-//    }
-    PROFILE_END(@"presentationLayer");
     
     PROFILE_BEGIN;
     if (layer.isHidden || layer.opacity == 0) {

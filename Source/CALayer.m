@@ -59,6 +59,12 @@ NSString *const kCAGravityTopRight = @"CAGravityTopRight";
 NSString *const kCAGravityBottomLeft = @"CAGravityBottomLeft";
 NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
 
+typedef NS_ENUM(NSInteger, CALayerType) {
+    CALayerModelType,
+    CALayerPresentationType,
+    CALayerRenderingType
+};
+
 @interface CALayer()
 @property (nonatomic, assign) CALayer * superlayer;
 @property (nonatomic, retain) NSMutableDictionary * animations;
@@ -70,7 +76,7 @@ NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
 
 // commit
 @property (assign) BOOL needsCommit;
-
+@property (assign) CALayerType type;
 @end
 
 @implementation CALayer
@@ -122,6 +128,7 @@ NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
 @synthesize backingStore=_backingStore;
 
 @synthesize dirty = _dirty;
+@synthesize type = _type;
 
 /* *** dynamic synthesis of properties *** */
 #if 0
@@ -367,6 +374,7 @@ NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
       [self setAnimationKeys: [layer animationKeys]];
         
         self.name = layer.name;
+        self.type = layer.type;
         
         _needsLayout = layer.needsLayout;
     }
@@ -656,6 +664,8 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 
       _presentationLayer = [[[self class] alloc] initWithLayer: self];
       [_presentationLayer setModelLayer: self];
+        [(CALayer *)_presentationLayer setType:CALayerPresentationType];
+        
       assert([_presentationLayer isPresentationLayer]);
         self.dirty = NO;
       
@@ -681,7 +691,17 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 
 - (BOOL) isPresentationLayer
 {
-  return !_presentationLayer && _modelLayer;
+    return (self.type == CALayerPresentationType);
+}
+
+- (BOOL)isRenderLayer
+{
+    return (self.type == CALayerRenderingType);
+}
+
+- (BOOL)isModelLayer
+{
+    return (self.type == CALayerModelType);
 }
 
 - (CALayer *) superlayer
@@ -698,19 +718,19 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 
 - (NSArray *) sublayers
 {
-    return _sublayers;
-//  if (![self isPresentationLayer])
-//    {
-//    }
-//  else
-//    {
-//      NSMutableArray * presentationSublayers = [NSMutableArray arrayWithCapacity:[[[self modelLayer] sublayers] count]];
-//      for (id modelSublayer in [[self modelLayer] sublayers])
-//        {
-//          [presentationSublayers addObject: [modelSublayer presentationLayer]];
-//        }
-//      return presentationSublayers;
-//    }
+  if (![self isPresentationLayer])
+    {
+        return _sublayers;
+    }
+  else
+    {
+      NSMutableArray * presentationSublayers = [NSMutableArray arrayWithCapacity:[[[self modelLayer] sublayers] count]];
+      for (id modelSublayer in [[self modelLayer] sublayers])
+        {
+          [presentationSublayers addObject: [modelSublayer presentationLayer]];
+        }
+      return presentationSublayers;
+    }
 }
 
 /* **************** */
@@ -759,7 +779,7 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 
 - (CFTimeInterval) applyAnimationsAtTime: (CFTimeInterval)theTime
 {
-  if (![self isPresentationLayer])
+  if ([self isModelLayer])
     {
       static BOOL warned = NO;
       if (!warned)
@@ -1321,14 +1341,16 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 {
     CALayer *copy = [[[self class] alloc] initWithLayer:self];
     [copy setModelLayer:self];
+    [copy setType:CALayerRenderingType];
     
     NSArray *subLayers = [self.sublayers copy];
     NSMutableArray *subRenderLayers = [NSMutableArray array];
     for (CALayer *subLayer in subLayers) {
         CALayer *subRenderLayer = [subLayer copyRenderLayer:transaction];
         [subRenderLayers addObject:subRenderLayer];
+        [subRenderLayer release];
     }
-    
+    [subLayers release];
     copy.sublayers = subRenderLayers;
     
     return copy;

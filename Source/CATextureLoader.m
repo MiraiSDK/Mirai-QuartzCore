@@ -19,7 +19,7 @@
 {
     self = [super init];
     if (self) {
-        _cachedTexture = [NSMutableDictionary dictionary];
+        _cachedTexture = [[NSMutableDictionary alloc] init];
     }
     return self;
 }
@@ -30,7 +30,6 @@
 
     CAGLTexture *texture = self.cachedTexture[layerIdentify];
     if (texture) {
-//        NSString *contentsIdentify = [NSString stringWithFormat:@"%p",layer.contents];
         if (texture.contents != layer.contents) {
             [self.cachedTexture removeObjectForKey:layerIdentify];
             texture = nil;
