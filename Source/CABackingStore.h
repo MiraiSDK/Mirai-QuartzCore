@@ -76,6 +76,7 @@
 - (id) initWithWidth: (CGFloat) width
               height: (CGFloat) height;
 - (void) refresh;
+@property (assign, getter = isRefreshed) BOOL refreshed;
 
 @property (assign) /* (retain) */ CGContextRef context;
 @property (retain) CAGLTexture * contentsTexture;

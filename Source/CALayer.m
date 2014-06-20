@@ -59,6 +59,12 @@ NSString *const kCAGravityTopRight = @"CAGravityTopRight";
 NSString *const kCAGravityBottomLeft = @"CAGravityBottomLeft";
 NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
 
+typedef NS_ENUM(NSInteger, CALayerType) {
+    CALayerModelType,
+    CALayerPresentationType,
+    CALayerRenderingType
+};
+
 @interface CALayer()
 @property (nonatomic, assign) CALayer * superlayer;
 @property (nonatomic, retain) NSMutableDictionary * animations;
@@ -67,6 +73,10 @@ NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
 @property (assign,getter = isDirty) BOOL dirty;
 
 - (void)setModelLayer: (id)modelLayer;
+
+// commit
+@property (assign) BOOL needsCommit;
+@property (assign) CALayerType type;
 @end
 
 @implementation CALayer
@@ -118,6 +128,7 @@ NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
 @synthesize backingStore=_backingStore;
 
 @synthesize dirty = _dirty;
+@synthesize type = _type;
 
 /* *** dynamic synthesis of properties *** */
 #if 0
@@ -363,6 +374,7 @@ NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
       [self setAnimationKeys: [layer animationKeys]];
         
         self.name = layer.name;
+        self.type = layer.type;
         
         _needsLayout = layer.needsLayout;
     }
@@ -548,7 +560,8 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
       if (![self contents])
         [self setContents: [self backingStore]];
       
-      [self.backingStore refresh];
+        self.backingStore.refreshed = NO;
+        //[self.backingStore refresh];
     }
 }
 
@@ -628,6 +641,15 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
     return _needsLayout;
 }
 
+- (void)_recursionLayoutAndDisplayIfNeeds
+{
+    [self layoutIfNeeded];
+    [self displayIfNeeded];
+    
+    for (CALayer *layer in self.sublayers) {
+        [layer _recursionLayoutAndDisplayIfNeeds];
+    }
+}
 /* ************************************* */
 /* MARK: - Model and presentation layers */
 - (id) presentationLayer
@@ -642,6 +664,8 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 
       _presentationLayer = [[[self class] alloc] initWithLayer: self];
       [_presentationLayer setModelLayer: self];
+        [(CALayer *)_presentationLayer setType:CALayerPresentationType];
+        
       assert([_presentationLayer isPresentationLayer]);
         self.dirty = NO;
       
@@ -667,7 +691,17 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 
 - (BOOL) isPresentationLayer
 {
-  return !_presentationLayer && _modelLayer;
+    return (self.type == CALayerPresentationType);
+}
+
+- (BOOL)isRenderLayer
+{
+    return (self.type == CALayerRenderingType);
+}
+
+- (BOOL)isModelLayer
+{
+    return (self.type == CALayerModelType);
 }
 
 - (CALayer *) superlayer
@@ -686,7 +720,7 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 {
   if (![self isPresentationLayer])
     {
-      return _sublayers;
+        return _sublayers;
     }
   else
     {
@@ -745,7 +779,7 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 
 - (CFTimeInterval) applyAnimationsAtTime: (CFTimeInterval)theTime
 {
-  if (![self isPresentationLayer])
+  if ([self isModelLayer])
     {
       static BOOL warned = NO;
       if (!warned)
@@ -1300,6 +1334,31 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
     if ([self hasAnimations]) {
         [self discardPresentationLayer];
     }
+}
+
+#pragma mark - commit
+- (CALayer *)copyRenderLayer:(CATransaction *)transaction
+{
+    CALayer *copy = [[[self class] alloc] initWithLayer:self];
+    [copy setModelLayer:self];
+    [copy setType:CALayerRenderingType];
+    
+    NSArray *subLayers = [self.sublayers copy];
+    NSMutableArray *subRenderLayers = [NSMutableArray array];
+    for (CALayer *subLayer in subLayers) {
+        CALayer *subRenderLayer = [subLayer copyRenderLayer:transaction];
+        [subRenderLayers addObject:subRenderLayer];
+        [subRenderLayer release];
+    }
+    [subLayers release];
+    copy.sublayers = subRenderLayers;
+    
+    return copy;
+}
+
+- (void)commitIfNeeds:(CATransaction *)transaction
+{
+    
 }
 @end
 

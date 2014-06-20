@@ -72,6 +72,8 @@
 #import <CoreGraphics/CoreGraphics.h>
 #endif
 
+#import "CATextureLoader.h"
+
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 // Uniform index.
@@ -131,6 +133,8 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
     GLuint _textureFlagUniform;
 
     NSMutableArray *_callTimeArray;
+    
+    CATextureLoader *_textureLoader;
 }
 @synthesize layer=_layer;
 @synthesize bounds=_bounds;
@@ -180,6 +184,8 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
     {
       [self setGLContext: ctx];
       
+        _textureLoader = [[CATextureLoader alloc] init];
+        
       /* SHADER SETUP */
 #ifdef ANDROID
         [EAGLContext setCurrentContext:ctx];
@@ -362,10 +368,6 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
     {
       _firstRender = timeInterval;
     }
-  if([[CATransaction topTransaction] isImplicit])
-    {
-      [CATransaction commit];
-    }
   _nextFrameTime = __builtin_inf();
   
   /* Prepare for rasterization */
@@ -459,8 +461,6 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
     if (isinf(updateBounds.origin.x) &&
         isinf(updateBounds.origin.y))
         return;
-    
-    [self recursionLayoutLayerIfNeeded:_layer];
 
 #ifdef ANDROID
     [EAGLContext setCurrentContext:_GLContext];
@@ -488,7 +488,7 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
 #if PROFILE_ENABLE
     NSDate *callBegin = [NSDate date];
 #endif
-    [self _renderLayer: [[self layer] presentationLayer]
+    [self _renderLayer: [self layer]
          withTransform: transform];
 #if PROFILE_ENABLE
     NSTimeInterval callUsage = -[callBegin timeIntervalSinceNow];
@@ -573,43 +573,27 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
 /* MARK: - Private methods */
 
 /* Internal method that updates a single presentation layer and then proceeds by recursing, updating its children. */
-- (void) _updateLayer: (CALayer *)layer
+- (void) _updateLayer: (CALayer *)renderLayer
                atTime: (CFTimeInterval)theTime
 {
     PROFILE_METHOD_INIT;
     
     PROFILE_BEGIN;
-  if ([layer modelLayer])
-    layer = [layer modelLayer];
 
   [CALayer setCurrentFrameBeginTime: theTime];
     PROFILE_END(@"_updateLayer modelLayer");
-
-  /* Destroy and then recreate the presentation layer.
-     This is the easiest way to reset it to default values. */
-
-    PROFILE_BEGIN;
-    CALayer *presentationLayer = layer.presentationLayer;
-    if (layer.isDirty || [layer hasAnimations]) {
-        CAGLTexture *prevTexture = [presentationLayer.texture retain];
-        [layer discardPresentationLayer];
-        
-        presentationLayer = [layer presentationLayer];
-        presentationLayer.texture = prevTexture;
-        [prevTexture release];
-    }
-    PROFILE_END(@"_updateLayer update presentationLayer");
     
     PROFILE_BEGIN;
   /* Tell the presentation layer to apply animations. */
   /* Also, determine nextFrameTime */
-  _nextFrameTime = MIN(_nextFrameTime, [presentationLayer applyAnimationsAtTime: theTime]);
+    CFTimeInterval time = [renderLayer applyAnimationsAtTime: theTime];
+  _nextFrameTime = MIN(_nextFrameTime, time);
   _nextFrameTime = MAX(_nextFrameTime, theTime);
     PROFILE_END(@"_updateLayer calcuate nextFrameTime");
     
   /* Tell all children to update themselves. */
     PROFILE_BEGIN;
-    NSArray *sublayers = [[layer sublayers] copy];
+    NSArray *sublayers = [[renderLayer sublayers] copy];
     PROFILE_END(@"_updateLayer sublayers copy");
   for (CALayer * sublayer in sublayers)
     {
@@ -632,7 +616,7 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
   #endif
     PROFILE_BEGIN;
   /* Then permit current layer to determine rasterization */
-  [self _determineAndScheduleRasterizationForLayer: layer];
+  [self _determineAndScheduleRasterizationForLayer: renderLayer];
     PROFILE_END(@"_updateLayer determineRasterization");
 }
 /* Internal method that renders a single layer and then proceeds by recursing, rendering its children. */
@@ -661,12 +645,6 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
 
     PROFILE_BEGIN;
     PROFILE_END(@"empty profile");
-
-    PROFILE_BEGIN;
-    if (![layer isPresentationLayer]) {
-        layer = [layer presentationLayer];
-    }
-    PROFILE_END(@"presentationLayer");
     
     PROFILE_BEGIN;
     if (layer.isHidden || layer.opacity == 0) {
@@ -811,6 +789,9 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
             {
 //                NSLog(@"contents is CABackingStore");
                 CABackingStore * backingStore = layerContents;
+                if (!backingStore.isRefreshed) {
+                    [backingStore refresh];
+                }
                 
                 texture = [backingStore contentsTexture];
             }
@@ -824,15 +805,14 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
 //                    NSLog(@"contents is CGImageRef, load it");
 
                     CGImageRef image = (CGImageRef)layerContents;
-                    if (!layer.texture || layer.texture.contents != layer.contents) {
-                        texture = [CAGLTexture texture];
+                    texture = [_textureLoader textureForLayer:layer];
+                    if (texture.contents == nil) {
                         NSLog(@"Texture:load image");
                         [texture loadImage: image];
                         texture.contents = layerContents;
-                        layer.texture = texture;
-                    } else {
-                        texture = layer.texture;
                     }
+                } else {
+                    NSLog(@"UnSupported layerContents:%@",layerContents);
                 }
             
 #if !__OPENGL_ES__
@@ -867,7 +847,7 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
         NSArray *subLayers = [layer sublayers];
         PROFILE_END(@"subLayers getting");
 //        PROFILE_BEGIN;
-//        subLayers = [subLayers copy];
+        subLayers = [subLayers copy];
 //        PROFILE_END(@"subLayers copy");
         
 #if PROFILE_ENABLE
@@ -880,7 +860,7 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
             CATransform3D subTransform = CATransform3DTranslate(transform, 0, layer.bounds.size.height - sublayer.position.y * 2, 0);
             [self _renderLayer: sublayer withTransform: subTransform];
         }
-//        [subLayers release];
+        [subLayers release];
     }
 }
 

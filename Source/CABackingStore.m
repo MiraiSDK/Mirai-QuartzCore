@@ -94,6 +94,7 @@ static CGContextRef createCGBitmapContext (int pixelsWide,
 @implementation CABackingStore
 @synthesize contentsTexture=_contentsTexture;
 @synthesize offscreenRenderTexture=_offscreenRenderTexture;
+@synthesize refreshed = _refreshed;
 
 + (CABackingStore *) backingStoreWithWidth: (CGFloat)width
                                     height: (CGFloat)height
@@ -110,7 +111,6 @@ static CGContextRef createCGBitmapContext (int pixelsWide,
   
   CGContextRef context = createCGBitmapContext(width, height);
   [self setContext: context];
-  [self setContentsTexture: [CAGLTexture texture]];
   [self setOffscreenRenderTexture: nil]; /* set at a later time by layer */
   
   CGContextRelease(context);
@@ -147,7 +147,8 @@ static CGContextRef createCGBitmapContext (int pixelsWide,
   _context = context;
   
   /* Refresh */
-  [self refresh];
+//  [self refresh];
+    self.refreshed = NO;
 }
 
 - (CGFloat) width
@@ -163,6 +164,10 @@ static CGContextRef createCGBitmapContext (int pixelsWide,
 {
   if (!_context)
     return;
+    
+    if (!_contentsTexture) {
+        [self setContentsTexture: [CAGLTexture texture]];
+    }
   
 #if __APPLE__ && !TARGET_OS_IPHONE
   /* Since we retain contents in the CGContext, we can use the
@@ -177,6 +182,8 @@ static CGContextRef createCGBitmapContext (int pixelsWide,
 #if __APPLE__ && !TARGET_OS_IPHONE
   glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, GL_FALSE);
 #endif
+    
+    self.refreshed = YES;
 
 }
 
