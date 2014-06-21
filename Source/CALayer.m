@@ -646,9 +646,11 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
     [self layoutIfNeeded];
     [self displayIfNeeded];
     
-    for (CALayer *layer in self.sublayers) {
+    NSArray *sublayers = [self.sublayers copy];
+    for (CALayer *layer in sublayers) {
         [layer _recursionLayoutAndDisplayIfNeeds];
     }
+    [sublayers release];
 }
 /* ************************************* */
 /* MARK: - Model and presentation layers */
