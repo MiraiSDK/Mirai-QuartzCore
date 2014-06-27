@@ -468,6 +468,8 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
     [_GLContext makeCurrentContext];
 #endif
 
+    glViewport(0, 0, _bounds.size.width, _bounds.size.height);
+    
     _projectionMatrix = CATransform3DMakeOrtho(0, _bounds.size.width, 0, _bounds.size.height, -1024, 1024);
     
 //    CATransform3D modelViewMatrix = CATransform3DIdentity;
