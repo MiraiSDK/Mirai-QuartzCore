@@ -852,11 +852,26 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
         }
     }
     
+    NSArray *animationsToRemove = [_animations objectsForKeys:animationKeysToRemove notFoundMarker:[NSNull null]];
+
   [_animations removeObjectsForKeys: animationKeysToRemove];
   [_animationKeys removeObjectsInArray: animationKeysToRemove];
   [animationKeysToRemove release];
+    
+    if (animationsToRemove.count > 0) {
+        [[self modelLayer] performSelectorOnMainThread:@selector(notifyAnimationsStopped:) withObject:animationsToRemove waitUntilDone:YES];
+    }
   
   return lowestNextFrameTime;
+}
+
+- (void)notifyAnimationsStopped:(NSArray *)animations
+{
+    for (CAAnimation *animation in animations) {
+        if (animation.delegate && [animation.delegate respondsToSelector:@selector(animationDidStop:finished:)]) {
+            [animation.delegate animationDidStop:animation finished:YES];
+        }
+    }
 }
 
 /* ***************** */
