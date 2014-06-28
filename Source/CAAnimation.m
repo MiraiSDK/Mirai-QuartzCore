@@ -92,7 +92,7 @@ NSString *const kCAAnimationDiscrete = @"CAAnimationDiscrete";
     }
   if ([key isEqualToString:@"repeatCount"])
     {
-      return [NSNumber numberWithFloat: 1.0];
+      return [NSNumber numberWithFloat: 0.0];
     }
   return nil;
 }
