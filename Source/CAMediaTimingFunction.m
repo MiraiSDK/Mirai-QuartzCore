@@ -229,5 +229,12 @@ static inline CGFloat calcParameterUsingXAndCoefficientsForX (CGFloat x, CGFloat
   return CGPointMake(x, y);
 }
 */
+
+#if DEBUG
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<%p %@> control points:{%.2f,%.2f},{%.2f,%.2f}",self,self.class,_c1x,_c1y,_c2x,_c2y];
+}
+#endif
 @end
 /* vim: set cindent cinoptions=>4,n-2,{2,^-2,:2,=2,g0,h2,p5,t0,+2,(0,u0,w1,m1 expandtabs shiftwidth=2 tabstop=8: */
