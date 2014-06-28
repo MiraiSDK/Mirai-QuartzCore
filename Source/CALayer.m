@@ -839,7 +839,7 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
         {
           CAPropertyAnimation * propertyAnimation = ((CAPropertyAnimation *)animation);
                         
-          if ([propertyAnimation removedOnCompletion] && [propertyAnimation activeTimeWithTimeAuthorityLocalTime: [self localTime]] > [propertyAnimation duration] * [propertyAnimation repeatCount] * ([propertyAnimation autoreverses] ? 2 : 1))
+          if ([propertyAnimation removedOnCompletion] && [propertyAnimation activeTimeWithTimeAuthorityLocalTime: [self localTime]] > [propertyAnimation duration] * ([propertyAnimation repeatCount] + 1) * ([propertyAnimation autoreverses] ? 2 : 1))
             {
               /* FIXME: doesn't take into account speed */
                 
