@@ -577,6 +577,13 @@ static GSQuartzCoreQuaternion linearInterpolationQuaternion(GSQuartzCoreQuaterni
   [super dealloc];
 }
 
+#if DEBUG
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<%p %@> keyPath:%@ fromValue:%@ toValue:%@ timingFunction:%@ beginTime:%.4f fillMode:%@ duration:%.2f, repeatCount:%.2f, autoreverses:%@, removedOnCompletion:%@ delegate:<%p %@>",self,self.class,self.keyPath,self.fromValue,self.toValue, self.timingFunction, self.beginTime,self.fillMode, self.duration,self.repeatCount,self.autoreverses?@"YES":@"NO", self.removedOnCompletion?@"YES":@"NO",self.delegate,[self.delegate class]];
+}
+#endif
+
 - (id) calculatedAnimationValueAtTime: (CFTimeInterval)theTime
                               onLayer: (CALayer *)layer
 {
