@@ -33,11 +33,12 @@
 #import "CABackingStore.h"
 #import "CALayer+FrameworkPrivate.h"
 #import "CAAnimation+FrameworkPrivate.h"
-#import "CAImplicitAnimationObserver.h"
 #import <objc/runtime.h>
 #import "CALayer+DynamicProperties.h"
 #import "QuartzCore/CATransaction.h"
 #import "CABackingStore.h"
+#import "CATransaction+FrameworkPrivate.h"
+
 
 #if GNUSTEP
 #import <CoreGraphics/CoreGraphics.h>
@@ -79,7 +80,9 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 @property (assign) CALayerType type;
 @end
 
-@implementation CALayer
+@implementation CALayer {
+    BOOL _inited;
+}
 
 @synthesize delegate=_delegate;
 @synthesize contents=_contents;
@@ -263,7 +266,6 @@ typedef NS_ENUM(NSInteger, CALayerType) {
       _animations = [[NSMutableDictionary alloc] init];
       _animationKeys = [[NSMutableArray alloc] init];
       _sublayers = [[NSMutableArray alloc] init];
-      _observedKeyPaths = [[NSMutableArray alloc] init];
 
       /* TODO: list all properties below */
       static NSString * keys[] = {
@@ -306,11 +308,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
           /* TODO: only animatable properties should be observed */
           /* TODO: @dynamically created properties also need to be
               set up and observed. */
-          [self addObserver: [CAImplicitAnimationObserver sharedObserver]
-                 forKeyPath: keys[i]
-                    options: NSKeyValueObservingOptionOld
-                    context: nil];
-          [_observedKeyPaths addObject: keys[i]];
+            _inited = YES;
         }
 
     }
@@ -324,8 +322,6 @@ typedef NS_ENUM(NSInteger, CALayerType) {
      layers. */
   if ((self = [super init]) != nil)
     {
-        _observedKeyPaths = [[NSMutableArray alloc] init];
-        
       [self setDelegate: [layer delegate]];
       [self setLayoutManager: [layer layoutManager]];
       [self setSuperlayer: [layer superlayer]]; /* if copied for use in presentation layer, then ignored */
@@ -383,14 +379,9 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 
 - (void) dealloc
 {
-  for(NSString *keyPath in _observedKeyPaths)
-    {
-      [self removeObserver: [CAImplicitAnimationObserver sharedObserver]
-                forKeyPath: keyPath];
-    }
+  
   CGColorRelease(_shadowColor);
   CGPathRelease(_shadowPath);
-  [_observedKeyPaths release];
   [_layoutManager release];
   [_contents release];
   [_sublayers release];
@@ -437,16 +428,104 @@ typedef NS_ENUM(NSInteger, CALayerType) {
     if (comparator(prop, _ ## prop)) \
       return; \
     \
+    [self beginChangeKeyPath: @ #prop];\
     [self willChangeValueForKey: @ #prop]; \
     _ ## prop = prop; \
     [self didChangeValueForKey: @ #prop]; \
   }
+
+#define GSCA_OBSERVABLE_ACCESSES(settername, type, prop, comparator) \
+  - (void) settername: (type)prop \
+  { \
+    @synchronized(self) {\
+      if (comparator(prop, _ ## prop)) \
+      return; \
+      \
+      [self beginChangeKeyPath: @ #prop];\
+      [self willChangeValueForKey: @ #prop]; \
+      _ ## prop = prop; \
+      [self didChangeValueForKey: @ #prop]; \
+    }\
+  }\
+  - (type) prop \
+  {\
+    @synchronized(self) {\
+      return _  ## prop;  \
+    }\
+  }
+
+#define GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(settername, type, prop) \
+  - (void) settername: (type)prop \
+  { \
+    @synchronized(self) {\
+      if (prop == _ ## prop) \
+        return; \
+      \
+      [self beginChangeKeyPath: @ #prop];\
+      [self willChangeValueForKey: @ #prop]; \
+      _ ## prop = prop; \
+      [self didChangeValueForKey: @ #prop]; \
+    }\
+  }\
+  - (type) prop \
+  {\
+    @synchronized(self) {\
+      return _  ## prop;  \
+    }\
+  }
+
+#define GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(settername, type, prop) \
+- (void) settername: (type)prop \
+{ \
+if (prop == _ ## prop) \
+return; \
+\
+[self beginChangeKeyPath: @ #prop];\
+[self willChangeValueForKey: @ #prop]; \
+_ ## prop = prop; \
+[self didChangeValueForKey: @ #prop]; \
+}
+
 
 GSCA_OBSERVABLE_SETTER(setPosition, CGPoint, position, CGPointEqualToPoint)
 GSCA_OBSERVABLE_SETTER(setAnchorPoint, CGPoint, anchorPoint, CGPointEqualToPoint)
 GSCA_OBSERVABLE_SETTER(setTransform, CATransform3D, transform, CATransform3DEqualToTransform)
 GSCA_OBSERVABLE_SETTER(setSublayerTransform, CATransform3D, sublayerTransform, CATransform3DEqualToTransform)
 GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
+
+GSCA_OBSERVABLE_ACCESSES(setContentsRect, CGRect, contentsRect, CGRectEqualToRect)
+
+GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(setRepeatCount, float, repeatCount)
+GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(setBeginTime, CFTimeInterval, beginTime)
+GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(setSpeed, float, speed)
+GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(setDuration, CFTimeInterval, duration)
+GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(setAutoreverses, BOOL, autoreverses)
+
+GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setDelegate, id, delegate)
+GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setOpacity, CGFloat, opacity)
+GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowOpacity, float, shadowOpacity)
+GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
+
+
+
+- (void)beginChangeKeyPath:(NSString *)keyPath
+{
+    if (!_inited) {
+        return;
+    }
+    if ([self isPresentationLayer])
+    {
+        return;
+    }
+
+    NSObject<CAAction>* action = (id)[self actionForKey: keyPath];
+    if (!action || [action isKindOfClass: [NSNull class]])
+        return;
+    [[CATransaction topTransaction] registerAction: action
+                                          onObject: self
+                                           keyPath: keyPath];
+    [self markDirty];
+}
 
 
 #endif
@@ -476,6 +555,7 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
   _bounds = bounds;
 #else
 #warning KVO under GNUstep doesn't work without custom setters for any struct type!
+    [self beginChangeKeyPath:@"bounds"];
   [self willChangeValueForKey: @"bounds"];
   _bounds = bounds;
   [self didChangeValueForKey: @"bounds"];
@@ -492,6 +572,7 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
   if (backgroundColor == _backgroundColor)
     return;
   
+    [self beginChangeKeyPath:@"backgroundColor"];
   [self willChangeValueForKey: @"backgroundColor"];
   CGColorRetain(backgroundColor);
   CGColorRelease(_backgroundColor);
@@ -504,6 +585,7 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
   if (shadowColor == _shadowColor)
     return;
   
+    [self beginChangeKeyPath:@"shadowColor"];
   [self willChangeValueForKey: @"shadowColor"];
   CGColorRetain(shadowColor);
   CGColorRelease(_shadowColor);
@@ -515,7 +597,8 @@ GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 {
   if (shadowPath == _shadowPath)
     return;
-  
+    
+    [self beginChangeKeyPath:@"shadowPath"];
   [self willChangeValueForKey: @"shadowPath"];
   CGPathRetain(shadowPath);
   CGPathRelease(_shadowPath);

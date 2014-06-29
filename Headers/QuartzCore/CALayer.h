@@ -113,7 +113,6 @@ NSString *const kCATransition;
   BOOL _needsLayout;
   NSMutableDictionary *_animations;
   NSMutableArray *_animationKeys;
-  NSMutableArray *_observedKeyPaths;
   CABackingStore * _backingStore;
   
   /* TODO: add CAGLSimpleFramebuffer ivars for storing:
