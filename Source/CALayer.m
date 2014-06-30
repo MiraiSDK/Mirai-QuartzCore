@@ -308,8 +308,8 @@ typedef NS_ENUM(NSInteger, CALayerType) {
           /* TODO: only animatable properties should be observed */
           /* TODO: @dynamically created properties also need to be
               set up and observed. */
-            _inited = YES;
         }
+        _inited = YES;
 
     }
   return self;
