@@ -837,8 +837,11 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     {
       CABasicAnimation * basicAnimation = (id)anim;
       CALayer * layer = self;
-      if (![layer isPresentationLayer])
-        layer = [layer presentationLayer];
+
+        // TODO: presentationLayer currently broken.
+        // also needs to figure out the fromValue should come from presentation value?
+//      if (![layer isPresentationLayer])
+//        layer = [layer presentationLayer];
       
       if (![basicAnimation fromValue])
         {
