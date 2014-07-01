@@ -513,7 +513,7 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     if (!_inited) {
         return;
     }
-    if ([self isPresentationLayer])
+    if (![self isModelLayer])
     {
         return;
     }
