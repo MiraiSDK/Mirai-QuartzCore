@@ -501,7 +501,7 @@ GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(setSpeed, float, speed)
 GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(setDuration, CFTimeInterval, duration)
 GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(setAutoreverses, BOOL, autoreverses)
 
-GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setDelegate, id, delegate)
+//GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setDelegate, id, delegate)
 GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setOpacity, CGFloat, opacity)
 GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowOpacity, float, shadowOpacity)
 GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
@@ -1450,6 +1450,7 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     NSMutableArray *subRenderLayers = [NSMutableArray array];
     for (CALayer *subLayer in subLayers) {
         CALayer *subRenderLayer = [subLayer copyRenderLayer:transaction];
+        subRenderLayer.superlayer = copy;
         [subRenderLayers addObject:subRenderLayer];
         [subRenderLayer release];
     }
