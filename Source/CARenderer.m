@@ -479,7 +479,9 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     
+    glEnable(GL_SCISSOR_TEST);
     glEnable(GL_BLEND);
+    glScissor(0, 0, _bounds.size.width, _bounds.size.height);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     [self _rasterizeAll];
     
@@ -859,8 +861,20 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
 
         for (CALayer * sublayer in subLayers)
         {
+            if (layer.masksToBounds) {
+                CGRect windowRect = [layer convertRect:layer.bounds toLayer:_layer];
+                CGRect glRect = windowRect;
+                glRect.origin.y = _layer.bounds.size.height - windowRect.size.height - windowRect.origin.y;
+                
+                glScissor(glRect.origin.x, glRect.origin.y, glRect.size.width, glRect.size.height);
+            }
+            
             CATransform3D subTransform = CATransform3DTranslate(transform, 0, layer.bounds.size.height - sublayer.position.y * 2, 0);
             [self _renderLayer: sublayer withTransform: subTransform];
+            
+            if (layer.masksToBounds) {
+                glScissor(0, 0, _layer.bounds.size.width, _layer.bounds.size.height);
+            }
         }
         [subLayers release];
     }
