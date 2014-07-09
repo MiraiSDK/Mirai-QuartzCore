@@ -132,6 +132,8 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 
 @synthesize dirty = _dirty;
 @synthesize type = _type;
+@synthesize borderColor = _borderColor;
+@synthesize borderWidth = _borderWidth;
 
 /* *** dynamic synthesis of properties *** */
 #if 0
@@ -344,6 +346,9 @@ typedef NS_ENUM(NSInteger, CALayerType) {
       [self setNeedsDisplayOnBoundsChange: [layer needsDisplayOnBoundsChange]];
       [self setZPosition: [layer zPosition]];
 
+        [self setBorderColor:[layer borderColor]];
+        [self setBorderWidth:[layer borderWidth]];
+        
       [self setShadowColor: [layer shadowColor]];
       [self setShadowOffset: [layer shadowOffset]];
       [self setShadowOpacity: [layer shadowOpacity]];

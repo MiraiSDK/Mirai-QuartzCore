@@ -623,6 +623,45 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
   [self _determineAndScheduleRasterizationForLayer: renderLayer];
     PROFILE_END(@"_updateLayer determineRasterization");
 }
+
+void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
+{
+    size_t numberOfComponents = CGColorGetNumberOfComponents(color);
+    
+    const CGFloat * componentsCG = CGColorGetComponents(color);
+    GLfloat components[4] = { 0, 0, 0, 1 };
+    
+    // convert
+    if (numberOfComponents == 1) {
+        components[0] = componentsCG[0];
+        components[1] = componentsCG[0];
+        components[2] = componentsCG[0];
+    } else if (numberOfComponents == 3) {
+        components[0] = componentsCG[0];
+        components[1] = componentsCG[1];
+        components[2] = componentsCG[2];
+    } else if (numberOfComponents == 4) {
+        components[0] = componentsCG[0];
+        components[1] = componentsCG[1];
+        components[2] = componentsCG[2];
+        components[3] = componentsCG[3];
+    } else {
+        NSLog(@"Expection NumberOfComponents:%zu",numberOfComponents);
+    }
+    
+    // apply opacity
+    components[3] *= opacity;
+    
+    
+    // FIXME: here we presume that color contains RGBA channels.
+    // However this may depend on colorspace, number of components et al
+    memcpy(buffer + 0*4, components, sizeof(GLfloat)*4);
+    memcpy(buffer + 1*4, components, sizeof(GLfloat)*4);
+    memcpy(buffer + 2*4, components, sizeof(GLfloat)*4);
+    memcpy(buffer + 3*4, components, sizeof(GLfloat)*4);
+    
+}
+
 /* Internal method that renders a single layer and then proceeds by recursing, rendering its children. */
 
 #if __OPENGL_ES__
@@ -738,39 +777,7 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
         if ([layer backgroundColor] && CGColorGetAlpha([layer backgroundColor]) > 0)
         {
 //            NSLog(@"render with background");
-            size_t numberOfComponents = CGColorGetNumberOfComponents([layer backgroundColor]);
-            
-            const CGFloat * componentsCG = CGColorGetComponents([layer backgroundColor]);
-            GLfloat components[4] = { 0, 0, 0, 1 };
-            
-            // convert
-            if (numberOfComponents == 1) {
-                components[0] = componentsCG[0];
-                components[1] = componentsCG[0];
-                components[2] = componentsCG[0];
-            } else if (numberOfComponents == 3) {
-                components[0] = componentsCG[0];
-                components[1] = componentsCG[1];
-                components[2] = componentsCG[2];
-            } else if (numberOfComponents == 4) {
-                components[0] = componentsCG[0];
-                components[1] = componentsCG[1];
-                components[2] = componentsCG[2];
-                components[3] = componentsCG[3];
-            } else {
-                NSLog(@"Expection NumberOfComponents:%zu",numberOfComponents);
-            }
-            
-            // apply opacity
-            components[3] *= [layer opacity];
-            
-            
-            // FIXME: here we presume that color contains RGBA channels.
-            // However this may depend on colorspace, number of components et al
-            memcpy(backgroundColor + 0*4, components, sizeof(GLfloat)*4);
-            memcpy(backgroundColor + 1*4, components, sizeof(GLfloat)*4);
-            memcpy(backgroundColor + 2*4, components, sizeof(GLfloat)*4);
-            memcpy(backgroundColor + 3*4, components, sizeof(GLfloat)*4);
+            configureColorBuffer(backgroundColor, layer.backgroundColor, layer.opacity);
             glVertexAttribPointer(CAVertexAttribColor, 4, GL_FLOAT, GL_FALSE, 0, backgroundColor);
             
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -840,6 +847,32 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
         }
         PROFILE_END(@"layer contents rendering");
         
+        if (layer.borderWidth > 0 && layer.borderColor) {
+            glUniform1f(_textureFlagUniform, 0);
+
+            GLfloat borderColor[] = {
+                1.0, 1.0, 1.0, 1.0,
+                1.0, 1.0, 1.0, 1.0,
+                1.0, 1.0, 1.0, 1.0,
+                1.0, 1.0, 1.0, 1.0,
+            };
+
+            GLfloat borderVertices[8];
+            borderVertices[0] = vertices[0];
+            borderVertices[1] = vertices[1];
+            borderVertices[2] = vertices[2];
+            borderVertices[3] = vertices[3];
+            borderVertices[4] = vertices[6];
+            borderVertices[5] = vertices[7];
+            borderVertices[6] = vertices[4];
+            borderVertices[7] = vertices[5];
+        
+            configureColorBuffer(borderColor, layer.borderColor, layer.opacity);
+            glLineWidth(layer.borderWidth);
+            glVertexAttribPointer(CAVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, 0, borderVertices);
+            glVertexAttribPointer(CAVertexAttribColor, 4, GL_FLOAT, GL_FALSE, 0, borderColor);
+            glDrawArrays(GL_LINE_LOOP, 0, 4);
+        }
         PROFILE_BEGIN;
         CGRect layerBounds = [layer bounds];
         transform = CATransform3DConcat ([layer sublayerTransform], transform);
