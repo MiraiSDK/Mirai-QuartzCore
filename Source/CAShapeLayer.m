@@ -25,6 +25,94 @@
 
 #import "CAShapeLayer.h"
 @implementation CAShapeLayer
+@synthesize path = _path;
+@synthesize fillColor = _fillColor;
+@synthesize fillRule = _fillRule;
+@synthesize strokeColor = _strokeColor;
+@synthesize strokeStart = _strokeStart, strokeEnd = _strokeEnd;
+@synthesize lineWidth = _lineWidth, miterLimit = _miterLimit;
+@synthesize lineCap = _lineCap, lineJoin = _lineJoin;
+@synthesize lineDashPhase = _lineDashPhase, lineDashPattern = _lineDashPattern;
+
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        CGColorSpaceRef cs = CGColorSpaceCreateDeviceRGB();
+        
+        const CGFloat components[] = {0,0,0,1};
+        _fillColor = CGColorCreate(cs, components);
+        
+        CGColorSpaceRelease(cs);
+        
+    }
+    return self;
+}
+
+// FIXME: The Apple's documentation indicate that CAShapeLayer class creates its content by rendering the path into a bitmap image at composite time.
+- (void)display
+{
+    CGColorSpaceRef cs = CGColorSpaceCreateDeviceRGB();
+    
+    CGContextRef ctx = CGBitmapContextCreate(NULL,
+                                             self.bounds.size.width,
+                                             self.bounds.size.height,
+                                             8,
+                                             self.bounds.size.width * 4,
+                                             cs,
+                                             kCGImageAlphaPremultipliedLast);
+    
+    CGContextScaleCTM(ctx, 1, -1);
+    CGContextTranslateCTM(ctx, 0, -self.bounds.size.height);
+    
+    if (_fillColor && _path) {
+        CGContextSetFillColorWithColor(ctx, self.fillColor);
+        CGContextAddPath(ctx, self.path);
+        CGContextFillPath(ctx);
+    }
+    
+    if (_strokeColor && _path) {
+        CGContextAddPath(ctx, self.path);
+        CGContextSetStrokeColorWithColor(ctx, self.strokeColor);
+        CGContextStrokePath(ctx);
+    }
+    
+    CGImageRef image = CGBitmapContextCreateImage(ctx);
+    self.contents = image;
+    CGImageRelease(image);
+    CGContextRelease(ctx);
+    CGColorSpaceRelease(cs);
+}
+
+- (void)setFillColor:(CGColorRef)fillColor
+{
+    _fillColor = CGColorRetain(fillColor);
+}
+
+- (CGColorRef)fillColor
+{
+    return _fillColor;
+}
+
+- (void)setStrokeColor:(CGColorRef)strokeColor
+{
+    _strokeColor = CGColorRetain(strokeColor);
+}
+
+- (CGColorRef)strokeColor
+{
+    return _strokeColor;
+}
+
+- (void)setPath:(CGPathRef)path
+{
+    _path = CGPathRetain(path);
+}
+
+- (CGPathRef)path
+{
+    return _path;
+}
 
 
 @end
