@@ -639,10 +639,14 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
         [self setContents:nil];
       }
       
-      CGContextSaveGState ([_backingStore context]);
-      CGContextClipToRect ([_backingStore context], [self bounds]);
-      [self drawInContext: [_backingStore context]];
-      CGContextRestoreGState ([_backingStore context]);
+        if ([_backingStore context]) {
+            CGContextSaveGState ([_backingStore context]);
+            CGContextClipToRect ([_backingStore context], [self bounds]);
+            [self drawInContext: [_backingStore context]];
+            CGContextRestoreGState ([_backingStore context]);
+        } else {
+            NSLog(@"[WARNING] EMPTY backing store context");
+        }
 
       /* Call -refresh on backing store to fill its texture */
       if (![self contents])
