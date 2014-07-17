@@ -177,6 +177,33 @@
   CGFloat height = CGImageGetHeight(image);
   size_t bitsPerComponent = 8; //CGImageGetBitsPerComponent(image);
   unsigned long bytesPerRow = width * 4; //CGImageGetBytesPerRow(image); // in some cases, we cannot generate RGB textureContext, it appears; only RGBA
+    
+    if (CGImageGetBitsPerComponent(image) == 8) {
+        //
+        // FIXME: Workaround
+        // We remove typically styles to get CGImage data
+        //  1. CGBitmapContextCreate
+        //  2. CGContextDrawImage
+        //  3. CGBitmapContextGetData
+        // Instead, we use
+        //  1. CGImageGetDataProvider
+        //  2. CGDataProviderCopyData
+        // This workaround implies assume one thing:
+        //  1. The CGImage's provider always provider decoded RGBA data
+        CGDataProviderRef provider = CGImageGetDataProvider(image);
+        CFDataRef dataRef = CGDataProviderCopyData(provider);
+        uint8_t * data = malloc(bytesPerRow * height);
+        CFDataGetBytes(dataRef, CFRangeMake(0, CFDataGetLength(dataRef)), data);
+        
+        [self loadRGBATexImage: data
+                         width: width
+                        height: height];
+        
+        free(data);
+        CFRelease(dataRef);
+        return;
+    }
+    
 #if !GNUSTEP
   CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB(); //CGImageGetColorSpace(image); // if we get indexed-colorspace image, creation of bitmap context will fail. also, we load image into OpenGL as RGB. so, force RGB
 #else
