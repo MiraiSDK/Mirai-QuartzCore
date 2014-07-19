@@ -35,7 +35,6 @@ NSString *kCATransactionAnimationDuration = @"animationDuration";
 NSString *kCATransactionAnimationTimingFunction= @"animationTimingFunction";
 NSString *kCATransactionDisableActions = @"disableActions";
 
-static NSMutableArray *transactionStack = nil;
 
 @interface CATransaction ()
 
@@ -55,15 +54,25 @@ static NSMutableArray *transactionStack = nil;
 @synthesize actions=_actions;
 @synthesize implicit=_implicit;
 
+static NSMutableArray * transactionStack()
+{
+    static NSString *transactionStackKey = @"transactionStack";
+    
+    NSMutableDictionary *threadDictionary = [[NSThread currentThread] threadDictionary];
+    
+    NSMutableArray *transactionStack = threadDictionary[transactionStackKey];
+    if (transactionStack == nil) {
+        transactionStack = [NSMutableArray array];
+        threadDictionary[transactionStackKey] = transactionStack;
+    }
+    
+    return transactionStack;
+}
+
 + (void) begin
 {
-  if (!transactionStack)
-    {
-      transactionStack = [NSMutableArray new];
-    }
-
   CATransaction *newTransaction = [CATransaction new];
-  [transactionStack addObject: newTransaction];
+  [transactionStack() addObject: newTransaction];
   [newTransaction release];
 }
 
@@ -72,7 +81,7 @@ static NSMutableArray *transactionStack = nil;
   CATransaction *topTransaction = [self topTransaction];
   [topTransaction commit];
 
-  [transactionStack removeObjectAtIndex: [transactionStack count]-1];
+  [transactionStack() removeObjectAtIndex: [transactionStack() count]-1];
 }
 
 + (void) flush
@@ -136,13 +145,13 @@ static NSMutableArray *transactionStack = nil;
 /* ***** Private class methods ******* */
 + (CATransaction *) topTransaction
 {
-  if(![transactionStack lastObject])
+  if(![transactionStack() lastObject])
     {
       [CATransaction begin];
-      [[transactionStack lastObject] setImplicit: YES];
+      [[transactionStack() lastObject] setImplicit: YES];
     }
 
-  return [transactionStack lastObject];
+  return [transactionStack() lastObject];
 }
 
 /* ***** Instance methods ****** */
