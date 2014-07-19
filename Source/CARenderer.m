@@ -758,7 +758,7 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
         }
         
         // apply opacity to white color
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < 4; i++)
         {
             whiteColor[i*4 + 3] *= [layer opacity];
         }
