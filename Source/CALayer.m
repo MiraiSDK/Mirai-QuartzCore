@@ -831,6 +831,16 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 /* MARK: Animations */
 - (void) addAnimation: (CAAnimation *)anim forKey: (NSString *)key
 {
+    // if animation key already exist, we must notify exist animation cancelled.
+    if ([_animationKeys containsObject:key]) {
+        CAAnimation *existAnimation = [_animations valueForKey:key];
+        if (existAnimation) {
+            [self performSelectorOnMainThread:@selector(notifyAnimationsCancelled:) withObject:@[existAnimation] waitUntilDone:NO];
+        } else {
+            NSLog(@"[Warning] exepect animation doesn't exist");
+        }
+    }
+    
   [_animations setValue: anim
                  forKey: key];
   [key retain];
@@ -954,17 +964,27 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
   [animationKeysToRemove release];
     
     if (animationsToRemove.count > 0) {
-        [[self modelLayer] performSelectorOnMainThread:@selector(notifyAnimationsStopped:) withObject:animationsToRemove waitUntilDone:YES];
+        [[self modelLayer] performSelectorOnMainThread:@selector(notifyAnimationsFinished:) withObject:animationsToRemove waitUntilDone:YES];
     }
   
   return lowestNextFrameTime;
 }
 
-- (void)notifyAnimationsStopped:(NSArray *)animations
+- (void)notifyAnimationsCancelled:(NSArray *)animations
+{
+    [self notifyAnimationsStopped:animations finished:NO];
+}
+
+- (void)notifyAnimationsFinished:(NSArray *)animations
+{
+    [self notifyAnimationsStopped:animations finished:YES];
+}
+
+- (void)notifyAnimationsStopped:(NSArray *)animations finished:(BOOL)finished
 {
     for (CAAnimation *animation in animations) {
         if (animation.delegate && [animation.delegate respondsToSelector:@selector(animationDidStop:finished:)]) {
-            [animation.delegate animationDidStop:animation finished:YES];
+            [animation.delegate animationDidStop:animation finished:finished];
         }
     }
 }

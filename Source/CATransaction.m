@@ -215,6 +215,24 @@ static NSMutableArray * transactionStack()
   [_actions removeAllObjects];
 }
 
+- (void)notifyActionsCancelled:(NSArray *)actions
+{
+    for (NSDictionary* actionDescription in actions) {
+        NSObject<CAAction> * action = [actionDescription objectForKey: @"action"];
+
+        if ([action isKindOfClass: [CAAnimation class]])
+        {
+            CAAnimation * animation = (id)action;
+            
+            if (animation.delegate && [animation.delegate respondsToSelector:@selector(animationDidStop:finished:)]) {
+                [animation.delegate animationDidStop:animation finished:NO];
+            }
+        } else {
+            // should an action that isn't a animation to be notify?
+        }
+    }
+}
+
 - (void)registerAction: (NSObject<CAAction> *)action
               onObject: (id)object
                keyPath: (NSString *)keyPath
@@ -223,6 +241,12 @@ static NSMutableArray * transactionStack()
   NSPredicate * sameActionsPredicate = [NSPredicate predicateWithFormat: @"object = %@ and keyPath = %@", object, keyPath];
   NSArray * duplicates = [_actions filteredArrayUsingPredicate: sameActionsPredicate];
   [_actions removeObjectsInArray: duplicates];
+    
+    // notify duplicate actions cancelled
+    if (duplicates.count > 0) {
+        [self performSelectorOnMainThread:@selector(notifyActionsCancelled:) withObject:duplicates waitUntilDone:NO];
+    }
+    
 
   /* now add the new action */
   NSDictionary * actionDescription = [NSDictionary dictionaryWithObjectsAndKeys:
