@@ -33,6 +33,7 @@
 #import "QuartzCore/CALayer.h"
 #import "QuartzCore/CAShapeLayer.h"
 #import "QuartzCore/CATextLayer.h"
+#import "QuartzCore/CAEAGLLayer.h"
 #import "QuartzCore/CAGradientLayer.h"
 #import "QuartzCore/CAAnimation.h"
 #import "QuartzCore/CAMediaTiming.h"
