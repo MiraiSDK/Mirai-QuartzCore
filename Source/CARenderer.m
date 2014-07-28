@@ -34,6 +34,7 @@
 #import "CALayer+FrameworkPrivate.h"
 #import "CATransaction+FrameworkPrivate.h"
 #import "CABackingStore.h"
+#import "CAMovieLayer.h"
 #import "CALayer+Texture.h"
 
 #if defined (__APPLE__)
@@ -132,9 +133,13 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
     GLuint _texture_2dUniform;
     GLuint _textureFlagUniform;
 
+    GLuint _videoProjectionUniform;
+
     NSMutableArray *_callTimeArray;
     
     CATextureLoader *_textureLoader;
+    
+    CAGLProgram *_videoProgram;
 }
 @synthesize layer=_layer;
 @synthesize bounds=_bounds;
@@ -210,6 +215,7 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
   
   /* Release all GL programs */
   [_simpleProgram release];
+  [_videoProgram release];
   [_blurHorizProgram release];
   [_blurVertProgram release];
   
@@ -230,17 +236,63 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
 #endif
 }
 
+void gl_check_error(NSString *state) {
+    GLint err = glGetError();
+    if (err != GL_NO_ERROR) {
+        NSLog(@"%@ error: %#04x",state, err);
+    }
+}
 #pragma mark Shaders
 - (void)loadShaders
 {
+    // Shader
+    
+    /* Simple, passthrough shader */
+    CAGLVertexShader * simpleVS = [[CAGLVertexShader alloc] initWithSource:[self vertexShaderString]];
+    
+    CAGLFragmentShader * simpleFS = [[CAGLFragmentShader alloc] initWithSource:[self fragmentShaderString]];
+    
+    NSArray * basicShaders = [NSArray arrayWithObjects: simpleVS, simpleFS, nil];
+    [simpleVS release];
+    [simpleFS release];
+
+    
     // Create programs
     // simple program
-    CAGLProgram * simpleProgram = [[CAGLProgram alloc] initWithArrayOfShaders: [self _basicShaders]];
+    CAGLProgram * simpleProgram = [[CAGLProgram alloc] initWithArrayOfShaders:basicShaders];
     [simpleProgram bindAttrib:@"position" toLocation:CAVertexAttribPosition];
     [simpleProgram bindAttrib:@"color" toLocation:CAVertexAttribColor];
     [simpleProgram bindAttrib:@"texturecoord_2d" toLocation:CAVertexAttribTexCoord0];
     [simpleProgram link];
     _simpleProgram = simpleProgram;
+    
+#if __OPENGL_ES__
+
+    [_simpleProgram use];
+    
+    // Get uniform locations.
+    _projectionUniform = [_simpleProgram locationForUniform:@"modelViewProjectionMatrix"];
+    _texture_2dUniform = [_simpleProgram locationForUniform:@"texture_2d"];
+    _textureFlagUniform = [_simpleProgram locationForUniform:@"textureFlag"];
+#endif
+    
+    CAGLFragmentShader * GLFS = [[CAGLFragmentShader alloc] initWithSource:[self glFragmentShaderString]];
+    
+    NSArray *glShaders = [NSArray arrayWithObjects:simpleVS,GLFS,nil];
+    
+    CAGLProgram * glProgram = [[CAGLProgram alloc] initWithArrayOfShaders:glShaders];
+    [glProgram bindAttrib:@"position" toLocation:CAVertexAttribPosition];
+    [glProgram bindAttrib:@"color" toLocation:CAVertexAttribColor];
+    [glProgram bindAttrib:@"texturecoord_2d" toLocation:CAVertexAttribTexCoord0];
+    
+    [glProgram link];
+    
+    _videoProgram = glProgram;
+    
+    [glProgram use];
+    _videoProjectionUniform = [glProgram locationForUniform:@"modelViewProjectionMatrix"];
+    
+    [_simpleProgram use];
     
     // blur program
     //    NSArray *blurShaders = [self _blurShaders];
@@ -253,65 +305,67 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
     //    blurVertProgram = [blurVertProgram initWithArrayOfShaders: blurShaders[1]];
     //    [blurVertProgram link];
     //    _blurVertProgram = blurVertProgram;
-    
-#if __OPENGL_ES__
-
-    [_simpleProgram use];
-    
-    // Get uniform locations.
-    _projectionUniform = [_simpleProgram locationForUniform:@"modelViewProjectionMatrix"];
-    _texture_2dUniform = [_simpleProgram locationForUniform:@"texture_2d"];
-    _textureFlagUniform = [_simpleProgram locationForUniform:@"textureFlag"];
-#endif
-    
 }
 
-- (NSArray *)_basicShaders
+- (NSString *)glFragmentShaderString
 {
-    // Shader
-    
-    /* Simple, passthrough shader */
-    CAGLVertexShader * simpleVS = [[CAGLVertexShader alloc] initWithSource:@"\
-                                   attribute vec4 position;\
-                                   attribute vec4 color;\
-                                   attribute vec3 normal;\
-                                   attribute vec2 texturecoord_2d;\
-                                   \
-                                   uniform mat4 modelViewProjectionMatrix;\
-                                   varying vec4 colorVarying;\
-                                   varying vec2 fragmentTextureCoordinates;\
-                                   \
-                                   void main()\
-                                   {\
-                                   gl_Position = modelViewProjectionMatrix * position;\
-                                   \
-                                   colorVarying.xyz = normal;\
-                                   colorVarying = color;\
-                                   fragmentTextureCoordinates = texturecoord_2d;\
-                                   }\
-                                   "];
-    
-    CAGLFragmentShader * simpleFS = [[CAGLFragmentShader alloc] initWithSource:@"\
-                                     precision highp float;\
-                                     \
-                                     uniform sampler2D texture_2d;\
-                                     uniform lowp float textureFlag;\
-                                     \
-                                     varying vec4 colorVarying;\
-                                     varying mediump vec2 fragmentTextureCoordinates;\
-                                     \
-                                     void main()\
-                                     {\
-                                     gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) * colorVarying + (1.0 - textureFlag) * colorVarying;\
-                                     }\
-                                     "];
-    
-    NSArray * objectsForSimpleShader = [NSArray arrayWithObjects: simpleVS, simpleFS, nil];
-    [simpleVS release];
-    [simpleFS release];
-    
-    return objectsForSimpleShader;
+    return @"\
+    #extension GL_OES_EGL_image_external:require\n\
+    precision highp float;\
+    \
+    uniform samplerExternalOES sTexture;\
+    \
+    varying vec4 colorVarying;\
+    varying mediump vec2 fragmentTextureCoordinates;\
+    \
+    void main()\
+    {\
+    gl_FragColor =  texture2D(sTexture, fragmentTextureCoordinates);\
+    }\
+    ";
 }
+
+- (NSString *)vertexShaderString
+{
+    return @"\
+    attribute vec4 position;\
+    attribute vec4 color;\
+    attribute vec3 normal;\
+    attribute vec2 texturecoord_2d;\
+    \
+    uniform mat4 modelViewProjectionMatrix;\
+    varying vec4 colorVarying;\
+    varying vec2 fragmentTextureCoordinates;\
+    \
+    void main()\
+    {\
+    gl_Position = modelViewProjectionMatrix * position;\
+    \
+    colorVarying.xyz = normal;\
+    colorVarying = color;\
+    fragmentTextureCoordinates = texturecoord_2d;\
+    }\
+    ";
+}
+
+- (NSString *)fragmentShaderString
+{
+    return @"\
+    precision highp float;\
+    \
+    uniform sampler2D texture_2d;\
+    uniform lowp float textureFlag;\
+    \
+    varying vec4 colorVarying;\
+    varying mediump vec2 fragmentTextureCoordinates;\
+    \
+    void main()\
+    {\
+    gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) * colorVarying + (1.0 - textureFlag) * colorVarying;\
+    }\
+    ";
+}
+
 
 - (NSArray *)_blurShaders
 {
@@ -664,6 +718,8 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
 
 /* Internal method that renders a single layer and then proceeds by recursing, rendering its children. */
 
+#define GL_TEXTURE_EXTERNAL_OES 0x8D65
+
 #if __OPENGL_ES__
 - (void) _renderLayer: (CALayer *)layer
         withTransform: (CATransform3D)transform
@@ -794,8 +850,26 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
 //            NSLog(@"rendering contents");
             glUniform1f(_textureFlagUniform, 1);
             CAGLTexture * texture = nil;
+            BOOL restoreProgram = NO;
             id layerContents = [layer contents];
             
+            if ([layer isKindOfClass:[CAMovieLayer class]]) {
+                restoreProgram = YES;
+                [_videoProgram use];
+
+                CAMovieLayer *eglLayer = [layer modelLayer];
+                static CATransform3D t;
+                [eglLayer updateTextureIfNeeds:&t];
+                
+                //_modelViewProjectionMatrix = CATransform3DMultiply(_modelViewProjectionMatrix, t);
+                glVertexAttribPointer(CAVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+
+                glUniformMatrix4fv(_videoProjectionUniform, 1, 0, &_modelViewProjectionMatrix);
+                glVertexAttribPointer(CAVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
+
+                
+                texture = [layer.backingStore contentsTexture];
+            } else
             if ([layerContents isKindOfClass: [CABackingStore class]])
             {
 //                NSLog(@"contents is CABackingStore");
@@ -844,6 +918,9 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
             [texture unbind];
             
+            if (restoreProgram) {
+                [_simpleProgram use];
+            }
         }
         PROFILE_END(@"layer contents rendering");
         
