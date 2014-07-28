@@ -134,7 +134,7 @@
   if (compileLog)
     {
       NSLog(@"Shader compile log:");
-      printf("%s\n", [compileLog UTF8String]);
+      NSLog(@"%@", compileLog);
     }
   
   /* Get compile status */
