@@ -58,6 +58,7 @@ CATransform3D CATransform3DConcat(CATransform3D a, CATransform3D b);
 CATransform3D CATransform3DInvert(CATransform3D t);
 
 CA_EXTERN CATransform3D CATransform3DMakeAffineTransform (CGAffineTransform m);
+CA_EXTERN CGAffineTransform CATransform3DGetAffineTransform (CATransform3D t);
 
 @interface NSValue (CATransform3D)
 + (NSValue *) valueWithCATransform3D: (CATransform3D)transform;

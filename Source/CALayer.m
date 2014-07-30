@@ -536,18 +536,27 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 #endif
 - (CGRect)frame
 {
+    CGAffineTransform t = self.affineTransform;
     
-    return CGRectMake(_position.x - (_bounds.size.width * _anchorPoint.x),
-                      _position.y - (_bounds.size.height * _anchorPoint.y),
-                      _bounds.size.width,
-                      _bounds.size.height);
+    CGSize size = _bounds.size;
+    size = CGSizeApplyAffineTransform(size, t);
+    CGPoint position = CGPointMake(_position.x + t.tx, _position.y + t.ty);
+    
+    return CGRectMake(position.x - (size.width * _anchorPoint.x),
+                      position.y - (size.height * _anchorPoint.y),
+                      size.width,
+                      size.height);
 }
 
 - (void)setFrame:(CGRect)frame
 {
-    _bounds.size = frame.size;
-    _position = CGPointMake(frame.origin.x + (frame.size.width * _anchorPoint.x),
-                            frame.origin.y + (frame.size.height * _anchorPoint.y));
+    CGAffineTransform invertedTransform = CGAffineTransformInvert(self.affineTransform);
+    CGSize transformedSize = CGSizeApplyAffineTransform(frame.size, invertedTransform);
+    CGPoint newOrigin = frame.origin;
+    
+    _bounds.size = transformedSize;
+    _position = CGPointMake(newOrigin.x + (frame.size.width * _anchorPoint.x),
+                            newOrigin.y + (frame.size.height * _anchorPoint.y));
     [self setNeedsLayout];
 }
 
@@ -1443,12 +1452,12 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 
 - (CGAffineTransform)affineTransform
 {
-    return CGAffineTransformIdentity;
+    return CATransform3DGetAffineTransform(self.transform);
 }
 
 - (void)setAffineTransform:(CGAffineTransform)m
 {
-    
+    self.transform = CATransform3DMakeAffineTransform(m);
 }
 
 - (void)markDirty
