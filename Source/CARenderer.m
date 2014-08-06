@@ -540,8 +540,10 @@ void gl_check_error(NSString *state) {
     [self _rasterizeAll];
     
     /* Perform render */
-    CATransform3D transform = CATransform3DIdentity;
-    transform = CATransform3DTranslate(transform, 0, _bounds.size.height -_layer.position.y * 2, 0);
+    
+    // flip coordinate
+    CATransform3D transform = CATransform3DMakeScale(1, -1, 1);
+    transform = CATransform3DTranslate(transform, 0, -_bounds.size.height, 0);
     
 #if PROFILE_ENABLE
     NSDate *callBegin = [NSDate date];
@@ -780,10 +782,10 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
         PROFILE_BEGIN;
         // fill vertex arrays
         GLfloat vertices[] = {
+            0.0, [layer bounds].size.height,
+            [layer bounds].size.width, [layer bounds].size.height,
             0.0, 0.0,
             [layer bounds].size.width, 0.0,
-            0.0, [layer bounds].size.height,
-            [layer bounds].size.width, [layer bounds].size.height,            
         };
         CGRect cr = [layer contentsRect];
 
@@ -953,7 +955,7 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
         PROFILE_BEGIN;
         CGRect layerBounds = [layer bounds];
         transform = CATransform3DConcat ([layer sublayerTransform], transform);
-        transform = CATransform3DTranslate (transform, -layerBounds.origin.x, layerBounds.origin.y, 0);
+        transform = CATransform3DTranslate (transform, -layerBounds.origin.x, -layerBounds.origin.y, 0);
         transform = CATransform3DTranslate (transform, -layerBounds.size.width/2, -layerBounds.size.height/2, 0);
         PROFILE_END(@"sublayer transform perpare");
         
@@ -979,8 +981,7 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
                 glScissor(glRect.origin.x, glRect.origin.y, glRect.size.width, glRect.size.height);
             }
             
-            CATransform3D subTransform = CATransform3DTranslate(transform, 0, layer.bounds.size.height - sublayer.position.y * 2, 0);
-            [self _renderLayer: sublayer withTransform: subTransform];
+            [self _renderLayer: sublayer withTransform: transform];
             
             if (layer.masksToBounds) {
                 glScissor(0, 0, _layer.bounds.size.width, _layer.bounds.size.height);
