@@ -736,6 +736,7 @@
 				43A9D08E185D9B2E00720B81 /* Frameworks */,
 				43A9D091185D9B2E00720B81 /* Headers */,
 				43A9D0B3185D9B2E00720B81 /* Resources */,
+				040872291997B71E00348AFC /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -868,6 +869,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		040872291997B71E00348AFC /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "pushd \"$SDK_LIB_PATH\"\nln -sf \"$LD_DYLIB_INSTALL_NAME\" \"lib$PRODUCT_NAME.so\"\npopd\n\npushd \"$SDK_ROOT/usr/include\"\nln -sf \"$INSTALL_PATH/$PUBLIC_HEADERS_FOLDER_PATH\" \"$PRODUCT_NAME\"\npopd\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		4398B91D1897D5D500445C3A /* Sources */ = {
@@ -1084,6 +1101,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 43E112C31860304600E771B4 /* Android.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				FRAMEWORK_VERSION = A;
@@ -1101,6 +1119,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 43E112C31860304600E771B4 /* Android.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				FRAMEWORK_VERSION = A;
@@ -1118,6 +1137,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 43E112C31860304600E771B4 /* Android.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				FRAMEWORK_VERSION = A;
