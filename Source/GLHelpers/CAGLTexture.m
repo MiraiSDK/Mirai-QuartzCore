@@ -177,8 +177,11 @@
   CGFloat height = CGImageGetHeight(image);
   size_t bitsPerComponent = 8; //CGImageGetBitsPerComponent(image);
   unsigned long bytesPerRow = width * 4; //CGImageGetBytesPerRow(image); // in some cases, we cannot generate RGB textureContext, it appears; only RGBA
+  CGImageAlphaInfo alphaInfo = CGImageGetAlphaInfo(image);
     
-    if (CGImageGetBitsPerComponent(image) == 8) {
+    // speedup image decode if it's dataprovider's formate is RGBA
+    if (CGImageGetBitsPerComponent(image) == 8 &&
+        alphaInfo == kCGImageAlphaLast) {
         //
         // FIXME: Workaround
         // We remove typically styles to get CGImage data
