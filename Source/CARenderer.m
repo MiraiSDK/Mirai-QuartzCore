@@ -361,7 +361,7 @@ void gl_check_error(NSString *state) {
     \
     void main()\
     {\
-    gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates) * colorVarying + (1.0 - textureFlag) * colorVarying;\
+    gl_FragColor = textureFlag * texture2D(texture_2d, fragmentTextureCoordinates).bgra * colorVarying + (1.0 - textureFlag) * colorVarying;\
     }\
     ";
 }

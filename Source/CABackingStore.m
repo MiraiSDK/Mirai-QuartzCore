@@ -50,21 +50,16 @@ static CGContextRef createCGBitmapContext (int pixelsWide,
   // This should be good under Cocoa too.
   bitmapData = NULL;
 
+    CGBitmapInfo info = kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little;
+    
   context = CGBitmapContextCreate (bitmapData,
                                    pixelsWide,
                                    pixelsHigh,
                                    8,      // bits per component
                                    bitmapBytesPerRow,
                                    colorSpace,
-#if !GNUSTEP || (__OPENGL_ES__)
-
-                                   kCGImageAlphaPremultipliedLast);
-#else
-  // Opal only supports kCGImageAlphaPremultipliedFirst.
-  // However, this is incorrect since it implies ARGB.
-                                  kCGImageAlphaPremultipliedFirst);
-#endif
-
+                                   info);
+    
   // Note: our use of premultiplied alpha means that we need to
   // do alpha blending using:
   //  GL_SRC_ALPHA, GL_ONE
