@@ -221,10 +221,10 @@
     bytesPerRow,
     space,
 #if !GNUSTEP || (__OPENGL_ES__)
-    kCGImageAlphaPremultipliedLast
+    kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little
 #else
 #warning GNUstep: forced to pass kCGImageAlphaPremultipliedFirst although we end up with ...Last
-    kCGImageAlphaPremultipliedFirst
+    kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little
 #endif
   );
   CGColorSpaceRelease(space);

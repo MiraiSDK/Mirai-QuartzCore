@@ -39,7 +39,7 @@
                                              8,
                                              self.bounds.size.width * 4,
                                              cs,
-                                             kCGImageAlphaPremultipliedLast);
+                                             kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little);
     
     CGContextScaleCTM(ctx, 1, -1);
     CGContextTranslateCTM(ctx, 0, -self.bounds.size.height);
