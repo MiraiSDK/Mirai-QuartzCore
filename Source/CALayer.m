@@ -1402,14 +1402,18 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     CGPoint parentAnchorPosition = [superlayer anchorPosition];
     
     // layer position in superlayer's anchor-coordinate
-    CGPoint anchorPosition = CGPointMake(self.position.x - parentAnchorPosition.x,
-                                         self.position.y - parentAnchorPosition.y);
+    CGPoint anchorOffset = CGPointMake(self.position.x - parentAnchorPosition.x,
+                                       self.position.y - parentAnchorPosition.y);
     
-    CATransform3D anchorTranslate = CATransform3DMakeTranslation(anchorPosition.x, anchorPosition.y, 0);
-    CATransform3D layerTransform = CATransform3DConcat(self.transform,superlayer.sublayerTransform);
+    // concat order: bounds_translate <- transform <- sublayerTransform <- anchor_translate
+    CATransform3D boundsTranslate = CATransform3DMakeTranslation(-self.bounds.origin.x,-self.bounds.origin.y, 0);
+    CATransform3D localeTransform = CATransform3DConcat(boundsTranslate, self.transform);
+
+    CATransform3D anchorTranslate = CATransform3DMakeTranslation(anchorOffset.x, anchorOffset.y, 0);
+    CATransform3D parentTransform = CATransform3DConcat(superlayer.sublayerTransform, anchorTranslate);
     
-    CATransform3D toSuperlayerTransform = CATransform3DConcat(layerTransform,anchorTranslate);
-    
+    CATransform3D toSuperlayerTransform = CATransform3DConcat(localeTransform, parentTransform);
+
     return toSuperlayerTransform;
 }
 
