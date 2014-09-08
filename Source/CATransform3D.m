@@ -305,17 +305,17 @@ CATransform3D CATransform3DMakeOrtho(float left, float right,
 CATransform3D CATransform3DMakeAffineTransform (CGAffineTransform m)
 {
     CATransform3D t = {
-        m.a, m.b, 0.0f, m.tx,
-        m.c, m.d, 0.0f, m.ty,
+        m.a, m.b, 0.0f, 0.0f,
+        m.c, m.d, 0.0f, 0.0f,
         0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f
+        m.tx, m.ty, 0.0f, 1.0f
     };
     return t;
 }
 
 CGAffineTransform CATransform3DGetAffineTransform (CATransform3D t)
 {
-    return CGAffineTransformMake(t.m11, t.m12, t.m21, t.m22, t.m14, t.m24);
+    return CGAffineTransformMake(t.m11, t.m12, t.m21, t.m22, t.m41, t.m42);
 }
 
 float CADegreesToRadians(float degrees) { return degrees * (M_PI / 180); };
