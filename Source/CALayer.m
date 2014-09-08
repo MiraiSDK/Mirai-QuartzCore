@@ -39,7 +39,6 @@
 #import "CABackingStore.h"
 #import "CATransaction+FrameworkPrivate.h"
 
-
 #if GNUSTEP
 #import <CoreGraphics/CoreGraphics.h>
 #endif
@@ -1385,63 +1384,118 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
   [super setValue: value forUndefinedKey: key];
 }
 
-- (CGPoint) convertPoint: (CGPoint)p fromLayer: (CALayer *)l
+#pragma mark - Point Convert
+
+- (CGPoint)anchorPosition
+{
+    return CGPointMake(self.anchorPoint.x * self.bounds.size.width,
+                       self.anchorPoint.y * self.bounds.size.height);
+}
+
+- (CATransform3D)anchor_TransformationToSuperlayer
+{
+    CALayer *superlayer = self.superlayer;
+    
+    if (!superlayer) return CATransform3DIdentity;
+    
+    // position of superlayer's anchor point, in view coordinate
+    CGPoint parentAnchorPosition = [superlayer anchorPosition];
+    
+    // layer position in superlayer's anchor-coordinate
+    CGPoint anchorPosition = CGPointMake(self.position.x - parentAnchorPosition.x,
+                                         self.position.y - parentAnchorPosition.y);
+    
+    CATransform3D anchorTranslate = CATransform3DMakeTranslation(anchorPosition.x, anchorPosition.y, 0);
+    CATransform3D layerTransform = CATransform3DConcat(self.transform,superlayer.sublayerTransform);
+    
+    CATransform3D toSuperlayerTransform = CATransform3DConcat(layerTransform,anchorTranslate);
+    
+    return toSuperlayerTransform;
+}
+
+- (CATransform3D)anchor_TransformationFromSuperLayer
+{
+    CATransform3D inverse = CATransform3DInvert([self anchor_TransformationToSuperlayer]);
+    return inverse;
+}
+
+- (CATransform3D)anchor_TransformationToScreenSpace
+{
+    CATransform3D t = [self anchor_TransformationToSuperlayer];
+    for (CALayer *l = self.superlayer; l != nil; l= l.superlayer) {
+        t = CATransform3DConcat(t, [l anchor_TransformationToSuperlayer]);
+    }
+    
+    return t;
+}
+
+- (CATransform3D)anchor_TransformationFromScreenSpace
+{
+    return CATransform3DInvert([self anchor_TransformationToScreenSpace]);
+}
+
+- (CATransform3D)anchor_TransformationtoLayer:(CALayer *)layer
+{
+    CATransform3D t1 = [self anchor_TransformationToScreenSpace];
+    CATransform3D t2 = [layer anchor_TransformationFromScreenSpace];
+    
+    CATransform3D t = CATransform3DConcat(t1, t2);
+    
+    return t;
+}
+
+- (CGPoint)convertPoint:(CGPoint)p fromLayer:(CALayer *)l
 {
     return [l convertPoint:p toLayer:self];
 }
 
-- (CGPoint) convertPoint: (CGPoint)p toLayer: (CALayer *)l
+- (CGPoint)convertPoint:(CGPoint)p toLayer:(CALayer *)l
 {
-    if (l == nil || self == l) {
-        return p;
-    } else {
-        CGPoint result = p;
-        CALayer *commonAncestor = [self lowestCommonAncestorOfLayer:l];
-        
-        CALayer *from = self;
-        while (from != commonAncestor) {
-            CGRect fRect = from.frame;
-            
-            // apply bounds origin
-            fRect.origin.x -= from.bounds.origin.x;
-            fRect.origin.y -= from.bounds.origin.y;
-            
-            result.x += fRect.origin.x;
-            result.y += fRect.origin.y;
-            from = [from superlayer];
-        }
-        
-        CALayer *to = l;
-        
-        while (to != commonAncestor) {
-            CGRect toRect = to.frame;
-            
-            // apply bounds origin
-            toRect.origin.x -= to.bounds.origin.x;
-            toRect.origin.y -= to.bounds.origin.y;
-            
-            result.x -= toRect.origin.x;
-            result.y -= toRect.origin.y;
-            to = [to superlayer];
-        }
-        return result;
-    }
+    // p is in view coordinate, convert it to anchor coordinate
+    CGPoint fromAnchorTranslate = [self anchorPosition];
+    CGPoint anchor_coord_point = CGPointMake(p.x - fromAnchorTranslate.x,
+                                             p.y - fromAnchorTranslate.y);
+    
+    // get transform
+    CATransform3D anchorTransform = [self anchor_TransformationtoLayer:l];
+    CGAffineTransform anchorAffineTransform = CATransform3DGetAffineTransform(anchorTransform);
+    
+    // convert anchor-coordinate point to destination layer
+    CGPoint anchorDestPoint = CGPointApplyAffineTransform(anchor_coord_point, anchorAffineTransform);
+    
+    // convert anchor-coordinate point to view coordinate
+    CGPoint destAnchorTranslate = [l anchorPosition];
+    CGPoint result = CGPointMake(anchorDestPoint.x + destAnchorTranslate.x,
+                                 anchorDestPoint.y + destAnchorTranslate.y);
+    
+    return result;
 }
 
-- (CGRect) convertRect: (CGRect)p fromLayer: (CALayer *)l
+- (CGRect)convertRect:(CGRect)r fromLayer:(CALayer *)l
 {
-    CGRect rect = p;
-    rect.origin = [self convertPoint:rect.origin fromLayer:l];
-    return rect;
+    return [l convertRect:r toLayer:self];
 }
 
-- (CGRect) convertRect: (CGRect)p toLayer: (CALayer *)l
+- (CGRect)convertRect:(CGRect)r toLayer:(CALayer *)l
 {
-    CGRect rect = p;
-    rect.origin = [self convertPoint:rect.origin toLayer:l];
-    return rect;
+    // r is in view coordinate, convert it to anchor coordinate
+    CGPoint fromAnchorTranslate = [self anchorPosition];
+    CGRect anchor_coord_rect = CGRectOffset(r, -fromAnchorTranslate.x, -fromAnchorTranslate.y);
+    
+    // get transform
+    CATransform3D anchorTransform = [self anchor_TransformationtoLayer:l];
+    CGAffineTransform anchorAffineTransform = CATransform3DGetAffineTransform(anchorTransform);
+    
+    // convert anchor-coordinate rect to destination layer
+    CGRect converted_anchor_rect = CGRectApplyAffineTransform(anchor_coord_rect, anchorAffineTransform);
+    
+    // convert anchor-coordinate rect to view coordinate
+    CGPoint destAnchorTranslate = [l anchorPosition];
+    CGRect result = CGRectOffset(converted_anchor_rect, destAnchorTranslate.x, destAnchorTranslate.y);
+    return result;
 }
 
+#pragma mark -
 /* TODO:
  * -setSublayers: needs to correctly unset superlayer from old values and set new superlayer for new values.
  */
