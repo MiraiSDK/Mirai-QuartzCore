@@ -140,6 +140,7 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
     CATextureLoader *_textureLoader;
     
     CAGLProgram *_videoProgram;
+    GLuint _stencilMaskDepth;
 }
 @synthesize layer=_layer;
 @synthesize bounds=_bounds;
@@ -533,9 +534,13 @@ void gl_check_error(NSString *state) {
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     
-    glEnable(GL_SCISSOR_TEST);
+    // reset stencil buffer
+    glEnable(GL_STENCIL_TEST);
+    glStencilMask(0xFF);
+    glClear(GL_STENCIL_BUFFER_BIT);
+    _stencilMaskDepth = 0;
+
     glEnable(GL_BLEND);
-    glScissor(0, 0, _bounds.size.width, _bounds.size.height);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     [self _rasterizeAll];
     
@@ -557,6 +562,7 @@ void gl_check_error(NSString *state) {
     /* Restore defaults */
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glDisable(GL_BLEND);
+    glDisable(GL_STENCIL_TEST);
     glBlendFunc(GL_ONE, GL_ZERO);
     glUniformMatrix4fv(_projectionUniform, 1, 0, &_projectionMatrix);
 
@@ -971,20 +977,65 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
         [_callTimeArray addObject:@[@"RenderLayerWIthTransform",@(allTime)]];
 #endif
 
+        CATransform3D mvp = _modelViewProjectionMatrix;
+        GLuint mask = _stencilMaskDepth;
+        if (layer.masksToBounds) {
+            if (_stencilMaskDepth == 0) {
+                glEnable(GL_STENCIL_TEST);
+                glStencilMask(0xFF);
+                glClear(GL_STENCIL_BUFFER_BIT);
+            }
+            _stencilMaskDepth ++;
+            
+            glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+            glDepthMask(GL_FALSE);
+            
+            // incr draw area value
+            glStencilFunc(GL_ALWAYS, _stencilMaskDepth, mask);
+            glStencilOp(GL_INCR, GL_INCR, GL_INCR);
+            glStencilMask(0xFF);
+            
+            glUniformMatrix4fv(_projectionUniform, 1, 0, &mvp);
+            glVertexAttribPointer(CAVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+            
+            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+            glDepthMask(GL_TRUE);
+            glStencilMask(0x00);
+            
+            glStencilFunc(GL_EQUAL, _stencilMaskDepth, mask);
+            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+            
+        }
+        
         for (CALayer * sublayer in subLayers)
         {
-            if (layer.masksToBounds) {
-                CGRect windowRect = [layer convertRect:layer.bounds toLayer:_layer];
-                CGRect glRect = windowRect;
-                glRect.origin.y = _layer.bounds.size.height - windowRect.size.height - windowRect.origin.y;
-                
-                glScissor(glRect.origin.x, glRect.origin.y, glRect.size.width, glRect.size.height);
-            }
-            
             [self _renderLayer: sublayer withTransform: transform];
+        }
+        
+        if (layer.masksToBounds) {
+            glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+            glDepthMask(GL_FALSE);
+
+            glStencilFunc(GL_ALWAYS, _stencilMaskDepth, mask);
+            glStencilOp(GL_DECR, GL_DECR, GL_DECR);
+            glStencilMask(0xFF);
+
+            glUniformMatrix4fv(_projectionUniform, 1, 0, &mvp);
+            glVertexAttribPointer(CAVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+            glDepthMask(GL_TRUE);
+            glStencilMask(0x00);
             
-            if (layer.masksToBounds) {
-                glScissor(0, 0, _layer.bounds.size.width, _layer.bounds.size.height);
+            _stencilMaskDepth --;
+            
+            glStencilFunc(GL_EQUAL, _stencilMaskDepth, mask);
+            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+            if (_stencilMaskDepth == 0) {
+                glDisable(GL_STENCIL_TEST);
             }
         }
         [subLayers release];
