@@ -46,7 +46,8 @@
     
     if (_fillColor && _path) {
         CGContextSetFillColorWithColor(ctx, self.fillColor);
-        CGContextAddPath(ctx, self.path);
+        //FIXME: why access self.path leading crash?
+        CGContextAddPath(ctx, _path);
         CGContextFillPath(ctx);
     }
     
