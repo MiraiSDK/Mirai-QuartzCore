@@ -214,6 +214,7 @@ NSString *const kCATransition;
 @property(retain) CALayer *mask;
 @property CGFloat rasterizationScale;
 @property(copy) NSString *name;
+@property CGFloat contentsScale;
 
 // TODO: should call from CATransaction commit
 - (void)_recursionLayoutAndDisplayIfNeeds;

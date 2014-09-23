@@ -256,6 +256,10 @@ typedef NS_ENUM(NSInteger, CALayerType) {
     {
       return [NSNumber numberWithFloat: 0.0];
     }
+    if ([key isEqualToString: @"contentsScale"])
+    {
+        return [NSNumber numberWithFloat: 1.0];
+    }
 
   return nil;
 }
@@ -280,7 +284,8 @@ typedef NS_ENUM(NSInteger, CALayerType) {
         @"shadowColor", @"shadowOffset", @"shadowOpacity",
         @"shadowPath", @"shadowRadius",
 
-        @"bounds", @"position" };
+        @"bounds", @"position",
+          @"contentsScale"};
       
       for (int i = 0; i < sizeof(keys)/sizeof(keys[0]); i++)
         {
@@ -344,6 +349,8 @@ typedef NS_ENUM(NSInteger, CALayerType) {
       [self setContentsGravity: [layer contentsGravity]];
       [self setNeedsDisplayOnBoundsChange: [layer needsDisplayOnBoundsChange]];
       [self setZPosition: [layer zPosition]];
+
+        [self setContentsScale: [layer contentsScale]];
 
         [self setBorderColor:[layer borderColor]];
         [self setBorderWidth:[layer borderWidth]];
@@ -643,12 +650,15 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
           [_backingStore height] != bounds.size.height)
       {
           //TODO: taking account the opaque property, should create a bitmap without alpha channel while opaque is YES.
-        [self setBackingStore: [CABackingStore backingStoreWithWidth: bounds.size.width height: bounds.size.height]];
+          CGFloat backingWidth = bounds.size.width * self.contentsScale;
+          CGFloat backingHeight = bounds.size.height * self.contentsScale;
+        [self setBackingStore: [CABackingStore backingStoreWithWidth: backingWidth height: backingHeight]];
         [self setContents:nil];
       }
       
         if ([_backingStore context]) {
             CGContextSaveGState ([_backingStore context]);
+            CGContextScaleCTM([_backingStore context], self.contentsScale, self.contentsScale);
             CGContextClipToRect ([_backingStore context], [self bounds]);
             [self drawInContext: [_backingStore context]];
             CGContextRestoreGState ([_backingStore context]);
