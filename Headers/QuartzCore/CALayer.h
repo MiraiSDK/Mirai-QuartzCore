@@ -114,7 +114,9 @@ NSString *const kCATransition;
   NSMutableDictionary *_animations;
   NSMutableArray *_animationKeys;
   CABackingStore * _backingStore;
-  
+    
+    BOOL _inited;
+
   /* TODO: add CAGLSimpleFramebuffer ivars for storing:
      - offscreen rendering framebuffer
      - shadow framebuffer

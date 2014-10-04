@@ -79,9 +79,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 @property (assign) CALayerType type;
 @end
 
-@implementation CALayer {
-    BOOL _inited;
-}
+@implementation CALayer
 
 @synthesize delegate=_delegate;
 @synthesize contents=_contents;
