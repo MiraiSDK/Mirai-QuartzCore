@@ -35,6 +35,11 @@
 		4398B9691897E8B900445C3A /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4398B9681897E8B900445C3A /* OpenGLES.framework */; };
 		43A48F8C19498DA000BEF21C /* CAAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F77517C1594AF2900F56E92 /* CAAnimation.m */; };
 		43A48FDA19499D7900BEF21C /* CALayer+Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = 43B819FB18E5522F0020624F /* CALayer+Texture.m */; };
+		43A8F0CF19E16E5D00AF4CAD /* CATransformDecompose.h in Headers */ = {isa = PBXBuildFile; fileRef = 43A8F0CD19E16E5D00AF4CAD /* CATransformDecompose.h */; };
+		43A8F0D019E16E5D00AF4CAD /* CATransformDecompose.h in Headers */ = {isa = PBXBuildFile; fileRef = 43A8F0CD19E16E5D00AF4CAD /* CATransformDecompose.h */; };
+		43A8F0D119E16E5D00AF4CAD /* CATransformDecompose.m in Sources */ = {isa = PBXBuildFile; fileRef = 43A8F0CE19E16E5D00AF4CAD /* CATransformDecompose.m */; };
+		43A8F0D219E16E5D00AF4CAD /* CATransformDecompose.m in Sources */ = {isa = PBXBuildFile; fileRef = 43A8F0CE19E16E5D00AF4CAD /* CATransformDecompose.m */; };
+		43A8F0D319E16E5D00AF4CAD /* CATransformDecompose.m in Sources */ = {isa = PBXBuildFile; fileRef = 43A8F0CE19E16E5D00AF4CAD /* CATransformDecompose.m */; };
 		43A9D075185D9B2E00720B81 /* CAAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F77517C1594AF2900F56E92 /* CAAnimation.m */; };
 		43A9D076185D9B2E00720B81 /* CABase.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F77517D1594AF2900F56E92 /* CABase.m */; };
 		43A9D077185D9B2E00720B81 /* CADisplayLink.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F77517E1594AF2900F56E92 /* CADisplayLink.m */; };
@@ -245,6 +250,8 @@
 		4398B9301897D5D500445C3A /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		4398B9331897D5D500445C3A /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
 		4398B9681897E8B900445C3A /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = ../MiraSDK/Products/android/Xcode/Platforms/MacOSX.platform/Developer/SDKs/FakeMacOSX10.9.sdk/System/Library/Frameworks/OpenGLES.framework; sourceTree = "<group>"; };
+		43A8F0CD19E16E5D00AF4CAD /* CATransformDecompose.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CATransformDecompose.h; sourceTree = "<group>"; };
+		43A8F0CE19E16E5D00AF4CAD /* CATransformDecompose.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CATransformDecompose.m; sourceTree = "<group>"; };
 		43A9D0BE185D9B2E00720B81 /* QuartzCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = QuartzCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		43A9D0C5185D9C9400720B81 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		43AF1DAF18A6206E002BC090 /* CATransform3D_Private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CATransform3D_Private.h; sourceTree = "<group>"; };
@@ -567,6 +574,8 @@
 				7F7751891594AF2900F56E92 /* CATransaction.m */,
 				7FFBC86815AB6390004B0E68 /* CATransaction+FrameworkPrivate.h */,
 				7F77518A1594AF2900F56E92 /* CATransform3D.m */,
+				43A8F0CD19E16E5D00AF4CAD /* CATransformDecompose.h */,
+				43A8F0CE19E16E5D00AF4CAD /* CATransformDecompose.m */,
 				7F77518B1594AF2900F56E92 /* CATransformLayer.m */,
 				7F77518C1594AF2900F56E92 /* CAValueFunction.m */,
 				43EE874B1953266A00CFB759 /* CATextureLoader.h */,
@@ -656,6 +665,7 @@
 				43A9D0AF185D9B2E00720B81 /* CAGLTexture.h in Headers */,
 				43A9D0B0185D9B2E00720B81 /* CALayer+DynamicProperties.h in Headers */,
 				43A9D0B1185D9B2E00720B81 /* CAGLShader.h in Headers */,
+				43A8F0D019E16E5D00AF4CAD /* CATransformDecompose.h in Headers */,
 				43F91D2319855549009E154D /* CAGLTextureAndroid.h in Headers */,
 				43A9D0B2185D9B2E00720B81 /* CAGLProgram.h in Headers */,
 				43A9D0A6185D9B2E00720B81 /* AppleSupport.h in Headers */,
@@ -685,6 +695,7 @@
 				7F7751C41594AF3A00F56E92 /* CATextLayer.h in Headers */,
 				7F7751C51594AF3A00F56E92 /* CATiledLayer.h in Headers */,
 				7F7751C61594AF3A00F56E92 /* CATransaction.h in Headers */,
+				43A8F0CF19E16E5D00AF4CAD /* CATransformDecompose.h in Headers */,
 				7F7751C71594AF3A00F56E92 /* CATransform3D.h in Headers */,
 				7F7751C81594AF3A00F56E92 /* CATransformLayer.h in Headers */,
 				7F7751C91594AF3A00F56E92 /* CAValueFunction.h in Headers */,
@@ -899,6 +910,7 @@
 				4398B9631897D63B00445C3A /* CAGLTexture.m in Sources */,
 				4398B95B1897D63300445C3A /* CAShapeLayer.m in Sources */,
 				4398B9501897D63300445C3A /* CADisplayLink.m in Sources */,
+				43A8F0D319E16E5D00AF4CAD /* CATransformDecompose.m in Sources */,
 				43A48FDA19499D7900BEF21C /* CALayer+Texture.m in Sources */,
 				4398B94E1897D63300445C3A /* CABackingStore.m in Sources */,
 				4398B9541897D63300445C3A /* CALayer.m in Sources */,
@@ -923,6 +935,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				43A8F0D219E16E5D00AF4CAD /* CATransformDecompose.m in Sources */,
 				43A9D075185D9B2E00720B81 /* CAAnimation.m in Sources */,
 				43A9D076185D9B2E00720B81 /* CABase.m in Sources */,
 				43A9D077185D9B2E00720B81 /* CADisplayLink.m in Sources */,
@@ -978,6 +991,7 @@
 				7F77519F1594AF2900F56E92 /* CAValueFunction.m in Sources */,
 				43F91D2419855549009E154D /* CAGLTextureAndroid.m in Sources */,
 				7F43F22F1594ECD800F1C5EB /* CABackingStore.m in Sources */,
+				43A8F0D119E16E5D00AF4CAD /* CATransformDecompose.m in Sources */,
 				7FCE5C5415964BC4009557DC /* CAMediaTiming.m in Sources */,
 				7F5026AE15BC63FB00184772 /* CAGLSimpleFramebuffer.m in Sources */,
 				7F5026B215BC685900184772 /* CAGLTexture.m in Sources */,
