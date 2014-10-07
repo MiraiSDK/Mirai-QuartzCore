@@ -38,6 +38,7 @@
 #import "QuartzCore/CATransaction.h"
 #import "CABackingStore.h"
 #import "CATransaction+FrameworkPrivate.h"
+#import "CATransformDecompose.h"
 
 #if GNUSTEP
 #import <CoreGraphics/CoreGraphics.h>
@@ -1346,6 +1347,213 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     [animation setFromValue: [[self presentationLayer] valueForKeyPath: key]];
   return animation;
 
+}
+
+- (id)valueForKeyPath:(NSString *)aKey
+{
+    NSRange r = [aKey rangeOfString: @"."];
+    if (r.length != 0) {
+        NSString	*key = [aKey substringToIndex: r.location];
+        NSString	*path = [aKey substringFromIndex: NSMaxRange(r)];
+        
+        id keyValue = [self valueForKey:key];
+        if ([keyValue isKindOfClass:[NSValue class]]) {
+            NSValue *v = keyValue;
+            const char *objCType = [v objCType];
+            if (strcmp(objCType, @encode(CATransform3D)) == 0) {
+                CATransform3D t = [v CATransform3DValue];
+                CAVector3D translation,scale,rotation;
+                CATransform3DDecompose(t, &translation, &scale, &rotation);
+                
+                if ([path isEqualToString:@"rotation"] || [path isEqualToString:@"rotation.z"]) {
+                    return @(rotation.z);
+                } else if ([path isEqualToString:@"rotation.x"]) {
+                    return @(rotation.x);
+                } else if ([path isEqualToString:@"rotation.y"]) {
+                    return @(rotation.y);
+                } else if ([path isEqualToString:@"scale"]) {
+                    // average of all three scale
+                    return @((scale.x + scale.y + scale.z)/3.0);
+                } else if ([path isEqualToString:@"scale.x"]) {
+                    return @(scale.x);
+                } else if ([path isEqualToString:@"scale.y"]) {
+                    return @(scale.y);
+                } else if ([path isEqualToString:@"scale.z"]) {
+                    return @(scale.z);
+                } else if ([path isEqualToString:@"translation"]) {
+                    // NSValue of CGSize, x and y
+                    CGSize tr = CGSizeMake(translation.x, translation.y);
+                    return [NSValue value:&tr withObjCType:@encode(CGSize)];
+                } else if ([path isEqualToString:@"translation.x"]) {
+                    return @(translation.x);
+                } else if ([path isEqualToString:@"translation.y"]) {
+                    return @(translation.y);
+                } else if ([path isEqualToString:@"translation.z"]) {
+                    return @(translation.z);
+                }
+            }
+            else if (strcmp(objCType, @encode(CGPoint)) ==0 ||
+                     strcmp(objCType, @encode(NSPoint)) ==0) { //Foundation doesn't support CGPoint
+                CGPoint p;
+                [v getValue:&p];
+                
+                if ([path isEqualToString:@"x"]) {
+                    return @(p.x);
+                } else if ([path isEqualToString:@"y"]) {
+                    return @(p.y);
+                }
+                
+            } else if (strcmp(objCType, @encode(CGSize)) == 0) {
+                CGSize size;
+                [v getValue:&size];
+                
+                if ([path isEqualToString:@"width"]) {
+                    return @(size.width);
+                } else if ([path isEqualToString:@"height"]) {
+                    return @(size.height);
+                }
+                
+            } else if (strcmp(objCType, @encode(CGRect)) == 0) {
+                CGRect rect;
+                [v getValue:&rect];
+                
+                if ([path isEqualToString:@"origin"]) {
+                    return [NSValue valueWithBytes:&rect.origin objCType:@encode(CGPoint)];
+                }  else if ([path isEqualToString:@"origin.x"]) {
+                    return @(rect.origin.x);
+                } else if ([path isEqualToString:@"origin.y"]) {
+                    return @(rect.origin.y);
+                } else if ([path isEqualToString:@"size"]) {
+                    return [NSValue valueWithBytes:&rect.size objCType:@encode(CGSize)];
+                } else if ([path isEqualToString:@"size.width"]) {
+                    return @(rect.size.width);
+                } else if ([path isEqualToString:@"size.height"]) {
+                    return @(rect.size.height);
+                }
+            } else {
+                NSLog(@"unknow objCType:%s",objCType);
+            }
+            
+        }
+    }
+    
+    return [super valueForKeyPath:aKey];
+}
+
+- (void)setValue:(id)anObject forKeyPath:(NSString *)aKey
+{
+    NSRange r = [aKey rangeOfString: @"."];
+    if (r.length != 0) {
+        NSString	*key = [aKey substringToIndex: r.location];
+        NSString	*path = [aKey substringFromIndex: NSMaxRange(r)];
+        id keyValue = [self valueForKey:key];
+        if ([keyValue isKindOfClass:[NSValue class]]) {
+            NSValue *v = keyValue;
+            const char *objCType = [v objCType];
+
+            NSValue *finalValue = nil;
+            if (strcmp(objCType, @encode(CATransform3D)) == 0) {
+                CATransform3D t = [v CATransform3DValue];
+                CAVector3D translation,scale,rotation;
+                CATransform3DDecompose(t, &translation, &scale, &rotation);
+                
+                if ([path isEqualToString:@"rotation"] || [path isEqualToString:@"rotation.z"]) {
+                    rotation.z = [anObject floatValue];
+                } else if ([path isEqualToString:@"rotation.x"]) {
+                    rotation.x = [anObject floatValue];
+                } else if ([path isEqualToString:@"rotation.y"]) {
+                    rotation.y = [anObject floatValue];
+                } else if ([path isEqualToString:@"scale"]) {
+                    // average of all three scale
+                    scale.x = [anObject floatValue];
+                    scale.y = [anObject floatValue];
+                    scale.z = [anObject floatValue];
+                } else if ([path isEqualToString:@"scale.x"]) {
+                    scale.x = [anObject floatValue];
+                } else if ([path isEqualToString:@"scale.y"]) {
+                    scale.y = [anObject floatValue];
+                } else if ([path isEqualToString:@"scale.z"]) {
+                    scale.z = [anObject floatValue];
+                } else if ([path isEqualToString:@"translation"]) {
+                    // NSValue of CGSize, x and y
+                    CGSize tr; [anObject getValue:&tr]; // = / CGSizeMake(t.m41, t.m42);
+                    translation.x = tr.width;
+                    translation.y = tr.height;
+                } else if ([path isEqualToString:@"translation.x"]) {
+                    translation.x = [anObject floatValue];
+                } else if ([path isEqualToString:@"translation.y"]) {
+                    translation.y = [anObject floatValue];
+                } else if ([path isEqualToString:@"translation.z"]) {
+                    translation.z = [anObject floatValue];
+                } else {
+                    return [super setValue:anObject forKeyPath:aKey];
+                }
+                
+                CATransform3D mt = CATransform3DCompose(translation, scale, rotation);
+                finalValue = [NSValue valueWithCATransform3D:mt];
+            }
+            else if (strcmp(objCType, @encode(CGPoint)) == 0 ||
+                     strcmp(objCType, @encode(NSPoint)) == 0) {
+                CGPoint p;
+                [v getValue:&p];
+                
+                if ([path isEqualToString:@"x"]) {
+                    p.x = [anObject floatValue];
+                } else if ([path isEqualToString:@"y"]) {
+                    p.y = [anObject floatValue];
+                } else {
+                    return [super setValue:anObject forKeyPath:aKey];
+                }
+                
+                finalValue = [NSValue value:&p withObjCType:@encode(CGPoint)];
+            } else if (strcmp(objCType, @encode(CGSize)) == 0) {
+                CGSize size;
+                [v getValue:&size];
+                
+                if ([path isEqualToString:@"width"]) {
+                    size.width = [anObject floatValue];
+                } else if ([path isEqualToString:@"height"]) {
+                    size.height = [anObject floatValue];
+                } else {
+                    return [super setValue:anObject forKeyPath:aKey];
+                }
+                
+                finalValue = [NSValue value:&size withObjCType:@encode(CGSize)];
+            } else if (strcmp(objCType, @encode(CGRect)) == 0) {
+                CGRect rect;
+                [v getValue:&rect];
+                
+                if ([path isEqualToString:@"origin"]) {
+                    CGPoint origin; [anObject getValue:&origin];
+                    rect.origin = origin;
+                }  else if ([path isEqualToString:@"origin.x"]) {
+                    rect.origin.x = [anObject floatValue];
+                } else if ([path isEqualToString:@"origin.y"]) {
+                    rect.origin.y = [anObject floatValue];
+                } else if ([path isEqualToString:@"size"]) {
+                    CGSize size; [anObject getValue:&size];
+                    rect.size = size;
+                } else if ([path isEqualToString:@"size.width"]) {
+                    rect.size.width = [anObject floatValue];
+                } else if ([path isEqualToString:@"size.height"]) {
+                    rect.size.height = [anObject floatValue];
+                } else {
+                    return [super setValue:anObject forKeyPath:aKey];
+                }
+                finalValue = [NSValue value:&rect withObjCType:@encode(CGRect)];
+
+            } else{
+                NSLog(@"Unknow objCType:%s",objCType);
+            }
+            
+            if (finalValue) {
+                return [self setValue:finalValue forKey:key];
+            }
+
+        }
+    }
+
+    [super setValue:anObject forKeyPath:aKey];
 }
 
 - (id)valueForUndefinedKey: (NSString *)key
