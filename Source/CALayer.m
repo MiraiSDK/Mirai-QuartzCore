@@ -1382,14 +1382,14 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
                     return @(scale.z);
                 } else if ([path isEqualToString:@"translation"]) {
                     // NSValue of CGSize, x and y
-                    CGSize translation = CGSizeMake(t.m41, t.m42);
-                    return [NSValue value:&translation withObjCType:@encode(CGSize)];
+                    CGSize tr = CGSizeMake(translation.x, translation.y);
+                    return [NSValue value:&tr withObjCType:@encode(CGSize)];
                 } else if ([path isEqualToString:@"translation.x"]) {
-                    return @(t.m41);
+                    return @(translation.x);
                 } else if ([path isEqualToString:@"translation.y"]) {
-                    return @(t.m42);
+                    return @(translation.y);
                 } else if ([path isEqualToString:@"translation.z"]) {
-                    return @(t.m43);
+                    return @(translation.z);
                 }
             }
             else if (strcmp(objCType, @encode(CGPoint)) ==0) {
@@ -1429,6 +1429,8 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
                 } else if ([path isEqualToString:@"size.height"]) {
                     return @(rect.size.height);
                 }
+            } else {
+                NSLog(@"unknow objCType:%s",objCType);
             }
             
         }
