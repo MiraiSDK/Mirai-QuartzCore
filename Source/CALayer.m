@@ -1392,7 +1392,8 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
                     return @(translation.z);
                 }
             }
-            else if (strcmp(objCType, @encode(CGPoint)) ==0) {
+            else if (strcmp(objCType, @encode(CGPoint)) ==0 ||
+                     strcmp(objCType, @encode(NSPoint)) ==0) { //Foundation doesn't support CGPoint
                 CGPoint p;
                 [v getValue:&p];
                 
