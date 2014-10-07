@@ -115,6 +115,7 @@ CATransform3D CATransform3DCompose(CAVector3D translation, CAVector3D scale, CAV
 
     CATransform3D scaleTransform = CATransform3DMakeScale(scale.x, scale.y, scale.z);
     CATransform3D translationTransform = CATransform3DMakeTranslation(translation.x, translation.y, translation.z);
+    translationTransform = transpose(translationTransform);
     
     CATransform3D transform = CATransform3DConcat(translationTransform, CATransform3DConcat(scaleTransform, rotationTransform));
     
