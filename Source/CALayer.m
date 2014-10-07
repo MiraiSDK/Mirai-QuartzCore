@@ -1492,7 +1492,8 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
                 CATransform3D mt = CATransform3DCompose(translation, scale, rotation);
                 finalValue = [NSValue valueWithCATransform3D:mt];
             }
-            else if (strcmp(objCType, @encode(CGPoint)) ==0) {
+            else if (strcmp(objCType, @encode(CGPoint)) == 0 ||
+                     strcmp(objCType, @encode(NSPoint)) == 0) {
                 CGPoint p;
                 [v getValue:&p];
                 
@@ -1541,6 +1542,8 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
                 }
                 finalValue = [NSValue value:&rect withObjCType:@encode(CGRect)];
 
+            } else{
+                NSLog(@"Unknow objCType:%s",objCType);
             }
             
             if (finalValue) {
