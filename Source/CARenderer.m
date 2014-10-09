@@ -978,7 +978,7 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
 #endif
 
         CATransform3D mvp = _modelViewProjectionMatrix;
-        GLuint mask = _stencilMaskDepth;
+        GLuint mask = 0xFF;
         if (layer.masksToBounds) {
             if (_stencilMaskDepth == 0) {
                 glEnable(GL_STENCIL_TEST);
