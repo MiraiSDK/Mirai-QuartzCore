@@ -848,6 +848,9 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 /* MARK: Animations */
 - (void) addAnimation: (CAAnimation *)anim forKey: (NSString *)key
 {
+    if (key == nil) {
+        key = @"__CALayer_NIL_KEY";;
+    }
     // if animation key already exist, we must notify exist animation cancelled.
     if ([_animationKeys containsObject:key]) {
         CAAnimation *existAnimation = [_animations valueForKey:key];
@@ -898,6 +901,10 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 
 - (CAAnimation *)animationForKey: (NSString *)key
 {
+    if (key == nil) {
+        key = @"__CALayer_NIL_KEY";;
+    }
+    
   return [_animations valueForKey: key];
 }
 
