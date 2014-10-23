@@ -1,5 +1,5 @@
 //
-//  CAGLTextureAndroid.h
+//  CAGLExternalTexture.h
 //  GSQuartzCore
 //
 //  Created by Chen Yonghui on 7/27/14.
@@ -8,6 +8,6 @@
 
 #import "CAGLTexture.h"
 
-@interface CAGLTextureAndroid : CAGLTexture
+@interface CAGLExternalTexture : CAGLTexture
 
 @end

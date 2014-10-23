@@ -9,7 +9,7 @@
 #import "CAMovieLayer.h"
 #import "CABackingStore.h"
 #import "CAGLTexture.h"
-#import "CAGLTextureAndroid.h"
+#import "CAGLExternalTexture.h"
 
 @implementation CAMovieLayer
 @synthesize updateCallback = _updateCallback;
@@ -36,7 +36,7 @@
         [self setContents:nil];
     }
     //  FIXME: texture target incorrect, should subclass
-    [_backingStore setContentsTexture:[CAGLTextureAndroid texture]];
+    [_backingStore setContentsTexture:[CAGLExternalTexture texture]];
     
     self.contents = _backingStore;
     

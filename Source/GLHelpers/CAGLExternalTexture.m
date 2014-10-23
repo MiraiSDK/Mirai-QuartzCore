@@ -1,16 +1,16 @@
 //
-//  CAGLTextureAndroid.m
+//  CAGLExternalTexture.m
 //  GSQuartzCore
 //
 //  Created by Chen Yonghui on 7/27/14.
 //  Copyright (c) 2014 Ivan Vučica. All rights reserved.
 //
 
-#import "CAGLTextureAndroid.h"
+#import "CAGLExternalTexture.h"
 
 #define GL_TEXTURE_EXTERNAL_OES 0x8D65
 
-@implementation CAGLTextureAndroid
+@implementation CAGLExternalTexture
 - (instancetype)init
 {
     self = [super init];
