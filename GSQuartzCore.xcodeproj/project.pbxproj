@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4365B40519F8F5F70087164B /* CAExternalContentLayer.h in Headers */ = {isa = PBXBuildFile; fileRef = 4365B40319F8F5F70087164B /* CAExternalContentLayer.h */; };
+		4365B40619F8F5F70087164B /* CAExternalContentLayer.h in Headers */ = {isa = PBXBuildFile; fileRef = 4365B40319F8F5F70087164B /* CAExternalContentLayer.h */; };
+		4365B40719F8F5F70087164B /* CAExternalContentLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4365B40419F8F5F70087164B /* CAExternalContentLayer.m */; };
+		4365B40819F8F5F70087164B /* CAExternalContentLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4365B40419F8F5F70087164B /* CAExternalContentLayer.m */; };
+		4365B40919F8F5F70087164B /* CAExternalContentLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4365B40419F8F5F70087164B /* CAExternalContentLayer.m */; };
 		43840645188167B2000D092C /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43840644188167B2000D092C /* CoreText.framework */; };
 		43840647188167E5000D092C /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43840646188167E5000D092C /* CoreFoundation.framework */; };
 		4398B9231897D5D500445C3A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4398B9221897D5D500445C3A /* Foundation.framework */; };
@@ -242,6 +247,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4365B40319F8F5F70087164B /* CAExternalContentLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CAExternalContentLayer.h; sourceTree = "<group>"; };
+		4365B40419F8F5F70087164B /* CAExternalContentLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CAExternalContentLayer.m; sourceTree = "<group>"; };
 		43840644188167B2000D092C /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = ../MiraSDK/Products/android/Xcode/Platforms/MacOSX.platform/Developer/SDKs/FakeMacOSX10.9.sdk/System/Library/Frameworks/CoreText.framework; sourceTree = "<group>"; };
 		43840646188167E5000D092C /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = ../MiraSDK/Products/android/Xcode/Platforms/MacOSX.platform/Developer/SDKs/FakeMacOSX10.9.sdk/System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<group>"; };
 		4398B9211897D5D500445C3A /* libGSQuartzCore-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libGSQuartzCore-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -419,6 +426,8 @@
 				43F91D2119855549009E154D /* CAGLExternalTexture.m */,
 				43F91D2C198695A4009E154D /* CAMovieLayer.h */,
 				43F91D2D198695A4009E154D /* CAMovieLayer.m */,
+				4365B40319F8F5F70087164B /* CAExternalContentLayer.h */,
+				4365B40419F8F5F70087164B /* CAExternalContentLayer.m */,
 			);
 			name = Video;
 			sourceTree = "<group>";
@@ -635,6 +644,7 @@
 				43A9D092185D9B2E00720B81 /* CAAnimation.h in Headers */,
 				43A9D093185D9B2E00720B81 /* CABase.h in Headers */,
 				43A9D094185D9B2E00720B81 /* CADisplayLink.h in Headers */,
+				4365B40619F8F5F70087164B /* CAExternalContentLayer.h in Headers */,
 				43A9D095185D9B2E00720B81 /* CAEAGLLayer.h in Headers */,
 				43A9D096185D9B2E00720B81 /* CAGradientLayer.h in Headers */,
 				43A9D097185D9B2E00720B81 /* CALayer.h in Headers */,
@@ -682,6 +692,7 @@
 				7F7751BA1594AF3A00F56E92 /* CADisplayLink.h in Headers */,
 				7F7751BB1594AF3A00F56E92 /* CAEAGLLayer.h in Headers */,
 				7F7751BC1594AF3A00F56E92 /* CAGradientLayer.h in Headers */,
+				4365B40519F8F5F70087164B /* CAExternalContentLayer.h in Headers */,
 				7F7751BD1594AF3A00F56E92 /* CALayer.h in Headers */,
 				7F7751BE1594AF3A00F56E92 /* CAMediaTiming.h in Headers */,
 				43F91D2219855549009E154D /* CAGLExternalTexture.h in Headers */,
@@ -906,6 +917,7 @@
 				4398B9521897D63300445C3A /* CAGradientLayer.m in Sources */,
 				4398B94F1897D63300445C3A /* CABase.m in Sources */,
 				4398B9571897D63300445C3A /* CAMediaTimingFunction.m in Sources */,
+				4365B40919F8F5F70087164B /* CAExternalContentLayer.m in Sources */,
 				4398B9641897D63B00445C3A /* CAGLShader.m in Sources */,
 				4398B9631897D63B00445C3A /* CAGLTexture.m in Sources */,
 				4398B95B1897D63300445C3A /* CAShapeLayer.m in Sources */,
@@ -945,6 +957,7 @@
 				43A9D07A185D9B2E00720B81 /* CALayer.m in Sources */,
 				43A9D07B185D9B2E00720B81 /* CAMediaTimingFunction.m in Sources */,
 				43F91D2519855549009E154D /* CAGLExternalTexture.m in Sources */,
+				4365B40819F8F5F70087164B /* CAExternalContentLayer.m in Sources */,
 				43A9D07C185D9B2E00720B81 /* CARenderer.m in Sources */,
 				43A9D07D185D9B2E00720B81 /* CAReplicatorLayer.m in Sources */,
 				43A9D07E185D9B2E00720B81 /* CAScrollLayer.m in Sources */,
@@ -971,6 +984,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4365B40719F8F5F70087164B /* CAExternalContentLayer.m in Sources */,
 				7F77518F1594AF2900F56E92 /* CAAnimation.m in Sources */,
 				7F7751901594AF2900F56E92 /* CABase.m in Sources */,
 				7F7751911594AF2900F56E92 /* CADisplayLink.m in Sources */,
