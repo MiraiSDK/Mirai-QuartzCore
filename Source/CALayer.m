@@ -132,6 +132,8 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 @synthesize type = _type;
 @synthesize borderColor = _borderColor;
 @synthesize borderWidth = _borderWidth;
+@synthesize contentsScale = _contentsScale;
+@synthesize name = _name;
 
 /* *** dynamic synthesis of properties *** */
 #if 0
@@ -327,38 +329,39 @@ typedef NS_ENUM(NSInteger, CALayerType) {
      layers. */
   if ((self = [super init]) != nil)
     {
-      [self setDelegate: [layer delegate]];
-      [self setLayoutManager: [layer layoutManager]];
-      [self setSuperlayer: [layer superlayer]]; /* if copied for use in presentation layer, then ignored */
-      [self setSublayers: [layer sublayers]]; /* if copied for use in presentation layer, then ignored */
+        _delegate = layer->_delegate;
+        _layoutManager = [layer->_layoutManager retain];
+        _superlayer = layer->_superlayer; /* if copied for use in presentation layer, then ignored */
+        _sublayers = [layer->_sublayers copy]; /* if copied for use in presentation layer, then ignored */
       /* frame not copied: dynamically generated */
-      [self setBounds: [layer bounds]];
-      [self setAnchorPoint: [layer anchorPoint]];
-      [self setPosition: [layer position]];
-      [self setOpacity: [layer opacity]];
-      [self setTransform: [layer transform]];
-      [self setSublayerTransform: [layer sublayerTransform]];
-      [self setShouldRasterize: [layer shouldRasterize]];
-      [self setOpaque: [layer isOpaque]];
-      [self setGeometryFlipped: [layer isGeometryFlipped]];
-      [self setBackgroundColor: [layer backgroundColor]];
-      [self setMasksToBounds: [layer masksToBounds]];
-      [self setContentsRect: [layer contentsRect]];
-      [self setHidden: [layer isHidden]];
-      [self setContentsGravity: [layer contentsGravity]];
-      [self setNeedsDisplayOnBoundsChange: [layer needsDisplayOnBoundsChange]];
-      [self setZPosition: [layer zPosition]];
-
-        [self setContentsScale: [layer contentsScale]];
-
-        [self setBorderColor:[layer borderColor]];
-        [self setBorderWidth:[layer borderWidth]];
+        _bounds = layer->_bounds;
+        _anchorPoint = layer->_anchorPoint;
+        _position = layer->_position;
+        _opacity = layer->_opacity;
+        _transform = layer->_transform;
+        _sublayerTransform = layer->_sublayerTransform;
+        _shouldRasterize = layer->_shouldRasterize;
+        _opaque = layer->_opaque;
+        _geometryFlipped = layer->_geometryFlipped;
+        _backgroundColor = CGColorRetain(layer->_backgroundColor);
+        _masksToBounds = layer->_masksToBounds;
+        _contentsRect = layer->_contentsRect;
+        _hidden = layer->_hidden;
+        _contentsGravity = [layer->_contentsGravity copy];
+        _needsDisplayOnBoundsChange = layer->_needsDisplayOnBoundsChange;
+        _zPosition = layer->_zPosition;
         
-      [self setShadowColor: [layer shadowColor]];
-      [self setShadowOffset: [layer shadowOffset]];
-      [self setShadowOpacity: [layer shadowOpacity]];
-      [self setShadowPath: [layer shadowPath]];
-      [self setShadowRadius: [layer shadowRadius]];
+        
+        _contentsScale = layer->_contentsScale;
+        
+        _borderColor = layer->_borderColor;
+        _borderWidth = layer->_borderWidth;
+        
+        _shadowColor = CGColorRetain(layer->_shadowColor);
+        _shadowOffset = layer->_shadowOffset;
+        _shadowOpacity = layer->_shadowOpacity;
+        _shadowPath = CGPathRetain(layer->_shadowPath);
+        _shadowRadius = layer->_shadowRadius;
       
       /* FIXME
          setting contents currently needs to be below setting bounds, 
@@ -366,21 +369,21 @@ typedef NS_ENUM(NSInteger, CALayerType) {
       [self setContents: [layer contents]]; 
       
       /* properties in protocol CAMediaTiming */
-      [self setBeginTime: [layer beginTime]];
-      [self setTimeOffset: [layer timeOffset]];
-      [self setRepeatCount: [layer repeatCount]];
-      [self setRepeatDuration: [layer repeatDuration]];
-      [self setAutoreverses: [layer autoreverses]];
-      [self setFillMode: [layer fillMode]];
-      [self setDuration: [layer duration]];
-      [self setSpeed: [layer speed]];
+        _beginTime = layer->_beginTime;
+        _timeOffset = layer->_timeOffset;
+        _repeatCount = layer->_repeatCount;
+        _repeatDuration = layer->_repeatDuration;
+        _autoreverses = layer->_autoreverses;
+        _fillMode = [layer->_fillMode copy];
+        _duration = layer->_duration;
+        _speed = layer->_speed;
       
       /* private or publicly read-only properties */
-      [self setAnimations: [layer animations]];
-      [self setAnimationKeys: [layer animationKeys]];
+        _animations = [layer->_animations retain];
+        _animationKeys = [layer->_animationKeys retain];
         
-        self.name = layer.name;
-        self.type = layer.type;
+        _type = layer->_type;
+        _name = [layer->_name copy];
         
         _needsLayout = layer.needsLayout;
     }
@@ -755,11 +758,30 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     [self layoutIfNeeded];
     [self displayIfNeeded];
     
-    NSArray *sublayers = [self.sublayers copy];
+    NSArray *sublayers = self.sublayers;
     for (CALayer *layer in sublayers) {
         [layer _recursionLayoutAndDisplayIfNeeds];
     }
-    [sublayers release];
+}
+
+- (void)_recursionLayoutIfNeeds
+{
+    [self layoutIfNeeded];
+    
+    NSArray *sublayers = self.sublayers;
+    for (CALayer *layer in sublayers) {
+        [layer _recursionLayoutIfNeeds];
+    }
+}
+
+- (void)_recursionDisplayIfNeeds
+{
+    [self displayIfNeeded];
+    
+    NSArray *sublayers = self.sublayers;
+    for (CALayer *layer in sublayers) {
+        [layer _recursionDisplayIfNeeds];
+    }
 }
 /* ************************************* */
 /* MARK: - Model and presentation layers */
