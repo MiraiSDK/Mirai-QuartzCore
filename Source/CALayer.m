@@ -758,11 +758,30 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     [self layoutIfNeeded];
     [self displayIfNeeded];
     
-    NSArray *sublayers = [self.sublayers copy];
+    NSArray *sublayers = self.sublayers;
     for (CALayer *layer in sublayers) {
         [layer _recursionLayoutAndDisplayIfNeeds];
     }
-    [sublayers release];
+}
+
+- (void)_recursionLayoutIfNeeds
+{
+    [self layoutIfNeeded];
+    
+    NSArray *sublayers = self.sublayers;
+    for (CALayer *layer in sublayers) {
+        [layer _recursionLayoutIfNeeds];
+    }
+}
+
+- (void)_recursionDisplayIfNeeds
+{
+    [self displayIfNeeded];
+    
+    NSArray *sublayers = self.sublayers;
+    for (CALayer *layer in sublayers) {
+        [layer _recursionDisplayIfNeeds];
+    }
 }
 /* ************************************* */
 /* MARK: - Model and presentation layers */
