@@ -31,6 +31,7 @@
 #import "QuartzCore/CATransform3D.h"
 #import "QuartzCore/CATransform3D_Private.h"
 #import "QuartzCore/CALayer.h"
+#import "CALayer.h"
 #import "CALayer+FrameworkPrivate.h"
 #import "CATransaction+FrameworkPrivate.h"
 #import "CABackingStore.h"
@@ -724,6 +725,127 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
     
 }
 
+static CGSize CALayerContentsGetSize(id contents)
+{
+    if ([contents isKindOfClass:[CABackingStore class]]) {
+        CABackingStore *backingStore = contents;
+        return CGSizeMake(backingStore.width, backingStore.height);
+    }
+#if GNUSTEP
+    else if ([contents isKindOfClass: NSClassFromString(@"CGImage")])
+#else
+        else if ([contents isKindOfClass: NSClassFromString(@"__NSCFType")] &&
+                 CFGetTypeID(layerContents) == CGImageGetTypeID())
+#endif
+        {
+            CGImageRef image = contents;
+            
+            CGFloat width = CGImageGetWidth(image);
+            CGFloat height = CGImageGetHeight(image);
+            return CGSizeMake(width, height);
+        }
+    
+    return CGSizeZero;
+}
+
+
+static CGSize CALayerContentsGetGravitySize(CALayer * layer)
+{
+    CGSize physicalSizeOfContents = CALayerContentsGetSize(layer.contents);
+    CGFloat contentsScale = layer.contentsScale;
+    CGSize logicSizeOfContents = CGSizeMake(physicalSizeOfContents.width/contentsScale,
+                                            physicalSizeOfContents.height/contentsScale);
+    NSString *contentsGravity = layer.contentsGravity;
+    CGSize boundsSize = layer.bounds.size;
+
+    CGFloat widthRatio = boundsSize.width / logicSizeOfContents.width;
+    CGFloat heightRatio = boundsSize.height / logicSizeOfContents.height;
+
+    if (!contentsGravity || [contentsGravity isEqualToString:kCAGravityResize]) {
+        return boundsSize;
+    }
+    
+    if ([contentsGravity isEqualToString:kCAGravityResizeAspect]) {
+        CGFloat ratio = MIN(widthRatio, heightRatio);
+        return CGSizeMake(logicSizeOfContents.width * ratio,
+                          logicSizeOfContents.height * ratio);
+
+    } else if ([contentsGravity isEqualToString:kCAGravityResizeAspectFill]) {
+        CGFloat ratio = MAX(widthRatio, heightRatio);
+        return CGSizeMake(logicSizeOfContents.width * ratio,
+                          logicSizeOfContents.height * ratio);
+    }
+    
+    return logicSizeOfContents;
+}
+
+static CGRect CALayerContentsGetGravityRect(CALayer *layer)
+{
+    // assume origin at top-left, to calc draw rect of texture:
+    //  1. calc the size base on gravity
+    //  2. then adjust origin base on gravity
+    
+    CGSize boundsSize = layer.bounds.size;
+    NSString *contentsGravity = layer.contentsGravity;
+    
+    // calc gravity size of contents
+    CGSize gravitySize = CALayerContentsGetGravitySize(layer);
+    
+    CGRect gravityRect = {CGPointZero, gravitySize};
+    
+    // adjust origin to match gravity
+    CGFloat leftX = 0;
+    CGFloat centerX = (boundsSize.width - gravityRect.size.width)/2;
+    CGFloat rightX = boundsSize.width - gravityRect.size.width;
+    
+    CGFloat topY = 0;
+    CGFloat centerY = (boundsSize.height - gravityRect.size.height)/2;
+    CGFloat bottomY = boundsSize.height - gravityRect.size.height;
+    
+    if ([contentsGravity isEqualToString:kCAGravityResize] || contentsGravity == nil) {
+        gravityRect.size = boundsSize;
+        gravityRect.origin = CGPointZero;
+    } else if ([contentsGravity isEqualToString:kCAGravityCenter]) {
+        gravityRect.origin.y = centerY;
+        gravityRect.origin.x = centerX;
+    } else if ([contentsGravity isEqualToString:kCAGravityTop]) {
+        gravityRect.origin.y = topY;
+        gravityRect.origin.x = centerX;
+    } else if ([contentsGravity isEqualToString:kCAGravityBottom]) {
+        gravityRect.origin.y = bottomY;
+        gravityRect.origin.x = centerX;
+    } else if ([contentsGravity isEqualToString:kCAGravityLeft]) {
+        gravityRect.origin.y = centerY;
+        gravityRect.origin.x = leftX;
+    } else if ([contentsGravity isEqualToString:kCAGravityRight]) {
+        gravityRect.origin.y = centerY;
+        gravityRect.origin.x = rightX;
+    } else if ([contentsGravity isEqualToString:kCAGravityTopLeft]) {
+        gravityRect.origin.y = topY;
+        gravityRect.origin.x = leftX;
+    } else if ([contentsGravity isEqualToString:kCAGravityTopRight]) {
+        gravityRect.origin.y = topY;
+        gravityRect.origin.x = rightX;
+    } else if ([contentsGravity isEqualToString:kCAGravityBottomLeft]) {
+        gravityRect.origin.y = bottomY;
+        gravityRect.origin.x = leftX;
+    } else if ([contentsGravity isEqualToString:kCAGravityBottomRight]) {
+        gravityRect.origin.y = bottomY;
+        gravityRect.origin.x = rightX;
+    } else if ([contentsGravity isEqualToString:kCAGravityResizeAspect]) {
+        // position at center
+        gravityRect.origin.y = centerY;
+        gravityRect.origin.x = centerX;
+    } else if ([contentsGravity isEqualToString:kCAGravityResizeAspectFill]) {
+        // resize, keep aspect, position at center
+        //position at center
+        gravityRect.origin.y = centerY;
+        gravityRect.origin.x = centerX;
+    }
+    
+    return gravityRect;
+}
+
 /* Internal method that renders a single layer and then proceeds by recursing, rendering its children. */
 
 #define GL_TEXTURE_EXTERNAL_OES 0x8D65
@@ -787,11 +909,12 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
         
         PROFILE_BEGIN;
         // fill vertex arrays
+        CGRect layerBounds = layer.bounds;
         GLfloat vertices[] = {
-            0.0, [layer bounds].size.height,
-            [layer bounds].size.width, [layer bounds].size.height,
+            0.0, layerBounds.size.height,
+            layerBounds.size.width, layerBounds.size.height,
             0.0, 0.0,
-            [layer bounds].size.width, 0.0,
+            layerBounds.size.width, 0.0,
         };
         CGRect cr = [layer contentsRect];
 
@@ -851,6 +974,38 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
         
         
         PROFILE_BEGIN;
+        
+        CATransform3D mvp = _modelViewProjectionMatrix;
+        GLuint mask = 0xFF;
+        if (layer.masksToBounds) {
+            if (_stencilMaskDepth == 0) {
+                glEnable(GL_STENCIL_TEST);
+                glStencilMask(0xFF);
+                glClear(GL_STENCIL_BUFFER_BIT);
+            }
+            _stencilMaskDepth ++;
+            
+            glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+            glDepthMask(GL_FALSE);
+            
+            // incr draw area value
+            glStencilFunc(GL_ALWAYS, _stencilMaskDepth, mask);
+            glStencilOp(GL_INCR, GL_INCR, GL_INCR);
+            glStencilMask(0xFF);
+            
+            glUniformMatrix4fv(_projectionUniform, 1, 0, &mvp);
+            glVertexAttribPointer(CAVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+            
+            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+            glDepthMask(GL_TRUE);
+            glStencilMask(0x00);
+            
+            glStencilFunc(GL_EQUAL, _stencilMaskDepth, mask);
+            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+            
+        }
+
         // if there are some contents, draw them
         if ([layer contents])
         {
@@ -860,6 +1015,22 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
             CAGLTexture * texture = nil;
             BOOL restoreProgram = NO;
             id layerContents = [layer contents];
+            
+            CGRect vr = CALayerContentsGetGravityRect(layer);
+           
+            // apply anchor point
+            vr = CGRectOffset(vr,
+                              -[layer anchorPoint].x * [layer bounds].size.width,
+                              -[layer anchorPoint].y * [layer bounds].size.height);
+            
+            GLfloat contentsVertices[] = {
+                CGRectGetMinX(vr),  CGRectGetMaxY(vr),
+                 CGRectGetMaxX(vr),  CGRectGetMaxY(vr),
+                 CGRectGetMinX(vr),  CGRectGetMinY(vr),
+                 CGRectGetMaxX(vr),  CGRectGetMinY(vr),
+            };
+            
+            glVertexAttribPointer(CAVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, 0, contentsVertices);
             
             if ([layer isKindOfClass:[CAMovieLayer class]]) {
                 restoreProgram = YES;
@@ -959,7 +1130,6 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
             glDrawArrays(GL_LINE_LOOP, 0, 4);
         }
         PROFILE_BEGIN;
-        CGRect layerBounds = [layer bounds];
         transform = CATransform3DConcat ([layer sublayerTransform], transform);
         transform = CATransform3DTranslate (transform, -layerBounds.origin.x, -layerBounds.origin.y, 0);
         transform = CATransform3DTranslate (transform, -layerBounds.size.width/2, -layerBounds.size.height/2, 0);
@@ -977,36 +1147,6 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
         [_callTimeArray addObject:@[@"RenderLayerWIthTransform",@(allTime)]];
 #endif
 
-        CATransform3D mvp = _modelViewProjectionMatrix;
-        GLuint mask = 0xFF;
-        if (layer.masksToBounds) {
-            if (_stencilMaskDepth == 0) {
-                glEnable(GL_STENCIL_TEST);
-                glStencilMask(0xFF);
-                glClear(GL_STENCIL_BUFFER_BIT);
-            }
-            _stencilMaskDepth ++;
-            
-            glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-            glDepthMask(GL_FALSE);
-            
-            // incr draw area value
-            glStencilFunc(GL_ALWAYS, _stencilMaskDepth, mask);
-            glStencilOp(GL_INCR, GL_INCR, GL_INCR);
-            glStencilMask(0xFF);
-            
-            glUniformMatrix4fv(_projectionUniform, 1, 0, &mvp);
-            glVertexAttribPointer(CAVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-            
-            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-            glDepthMask(GL_TRUE);
-            glStencilMask(0x00);
-            
-            glStencilFunc(GL_EQUAL, _stencilMaskDepth, mask);
-            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-            
-        }
         
         for (CALayer * sublayer in subLayers)
         {

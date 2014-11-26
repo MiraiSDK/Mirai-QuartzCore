@@ -59,6 +59,7 @@ NSString *const kCAGravityTopLeft = @"CAGravityTopLeft";
 NSString *const kCAGravityTopRight = @"CAGravityTopRight";
 NSString *const kCAGravityBottomLeft = @"CAGravityBottomLeft";
 NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
+NSString *const kCATransition = @"CATransition";
 
 typedef NS_ENUM(NSInteger, CALayerType) {
     CALayerModelType,
@@ -262,6 +263,10 @@ typedef NS_ENUM(NSInteger, CALayerType) {
         return [NSNumber numberWithFloat: 1.0];
     }
 
+    if ([key isEqualToString: @"contentsGravity"])
+    {
+        return kCAGravityResize;
+    }
   return nil;
 }
 /* *** methods *** */
