@@ -974,6 +974,38 @@ static CGRect CALayerContentsGetGravityRect(CALayer *layer)
         
         
         PROFILE_BEGIN;
+        
+        CATransform3D mvp = _modelViewProjectionMatrix;
+        GLuint mask = 0xFF;
+        if (layer.masksToBounds) {
+            if (_stencilMaskDepth == 0) {
+                glEnable(GL_STENCIL_TEST);
+                glStencilMask(0xFF);
+                glClear(GL_STENCIL_BUFFER_BIT);
+            }
+            _stencilMaskDepth ++;
+            
+            glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+            glDepthMask(GL_FALSE);
+            
+            // incr draw area value
+            glStencilFunc(GL_ALWAYS, _stencilMaskDepth, mask);
+            glStencilOp(GL_INCR, GL_INCR, GL_INCR);
+            glStencilMask(0xFF);
+            
+            glUniformMatrix4fv(_projectionUniform, 1, 0, &mvp);
+            glVertexAttribPointer(CAVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+            
+            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+            glDepthMask(GL_TRUE);
+            glStencilMask(0x00);
+            
+            glStencilFunc(GL_EQUAL, _stencilMaskDepth, mask);
+            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+            
+        }
+
         // if there are some contents, draw them
         if ([layer contents])
         {
@@ -1115,36 +1147,6 @@ static CGRect CALayerContentsGetGravityRect(CALayer *layer)
         [_callTimeArray addObject:@[@"RenderLayerWIthTransform",@(allTime)]];
 #endif
 
-        CATransform3D mvp = _modelViewProjectionMatrix;
-        GLuint mask = 0xFF;
-        if (layer.masksToBounds) {
-            if (_stencilMaskDepth == 0) {
-                glEnable(GL_STENCIL_TEST);
-                glStencilMask(0xFF);
-                glClear(GL_STENCIL_BUFFER_BIT);
-            }
-            _stencilMaskDepth ++;
-            
-            glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-            glDepthMask(GL_FALSE);
-            
-            // incr draw area value
-            glStencilFunc(GL_ALWAYS, _stencilMaskDepth, mask);
-            glStencilOp(GL_INCR, GL_INCR, GL_INCR);
-            glStencilMask(0xFF);
-            
-            glUniformMatrix4fv(_projectionUniform, 1, 0, &mvp);
-            glVertexAttribPointer(CAVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-            
-            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-            glDepthMask(GL_TRUE);
-            glStencilMask(0x00);
-            
-            glStencilFunc(GL_EQUAL, _stencilMaskDepth, mask);
-            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-            
-        }
         
         for (CALayer * sublayer in subLayers)
         {
