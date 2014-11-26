@@ -725,7 +725,7 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
     
 }
 
-- (CGSize)sizeOfContents:(id)contents
+static CGSize CALayerContentsGetSize(id contents)
 {
     if ([contents isKindOfClass:[CABackingStore class]]) {
         CABackingStore *backingStore = contents;
@@ -748,85 +748,102 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
     return CGSizeZero;
 }
 
-- (CGRect)caculateContentsVerticesRectforLayer:(CALayer *)layer
+
+static CGSize CALayerContentsGetGravitySize(CALayer * layer)
+{
+    CGSize physicalSizeOfContents = CALayerContentsGetSize(layer.contents);
+    CGFloat contentsScale = layer.contentsScale;
+    CGSize logicSizeOfContents = CGSizeMake(physicalSizeOfContents.width/contentsScale,
+                                            physicalSizeOfContents.height/contentsScale);
+    NSString *contentsGravity = layer.contentsGravity;
+    CGSize boundsSize = layer.bounds.size;
+
+    CGFloat widthRatio = boundsSize.width / logicSizeOfContents.width;
+    CGFloat heightRatio = boundsSize.height / logicSizeOfContents.height;
+
+    if (!contentsGravity || [contentsGravity isEqualToString:kCAGravityResize]) {
+        return boundsSize;
+    }
+    
+    if ([contentsGravity isEqualToString:kCAGravityResizeAspect]) {
+        CGFloat ratio = MIN(widthRatio, heightRatio);
+        return CGSizeMake(logicSizeOfContents.width * ratio,
+                          logicSizeOfContents.height * ratio);
+
+    } else if ([contentsGravity isEqualToString:kCAGravityResizeAspectFill]) {
+        CGFloat ratio = MAX(widthRatio, heightRatio);
+        return CGSizeMake(logicSizeOfContents.width * ratio,
+                          logicSizeOfContents.height * ratio);
+    }
+    
+    return logicSizeOfContents;
+}
+
+static CGRect CALayerContentsGetGravityRect(CALayer *layer)
 {
     // assume origin at top-left, to calc draw rect of texture:
     //  1. calc the size base on gravity
-    //  2. then offset origin base on gravity
+    //  2. then adjust origin base on gravity
     
     CGSize boundsSize = layer.bounds.size;
     NSString *contentsGravity = layer.contentsGravity;
     
-    // calc logic size of contents
-    CGSize physicalSizeOfContents = [self sizeOfContents:layer.contents];
-    CGFloat contentsScale = layer.contentsScale;
-    CGSize logicSizeOfContents = CGSizeMake(physicalSizeOfContents.width/contentsScale,
-                                            physicalSizeOfContents.height/contentsScale);
+    // calc gravity size of contents
+    CGSize gravitySize = CALayerContentsGetGravitySize(layer);
     
-    CGRect verticesInBoundsRect = {CGPointZero, logicSizeOfContents};
+    CGRect gravityRect = {CGPointZero, gravitySize};
     
-    CGFloat widthRatio = boundsSize.width / logicSizeOfContents.width;
-    CGFloat heightRatio = boundsSize.height / logicSizeOfContents.height;
-    
+    // adjust origin to match gravity
     CGFloat leftX = 0;
-    CGFloat centerX = (boundsSize.width - verticesInBoundsRect.size.width)/2;
-    CGFloat rightX = boundsSize.width - verticesInBoundsRect.size.width;
+    CGFloat centerX = (boundsSize.width - gravityRect.size.width)/2;
+    CGFloat rightX = boundsSize.width - gravityRect.size.width;
     
     CGFloat topY = 0;
-    CGFloat centerY = (boundsSize.height - verticesInBoundsRect.size.height)/2;
-    CGFloat bottomY = boundsSize.height - verticesInBoundsRect.size.height;
+    CGFloat centerY = (boundsSize.height - gravityRect.size.height)/2;
+    CGFloat bottomY = boundsSize.height - gravityRect.size.height;
     
     if ([contentsGravity isEqualToString:kCAGravityResize] || contentsGravity == nil) {
-        verticesInBoundsRect.size = boundsSize;
-        verticesInBoundsRect.origin = CGPointZero;
+        gravityRect.size = boundsSize;
+        gravityRect.origin = CGPointZero;
     } else if ([contentsGravity isEqualToString:kCAGravityCenter]) {
-        verticesInBoundsRect.origin.y = centerY;
-        verticesInBoundsRect.origin.x = centerX;
+        gravityRect.origin.y = centerY;
+        gravityRect.origin.x = centerX;
     } else if ([contentsGravity isEqualToString:kCAGravityTop]) {
-        verticesInBoundsRect.origin.y = topY;
-        verticesInBoundsRect.origin.x = centerX;
+        gravityRect.origin.y = topY;
+        gravityRect.origin.x = centerX;
     } else if ([contentsGravity isEqualToString:kCAGravityBottom]) {
-        verticesInBoundsRect.origin.y = bottomY;
-        verticesInBoundsRect.origin.x = centerX;
+        gravityRect.origin.y = bottomY;
+        gravityRect.origin.x = centerX;
     } else if ([contentsGravity isEqualToString:kCAGravityLeft]) {
-        verticesInBoundsRect.origin.y = centerY;
-        verticesInBoundsRect.origin.x = leftX;
+        gravityRect.origin.y = centerY;
+        gravityRect.origin.x = leftX;
     } else if ([contentsGravity isEqualToString:kCAGravityRight]) {
-        verticesInBoundsRect.origin.y = centerY;
-        verticesInBoundsRect.origin.x = rightX;
+        gravityRect.origin.y = centerY;
+        gravityRect.origin.x = rightX;
     } else if ([contentsGravity isEqualToString:kCAGravityTopLeft]) {
-        verticesInBoundsRect.origin.y = topY;
-        verticesInBoundsRect.origin.x = leftX;
+        gravityRect.origin.y = topY;
+        gravityRect.origin.x = leftX;
     } else if ([contentsGravity isEqualToString:kCAGravityTopRight]) {
-        verticesInBoundsRect.origin.y = topY;
-        verticesInBoundsRect.origin.x = rightX;
+        gravityRect.origin.y = topY;
+        gravityRect.origin.x = rightX;
     } else if ([contentsGravity isEqualToString:kCAGravityBottomLeft]) {
-        verticesInBoundsRect.origin.y = bottomY;
-        verticesInBoundsRect.origin.x = leftX;
+        gravityRect.origin.y = bottomY;
+        gravityRect.origin.x = leftX;
     } else if ([contentsGravity isEqualToString:kCAGravityBottomRight]) {
-        verticesInBoundsRect.origin.y = bottomY;
-        verticesInBoundsRect.origin.x = rightX;
+        gravityRect.origin.y = bottomY;
+        gravityRect.origin.x = rightX;
     } else if ([contentsGravity isEqualToString:kCAGravityResizeAspect]) {
-        CGFloat ratio = MIN(widthRatio, heightRatio);
-        
-        verticesInBoundsRect.size.width = logicSizeOfContents.width * ratio;
-        verticesInBoundsRect.size.height = logicSizeOfContents.height * ratio;
-        
         // position at center
-        verticesInBoundsRect.origin.y = (boundsSize.height - verticesInBoundsRect.size.height)/2;
-        verticesInBoundsRect.origin.x = (boundsSize.width - verticesInBoundsRect.size.width)/2;
+        gravityRect.origin.y = centerY;
+        gravityRect.origin.x = centerX;
     } else if ([contentsGravity isEqualToString:kCAGravityResizeAspectFill]) {
         // resize, keep aspect, position at center
-        CGFloat ratio = MAX(widthRatio, heightRatio);
-        verticesInBoundsRect.size.width = logicSizeOfContents.width * ratio;
-        verticesInBoundsRect.size.height = logicSizeOfContents.height * ratio;
-        
         //position at center
-        verticesInBoundsRect.origin.y = (boundsSize.height - verticesInBoundsRect.size.height)/2;
-        verticesInBoundsRect.origin.x = (boundsSize.width - verticesInBoundsRect.size.width)/2;
+        gravityRect.origin.y = centerY;
+        gravityRect.origin.x = centerX;
     }
     
-    return verticesInBoundsRect;
+    return gravityRect;
 }
 
 /* Internal method that renders a single layer and then proceeds by recursing, rendering its children. */
@@ -967,7 +984,7 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
             BOOL restoreProgram = NO;
             id layerContents = [layer contents];
             
-            CGRect vr = [self caculateContentsVerticesRectforLayer:layer];
+            CGRect vr = CALayerContentsGetGravityRect(layer);
            
             // apply anchor point
             vr = CGRectOffset(vr,
