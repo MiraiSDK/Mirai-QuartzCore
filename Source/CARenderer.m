@@ -31,6 +31,7 @@
 #import "QuartzCore/CATransform3D.h"
 #import "QuartzCore/CATransform3D_Private.h"
 #import "QuartzCore/CALayer.h"
+#import "CALayer.h"
 #import "CALayer+FrameworkPrivate.h"
 #import "CATransaction+FrameworkPrivate.h"
 #import "CABackingStore.h"
@@ -724,6 +725,110 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
     
 }
 
+- (CGSize)sizeOfContents:(id)contents
+{
+    if ([contents isKindOfClass:[CABackingStore class]]) {
+        CABackingStore *backingStore = contents;
+        return CGSizeMake(backingStore.width, backingStore.height);
+    }
+#if GNUSTEP
+    else if ([contents isKindOfClass: NSClassFromString(@"CGImage")])
+#else
+        else if ([contents isKindOfClass: NSClassFromString(@"__NSCFType")] &&
+                 CFGetTypeID(layerContents) == CGImageGetTypeID())
+#endif
+        {
+            CGImageRef image = contents;
+            
+            CGFloat width = CGImageGetWidth(image);
+            CGFloat height = CGImageGetHeight(image);
+            return CGSizeMake(width, height);
+        }
+    
+    return CGSizeZero;
+}
+
+- (CGRect)caculateContentsVerticesRectforLayer:(CALayer *)layer
+{
+    // assume origin at top-left, to calc draw rect of texture:
+    //  1. calc the size base on gravity
+    //  2. then offset origin base on gravity
+    
+    CGSize boundsSize = layer.bounds.size;
+    NSString *contentsGravity = layer.contentsGravity;
+    
+    // calc logic size of contents
+    CGSize physicalSizeOfContents = [self sizeOfContents:layer.contents];
+    CGFloat contentsScale = layer.contentsScale;
+    CGSize logicSizeOfContents = CGSizeMake(physicalSizeOfContents.width/contentsScale,
+                                            physicalSizeOfContents.height/contentsScale);
+    
+    CGRect verticesInBoundsRect = {CGPointZero, logicSizeOfContents};
+    
+    CGFloat widthRatio = boundsSize.width / logicSizeOfContents.width;
+    CGFloat heightRatio = boundsSize.height / logicSizeOfContents.height;
+    
+    CGFloat leftX = 0;
+    CGFloat centerX = (boundsSize.width - verticesInBoundsRect.size.width)/2;
+    CGFloat rightX = boundsSize.width - verticesInBoundsRect.size.width;
+    
+    CGFloat topY = 0;
+    CGFloat centerY = (boundsSize.height - verticesInBoundsRect.size.height)/2;
+    CGFloat bottomY = boundsSize.height - verticesInBoundsRect.size.height;
+    
+    if ([contentsGravity isEqualToString:kCAGravityResize] || contentsGravity == nil) {
+        verticesInBoundsRect.size = boundsSize;
+        verticesInBoundsRect.origin = CGPointZero;
+    } else if ([contentsGravity isEqualToString:kCAGravityCenter]) {
+        verticesInBoundsRect.origin.y = centerY;
+        verticesInBoundsRect.origin.x = centerX;
+    } else if ([contentsGravity isEqualToString:kCAGravityTop]) {
+        verticesInBoundsRect.origin.y = topY;
+        verticesInBoundsRect.origin.x = centerX;
+    } else if ([contentsGravity isEqualToString:kCAGravityBottom]) {
+        verticesInBoundsRect.origin.y = bottomY;
+        verticesInBoundsRect.origin.x = centerX;
+    } else if ([contentsGravity isEqualToString:kCAGravityLeft]) {
+        verticesInBoundsRect.origin.y = centerY;
+        verticesInBoundsRect.origin.x = leftX;
+    } else if ([contentsGravity isEqualToString:kCAGravityRight]) {
+        verticesInBoundsRect.origin.y = centerY;
+        verticesInBoundsRect.origin.x = rightX;
+    } else if ([contentsGravity isEqualToString:kCAGravityTopLeft]) {
+        verticesInBoundsRect.origin.y = topY;
+        verticesInBoundsRect.origin.x = leftX;
+    } else if ([contentsGravity isEqualToString:kCAGravityTopRight]) {
+        verticesInBoundsRect.origin.y = topY;
+        verticesInBoundsRect.origin.x = rightX;
+    } else if ([contentsGravity isEqualToString:kCAGravityBottomLeft]) {
+        verticesInBoundsRect.origin.y = bottomY;
+        verticesInBoundsRect.origin.x = leftX;
+    } else if ([contentsGravity isEqualToString:kCAGravityBottomRight]) {
+        verticesInBoundsRect.origin.y = bottomY;
+        verticesInBoundsRect.origin.x = rightX;
+    } else if ([contentsGravity isEqualToString:kCAGravityResizeAspect]) {
+        CGFloat ratio = MIN(widthRatio, heightRatio);
+        
+        verticesInBoundsRect.size.width = logicSizeOfContents.width * ratio;
+        verticesInBoundsRect.size.height = logicSizeOfContents.height * ratio;
+        
+        // position at center
+        verticesInBoundsRect.origin.y = (boundsSize.height - verticesInBoundsRect.size.height)/2;
+        verticesInBoundsRect.origin.x = (boundsSize.width - verticesInBoundsRect.size.width)/2;
+    } else if ([contentsGravity isEqualToString:kCAGravityResizeAspectFill]) {
+        // resize, keep aspect, position at center
+        CGFloat ratio = MAX(widthRatio, heightRatio);
+        verticesInBoundsRect.size.width = logicSizeOfContents.width * ratio;
+        verticesInBoundsRect.size.height = logicSizeOfContents.height * ratio;
+        
+        //position at center
+        verticesInBoundsRect.origin.y = (boundsSize.height - verticesInBoundsRect.size.height)/2;
+        verticesInBoundsRect.origin.x = (boundsSize.width - verticesInBoundsRect.size.width)/2;
+    }
+    
+    return verticesInBoundsRect;
+}
+
 /* Internal method that renders a single layer and then proceeds by recursing, rendering its children. */
 
 #define GL_TEXTURE_EXTERNAL_OES 0x8D65
@@ -787,11 +892,12 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
         
         PROFILE_BEGIN;
         // fill vertex arrays
+        CGRect layerBounds = layer.bounds;
         GLfloat vertices[] = {
-            0.0, [layer bounds].size.height,
-            [layer bounds].size.width, [layer bounds].size.height,
+            0.0, layerBounds.size.height,
+            layerBounds.size.width, layerBounds.size.height,
             0.0, 0.0,
-            [layer bounds].size.width, 0.0,
+            layerBounds.size.width, 0.0,
         };
         CGRect cr = [layer contentsRect];
 
@@ -860,6 +966,22 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
             CAGLTexture * texture = nil;
             BOOL restoreProgram = NO;
             id layerContents = [layer contents];
+            
+            CGRect vr = [self caculateContentsVerticesRectforLayer:layer];
+           
+            // apply anchor point
+            vr = CGRectOffset(vr,
+                              -[layer anchorPoint].x * [layer bounds].size.width,
+                              -[layer anchorPoint].y * [layer bounds].size.height);
+            
+            GLfloat contentsVertices[] = {
+                CGRectGetMinX(vr),  CGRectGetMaxY(vr),
+                 CGRectGetMaxX(vr),  CGRectGetMaxY(vr),
+                 CGRectGetMinX(vr),  CGRectGetMinY(vr),
+                 CGRectGetMaxX(vr),  CGRectGetMinY(vr),
+            };
+            
+            glVertexAttribPointer(CAVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, 0, contentsVertices);
             
             if ([layer isKindOfClass:[CAMovieLayer class]]) {
                 restoreProgram = YES;
@@ -959,7 +1081,6 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
             glDrawArrays(GL_LINE_LOOP, 0, 4);
         }
         PROFILE_BEGIN;
-        CGRect layerBounds = [layer bounds];
         transform = CATransform3DConcat ([layer sublayerTransform], transform);
         transform = CATransform3DTranslate (transform, -layerBounds.origin.x, -layerBounds.origin.y, 0);
         transform = CATransform3DTranslate (transform, -layerBounds.size.width/2, -layerBounds.size.height/2, 0);
