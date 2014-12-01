@@ -917,6 +917,19 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
           
           [basicAnimation setFromValue: [layer valueForKeyPath: [basicAnimation keyPath]]];
         }
+    } else if ([anim isKindOfClass: [CAAnimationGroup class]]){
+        CAAnimationGroup *group = anim;
+        CALayer * layer = self;
+
+        for (CAAnimation *a in group.animations) {
+            if ([a isKindOfClass: [CABasicAnimation class]]) {
+                CABasicAnimation * basicAnimation = a;
+                if (![basicAnimation fromValue]) {
+                    [basicAnimation setFromValue: [layer valueForKeyPath: [basicAnimation keyPath]]];
+                }
+            }
+        }
+        
     }
 }
 
@@ -1005,6 +1018,16 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
             
           [propertyAnimation applyToLayer: self];
             
+        } else if ([animation isKindOfClass: [CAAnimationGroup class]]) {
+            CAAnimationGroup * group = ((CAAnimationGroup *)animation);
+            if ([group removedOnCompletion] && [group activeTimeWithTimeAuthorityLocalTime: [self localTime]] > [group duration] * ([group repeatCount] + 1) * ([group autoreverses] ? 2 : 1))
+            {
+                /* FIXME: doesn't take into account speed */
+                NSLog(@"group animation will remove");
+                [animationKeysToRemove addObject: animationKey];
+                continue; /* Prevents animation from applying for one frame longer than its duration */
+            }
+            [group applyToLayer:self];
         }
     }
     
