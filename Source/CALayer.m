@@ -402,6 +402,13 @@ typedef NS_ENUM(NSInteger, CALayerType) {
   CGPathRelease(_shadowPath);
   [_layoutManager release];
   [_contents release];
+    
+    // should clear reference in sublayers,
+    // without doing this, sublayer will crash on -[CALayer removeFromSuperlayer] call
+    // this can be remove after we convert project to ARC enabled, and declare superlayer as weak reference
+    for (CALayer *subLayer in _sublayers) {
+        [subLayer setSuperlayer:nil];
+    }
   [_sublayers release];
   CGColorRelease(_backgroundColor);
   [_contentsGravity release];
