@@ -695,19 +695,31 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
     GLfloat components[4] = { 0, 0, 0, 1 };
     
     // convert
-    if (numberOfComponents == 1) {
+    if (numberOfComponents == 2) { // grey + a,
         components[0] = componentsCG[0];
         components[1] = componentsCG[0];
         components[2] = componentsCG[0];
-    } else if (numberOfComponents == 3) {
-        components[0] = componentsCG[0];
-        components[1] = componentsCG[1];
-        components[2] = componentsCG[2];
-    } else if (numberOfComponents == 4) {
+        components[3] = componentsCG[1];
+    } else if (numberOfComponents == 4) { // rgb + a
         components[0] = componentsCG[0];
         components[1] = componentsCG[1];
         components[2] = componentsCG[2];
         components[3] = componentsCG[3];
+        
+    } else if (numberOfComponents == 5) { // cmyk + a
+        
+        // FIXME: needs convert to rgba
+        static BOOL warned = NO;
+        if (!warned) {
+            NSLog(@"[Warning] color that numberOfComponents == 5 is not correct supported");
+            warned = YES;
+        }
+        components[0] = componentsCG[0];
+        components[1] = componentsCG[1];
+        components[2] = componentsCG[2];
+        components[2] = componentsCG[3];
+        
+        components[3] = componentsCG[4];
     } else {
         NSLog(@"Expection NumberOfComponents:%zu",numberOfComponents);
     }
