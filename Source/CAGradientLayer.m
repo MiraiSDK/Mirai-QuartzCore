@@ -14,6 +14,15 @@
 @synthesize endPoint = _endPoint;
 @synthesize type = _type;
 
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        // FIXME:  Should remove this while we support gradient in OpenGL ES renderer
+        self.needsDisplayOnBoundsChange = YES;
+    }
+    return self;
+}
 -(CGPoint) startPoint {
 
     return _startPoint;
