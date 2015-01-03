@@ -187,7 +187,7 @@ NSString *const kCAAnimationDiscrete = @"CAAnimationDiscrete";
 {
   [_timingFunction release];
   [_fillMode release];
-  
+    [_delegate release];
   [super dealloc];
 }
 
