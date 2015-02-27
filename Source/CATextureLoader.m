@@ -30,7 +30,8 @@
 
     CAGLTexture *texture = self.cachedTexture[layerIdentify];
     if (texture) {
-        if (texture.contents != layer.contents) {
+        if (texture.contents != layer.contents ||
+            texture.isInvalidated) {
             [self.cachedTexture removeObjectForKey:layerIdentify];
             texture = nil;
         }

@@ -77,6 +77,7 @@
               height: (CGFloat) height;
 - (void) refresh;
 @property (assign, getter = isRefreshed) BOOL refreshed;
+@property (assign, readonly) BOOL needsRefresh;
 
 @property (assign) /* (retain) */ CGContextRef context;
 @property (retain) CAGLTexture * contentsTexture;

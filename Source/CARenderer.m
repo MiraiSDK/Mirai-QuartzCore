@@ -1065,7 +1065,7 @@ static CGRect CALayerContentsGetGravityRect(CALayer *layer)
             {
 //                NSLog(@"contents is CABackingStore");
                 CABackingStore * backingStore = layerContents;
-                if (!backingStore.isRefreshed) {
+                if (backingStore.needsRefresh) {
                     [backingStore refresh];
                 }
                 
@@ -1103,7 +1103,9 @@ static CGRect CALayerContentsGetGravityRect(CALayer *layer)
                 }
             }
 #endif
-            
+            if (texture.isInvalidated) {
+                NSLog(@"[Warning] rendering a invalidated texture");
+            }
             [texture bind];
             glVertexAttribPointer(CAVertexAttribColor, 4, GL_FLOAT, GL_FALSE, 0, whiteColor);
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);

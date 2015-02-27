@@ -160,7 +160,7 @@ static CGContextRef createCGBitmapContext (int pixelsWide,
   if (!_context)
     return;
     
-    if (!_contentsTexture) {
+    if (!_contentsTexture || _contentsTexture.isInvalidated) {
         [self setContentsTexture: [CAGLTexture texture]];
     }
   
@@ -180,6 +180,11 @@ static CGContextRef createCGBitmapContext (int pixelsWide,
     
     self.refreshed = YES;
 
+}
+
+- (BOOL)needsRefresh
+{
+    return !self.isRefreshed || !_contentsTexture || _contentsTexture.isInvalidated;
 }
 
 - (NSString *)description

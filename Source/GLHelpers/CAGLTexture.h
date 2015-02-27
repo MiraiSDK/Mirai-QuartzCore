@@ -71,5 +71,6 @@
 - (GLenum) textureTarget;
 
 @property (nonatomic, assign) id contents;
-
+@property (nonatomic, assign,getter=isInvalidated) BOOL invalidated;
++ (void)invalidate;
 @end

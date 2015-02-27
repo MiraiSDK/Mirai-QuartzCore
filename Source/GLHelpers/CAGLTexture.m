@@ -53,10 +53,43 @@
 @synthesize width=_width;
 @synthesize height=_height;
 @synthesize contents = _contents;
+@synthesize invalidated = _invalidated;
 
 + (CAGLTexture *) texture
 {
   return [[self new] autorelease];
+}
+
+static NSMutableArray *_textures;
++ (void)invalidate
+{
+    for (NSValue *value in _textures) {
+        CAGLTexture *texture = [value nonretainedObjectValue];
+        [texture invalidate];
+    }
+    
+    [_textures removeAllObjects];
+}
+
++ (void)registerInstance:(CAGLTexture *)texture
+{
+    if (_textures == nil) {
+        _textures = [[NSMutableArray alloc] init];
+    }
+    
+    NSValue *value = [NSValue valueWithNonretainedObject:texture];
+    [_textures addObject:value];
+}
+
++ (void)unregisterInstance:(CAGLTexture *)texture
+{
+    NSValue *value = [NSValue valueWithNonretainedObject:texture];
+    [_textures removeObject:value];
+}
+
+- (void)invalidate
+{
+    self.invalidated = YES;
 }
 
 - (id) init
@@ -66,14 +99,16 @@
     return nil;
   
   glGenTextures(1, &_textureID);
-
+    [CAGLTexture registerInstance:self];
+    _invalidated = NO;
+    
   return self;
 }
 
 - (void) dealloc
 {
   glDeleteTextures(1, &_textureID);
-  
+    [CAGLTexture unregisterInstance:self];
   [super dealloc];
 }
 

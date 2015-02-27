@@ -11,4 +11,5 @@
 #import "GLHelpers/CAGLTexture.h"
 @interface CATextureLoader : NSObject
 - (CAGLTexture *)textureForLayer:(CALayer *)layer;
+- (void)invalidate;
 @end
