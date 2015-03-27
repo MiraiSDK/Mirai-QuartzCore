@@ -1007,6 +1007,8 @@ static CGRect CALayerContentsGetGravityRect(CALayer *layer)
             
             glUniformMatrix4fv(_projectionUniform, 1, 0, &mvp);
             glVertexAttribPointer(CAVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+            glVertexAttribPointer(CAVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
+            glVertexAttribPointer(CAVertexAttribColor, 4, GL_FLOAT, GL_FALSE, 0, backgroundColor);
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
             
             glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -1177,6 +1179,8 @@ static CGRect CALayerContentsGetGravityRect(CALayer *layer)
 
             glUniformMatrix4fv(_projectionUniform, 1, 0, &mvp);
             glVertexAttribPointer(CAVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+            glVertexAttribPointer(CAVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
+            glVertexAttribPointer(CAVertexAttribColor, 4, GL_FLOAT, GL_FALSE, 0, backgroundColor);
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
             glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
