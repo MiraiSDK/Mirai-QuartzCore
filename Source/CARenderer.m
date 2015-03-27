@@ -1658,6 +1658,10 @@ static CGRect CALayerContentsGetGravityRect(CALayer *layer)
 
 - (void) _determineAndScheduleRasterizationForLayer: (CALayer*)layer
 {
+    // Rasterization not supported now
+    // below code cause memory leak
+    // disable it.
+    return;
   BOOL shouldRasterize = NO;
   /* Whether a layer needs to be rasterized is complex to determine,
      but the first thing to check is user-specifiable property
