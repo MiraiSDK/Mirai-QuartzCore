@@ -9,13 +9,13 @@
 SDK_ROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/Android18.sdk
 SDK_LIB_PATH=$(SDK_ROOT)/usr/lib
 
-ARCHFLAGS=-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16
-ARCHLDFLAGS=-march=armv7-a -Wl,--fix-cortex-a8
-
 DEPLOYMENT_LOCATION = YES
 DSTROOT = /
-OTHER_LDFLAGS= $(ARCHLDFLAGS) $(inherited) -shared -Wl,-z,defs -lobjc -lgnustl_shared -lGLESv2 -lm
 INSTALL_PATH = $(SDK_ROOT)/System/Library/Frameworks/
 
-OTHER_CFLAGS= $(ARCHFLAGS) $(inherited) -DANDROID=1 -fblocks -DGNUSTEP=1
+BASE_CFLAGS= -DANDROID=1 -fblocks -DGNUSTEP=1
+BASE_LDFLAGS= -shared -Wl,-z,defs -lobjc -lgnustl_shared -lGLESv2 -lm
+
+OTHER_CFLAGS = $(inherited) $(BASE_CFLAGS)
+OTHER_LDFLAGS = $(inherited) $(BASE_LDFLAGS)
 

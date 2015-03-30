@@ -247,6 +247,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		436060E21AC92F7400303792 /* Android-arm.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Android-arm.xcconfig"; sourceTree = "<group>"; };
+		436060E31AC92F7400303792 /* Android-x86.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Android-x86.xcconfig"; sourceTree = "<group>"; };
 		4365B40319F8F5F70087164B /* CAExternalContentLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CAExternalContentLayer.h; sourceTree = "<group>"; };
 		4365B40419F8F5F70087164B /* CAExternalContentLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CAExternalContentLayer.m; sourceTree = "<group>"; };
 		43840644188167B2000D092C /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = ../MiraSDK/Products/android/Xcode/Platforms/MacOSX.platform/Developer/SDKs/FakeMacOSX10.9.sdk/System/Library/Frameworks/CoreText.framework; sourceTree = "<group>"; };
@@ -414,6 +416,8 @@
 		43E112C21860304600E771B4 /* xcconfig */ = {
 			isa = PBXGroup;
 			children = (
+				436060E21AC92F7400303792 /* Android-arm.xcconfig */,
+				436060E31AC92F7400303792 /* Android-x86.xcconfig */,
 				43E112C31860304600E771B4 /* Android.xcconfig */,
 			);
 			path = xcconfig;
