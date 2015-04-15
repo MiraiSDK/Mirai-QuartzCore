@@ -417,6 +417,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
   [_backingStore release];
   [_animations release];
   [_animationKeys release];
+  [_modelLayer release];
   
   [super dealloc];
 }
@@ -831,7 +832,8 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 
 - (void) setModelLayer: (id)modelLayer
 {
-  _modelLayer = modelLayer;
+    [_modelLayer release];
+  _modelLayer = [modelLayer retain];
 }
 
 - (BOOL) isPresentationLayer
