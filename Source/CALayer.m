@@ -73,6 +73,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 @property (retain) NSMutableArray * animationKeys;
 @property (retain) CABackingStore * backingStore;
 @property (assign,getter = isDirty) BOOL dirty;
+@property (nonatomic, retain) NSMutableArray *finishedAnimations;
 
 - (void)setModelLayer: (id)modelLayer;
 
@@ -135,6 +136,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 @synthesize borderWidth = _borderWidth;
 @synthesize contentsScale = _contentsScale;
 @synthesize name = _name;
+@synthesize finishedAnimations = _finishedAnimations;
 
 /* *** dynamic synthesis of properties *** */
 #if 0
@@ -277,7 +279,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
       _animations = [[NSMutableDictionary alloc] init];
       _animationKeys = [[NSMutableArray alloc] init];
       _sublayers = [[NSMutableArray alloc] init];
-
+      _finishedAnimations = [[NSMutableArray alloc] init];
       /* TODO: list all properties below */
       static NSString * keys[] = {
         @"anchorPoint", @"transform", @"sublayerTransform",
@@ -418,6 +420,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
   [_animations release];
   [_animationKeys release];
   [_modelLayer release];
+  [_finishedAnimations release];
   
   [super dealloc];
 }
@@ -1047,10 +1050,15 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
   [animationKeysToRemove release];
     
     if (animationsToRemove.count > 0) {
-        [[self modelLayer] performSelectorOnMainThread:@selector(notifyAnimationsFinished:) withObject:animationsToRemove waitUntilDone:YES];
+        [[self modelLayer] addFinishedAnimations:animationsToRemove];
     }
   
   return lowestNextFrameTime;
+}
+
+- (void)addFinishedAnimations:(NSArray *)animations
+{
+    [_finishedAnimations addObjectsFromArray:animations];
 }
 
 - (void)notifyAnimationsCancelled:(NSArray *)animations
@@ -1058,9 +1066,18 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     [self notifyAnimationsStopped:animations finished:NO];
 }
 
-- (void)notifyAnimationsFinished:(NSArray *)animations
+// should called in main thead
+- (void)callAnimationsFinishedCallback
 {
-    [self notifyAnimationsStopped:animations finished:YES];
+    [self notifyAnimationsStopped:_finishedAnimations finished:YES];
+
+    [_finishedAnimations removeAllObjects];
+    
+    NSArray *sublayers = [self.sublayers copy];
+    for (CALayer *subLayer in sublayers) {
+        [subLayer callAnimationsFinishedCallback];
+    }
+    [sublayers release];
 }
 
 - (void)notifyAnimationsStopped:(NSArray *)animations finished:(BOOL)finished
