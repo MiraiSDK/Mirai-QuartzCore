@@ -87,25 +87,16 @@
 
 /* Truncation modes. */
 
-CA_EXTERN NSString * const kCATruncationNone
-__OSX_AVAILABLE_STARTING (__MAC_10_5, __IPHONE_3_2);
-CA_EXTERN NSString * const kCATruncationStart
-__OSX_AVAILABLE_STARTING (__MAC_10_5, __IPHONE_3_2);
-CA_EXTERN NSString * const kCATruncationEnd
-__OSX_AVAILABLE_STARTING (__MAC_10_5, __IPHONE_3_2);
-CA_EXTERN NSString * const kCATruncationMiddle
-__OSX_AVAILABLE_STARTING (__MAC_10_5, __IPHONE_3_2);
+CA_EXTERN NSString * const kCATruncationNone;
+CA_EXTERN NSString * const kCATruncationStart;
+CA_EXTERN NSString * const kCATruncationEnd;
+CA_EXTERN NSString * const kCATruncationMiddle;
 
 /* Alignment modes. */
 
-CA_EXTERN NSString * const kCAAlignmentNatural
-__OSX_AVAILABLE_STARTING (__MAC_10_5, __IPHONE_3_2);
-CA_EXTERN NSString * const kCAAlignmentLeft
-__OSX_AVAILABLE_STARTING (__MAC_10_5, __IPHONE_3_2);
-CA_EXTERN NSString * const kCAAlignmentRight
-__OSX_AVAILABLE_STARTING (__MAC_10_5, __IPHONE_3_2);
-CA_EXTERN NSString * const kCAAlignmentCenter
-__OSX_AVAILABLE_STARTING (__MAC_10_5, __IPHONE_3_2);
-CA_EXTERN NSString * const kCAAlignmentJustified
-__OSX_AVAILABLE_STARTING (__MAC_10_5, __IPHONE_3_2);
+CA_EXTERN NSString * const kCAAlignmentNatural;
+CA_EXTERN NSString * const kCAAlignmentLeft;
+CA_EXTERN NSString * const kCAAlignmentRight;
+CA_EXTERN NSString * const kCAAlignmentCenter;
+CA_EXTERN NSString * const kCAAlignmentJustified;
 

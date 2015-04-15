@@ -49,5 +49,4 @@
 
 /** `type' values. **/
 
-CA_EXTERN NSString * const kCAGradientLayerAxial
-__OSX_AVAILABLE_STARTING (__MAC_10_6, __IPHONE_3_0);
+CA_EXTERN NSString * const kCAGradientLayerAxial;
