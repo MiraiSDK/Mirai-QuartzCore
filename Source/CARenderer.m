@@ -409,6 +409,21 @@ void gl_check_error(NSString *state) {
     _updateBounds = CGRectUnion(_updateBounds, updateRect);
 }
 
+static CARenderer *_currentRenderr = nil;
++ (CARenderer *)currentRenderer
+{
+    return _currentRenderr;
+}
+
++ (void)setCurrentRenderer:(CARenderer *)renderer
+{
+    _currentRenderr = renderer;
+}
+
+- (EAGLContext *)context
+{
+    return _GLContext;
+}
 /* Begins rendering a frame at the specified time.
    Timestamp is currently ignored. */
 - (void) beginFrameAtTime: (CFTimeInterval)timeInterval

@@ -17,12 +17,18 @@
 - (void) display
 {
     CGRect bounds = self.bounds;
+    static EAGLSharegroup *group = nil;
+    if (group == nil) {
+        CARenderer *r = [CARenderer currentRenderer];
+        group = r.context.sharegroup;
+        NSLog(@"currentRenderer:%@ set sharegroup:%@",r, group);
+    }
     
     EAGLContext *ctx = [EAGLContext currentContext];
     BOOL customCtx = NO;
     if (!ctx) {
         NSLog(@"create custom texture");
-        ctx = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+        ctx = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2 sharegroup:group];
         [EAGLContext setCurrentContext:ctx];
         customCtx = YES;
     }
