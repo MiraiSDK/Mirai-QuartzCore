@@ -441,6 +441,16 @@ typedef NS_ENUM(NSInteger, CALayerType) {
         [str appendFormat:@"name = %@",self.name];
     }
 
+    NSString *type;
+    switch (_type) {
+        case CALayerModelType: type = @"model"; break;
+        case CALayerPresentationType: type = @"presentation"; break;
+        case CALayerRenderingType: type = @"rendering"; break;
+            
+        default:
+            break;
+    }
+    [str appendFormat:@" layerType: %@",type];
     [str appendString:@">"];
     return str;
 }
