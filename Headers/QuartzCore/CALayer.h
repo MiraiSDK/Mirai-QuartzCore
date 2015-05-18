@@ -89,7 +89,7 @@ CA_EXTERN NSString *const kCATransition;
   CGFloat _zPosition;
   NSDictionary *_actions;
   NSDictionary *_style;
-  id _presentationLayer;
+  __weak id _presentationLayer;
   id _modelLayer;
   
   CGColorRef _shadowColor;

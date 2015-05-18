@@ -80,6 +80,8 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 // commit
 @property (assign) BOOL needsCommit;
 @property (assign) CALayerType type;
+@property (assign) CALayer *renderingLayer;
+
 @end
 
 @implementation CALayer
@@ -137,7 +139,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 @synthesize contentsScale = _contentsScale;
 @synthesize name = _name;
 @synthesize finishedAnimations = _finishedAnimations;
-
+@synthesize renderingLayer = _renderingLayer;
 /* *** dynamic synthesis of properties *** */
 #if 0
 + (void) initialize
@@ -419,7 +421,15 @@ typedef NS_ENUM(NSInteger, CALayerType) {
   [_backingStore release];
   [_animations release];
   [_animationKeys release];
-  [_modelLayer release];
+    if (_modelLayer) {
+        CALayer * m = _modelLayer;
+        if (_type == CALayerPresentationType && m->_presentationLayer == self) {
+            m->_presentationLayer = nil;
+        } else if (_type == CALayerRenderingType && m->_renderingLayer == self) {
+            m->_renderingLayer = nil;
+        }
+        [_modelLayer release];
+    }
   [_finishedAnimations release];
   
   [super dealloc];
@@ -1850,6 +1860,7 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     CALayer *copy = [[[self class] alloc] initWithLayer:self];
     [copy setModelLayer:self];
     [copy setType:CALayerRenderingType];
+    self.renderingLayer = copy;
     
     NSArray *subLayers = [self.sublayers copy];
     NSMutableArray *subRenderLayers = [NSMutableArray array];
