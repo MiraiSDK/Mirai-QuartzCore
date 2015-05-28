@@ -831,7 +831,7 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     {
       [self displayIfNeeded];
 
-      _presentationLayer = [[[self class] alloc] initWithLayer: self];
+      _presentationLayer = [[[[self class] alloc] initWithLayer: self] autorelease];
       [_presentationLayer setModelLayer: self];
         [(CALayer *)_presentationLayer setType:CALayerPresentationType];
         
@@ -844,7 +844,7 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 
 - (void) discardPresentationLayer
 {
-  [_presentationLayer release];
+//  [_presentationLayer release];
   _presentationLayer = nil;
 }
 
