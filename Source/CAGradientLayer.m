@@ -23,6 +23,15 @@
     }
     return self;
 }
+
+- (void)dealloc
+{
+    [_colors release];
+    [_locations release];
+    [_type release];
+    
+    [super dealloc];
+}
 -(CGPoint) startPoint {
 
     return _startPoint;
@@ -67,6 +76,8 @@
         CGColorRef c1 = CGColorCreate(colorSpace, c1Components); // CGColorCreateGenericRGB(0.0, 0.0 , 0.0, 1);
         CGColorRef c2 = CGColorCreate(colorSpace, c2Components); //CGColorCreateGenericRGB(1.0, 1.0, 1.0, 1);
         _colors = [NSArray arrayWithObjects:(id)c1,(id)c2,nil];
+        CGColorRelease(c1);
+        CGColorRelease(c2);
     }
     
     if(!_locations || [_locations count]<2) {

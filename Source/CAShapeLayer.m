@@ -28,6 +28,19 @@
     return self;
 }
 
+- (void)dealloc
+{
+    CGColorRelease(_strokeColor);
+    CGColorRelease(_fillColor);
+    CGPathRelease(_path);
+    
+    [_lineCap release];
+    [_lineJoin release];
+    [_lineDashPattern release];
+    [_fillRule release];
+    [super dealloc];
+}
+
 // FIXME: The Apple's documentation indicate that CAShapeLayer class creates its content by rendering the path into a bitmap image at composite time.
 - (void)display
 {
@@ -58,7 +71,7 @@
     }
     
     CGImageRef image = CGBitmapContextCreateImage(ctx);
-    self.contents = image;
+    self.contents = (id)image;
     CGImageRelease(image);
     CGContextRelease(ctx);
     CGColorSpaceRelease(cs);

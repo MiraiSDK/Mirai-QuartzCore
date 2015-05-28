@@ -363,7 +363,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
         
         _contentsScale = layer->_contentsScale;
         
-        _borderColor = layer->_borderColor;
+        _borderColor = CGColorRetain(layer->_borderColor);
         _borderWidth = layer->_borderWidth;
         
         _shadowColor = CGColorRetain(layer->_shadowColor);
@@ -404,6 +404,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
   
   CGColorRelease(_shadowColor);
   CGPathRelease(_shadowPath);
+    CGColorRelease(_borderColor);
   [_layoutManager release];
   [_contents release];
     
@@ -636,6 +637,23 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
   CGColorRelease(_backgroundColor);
   _backgroundColor = backgroundColor;
   [self didChangeValueForKey: @"backgroundColor"];
+}
+
+- (void)setBorderColor:(CGColorRef)borderColor
+{
+    if (borderColor == _borderColor)
+        return;
+
+    [self beginChangeKeyPath:@"borderColor"];
+    [self willChangeValueForKey: @"borderColor"];
+    CGColorRelease(_borderColor);
+    _borderColor = CGColorRetain(borderColor);
+    [self didChangeValueForKey:@"borderColor"];
+}
+
+- (CGColorRef)borderColor
+{
+    return _borderColor;
 }
 
 - (void)setShadowColor: (CGColorRef)shadowColor
@@ -1675,7 +1693,10 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     {
       return (id)[self shadowColor];
     }
-  
+    if ([key isEqualToString: @"borderColor"])
+    {
+        return (id)[self borderColor];
+    }
   return [super valueForUndefinedKey: key];
 }
 
@@ -1699,7 +1720,12 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
       [self setShadowPath: (CGPathRef)value];
       return;
     }
-  
+    if ([key isEqualToString: @"borderColor"])
+    {
+        [self setBorderColor: (CGColorRef)value];
+        return;
+    }
+    
   [super setValue: value forUndefinedKey: key];
 }
 

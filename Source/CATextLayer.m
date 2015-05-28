@@ -66,6 +66,8 @@
 {
     [_string release];
     CGColorRelease(_foregroundColor);
+    [_truncationMode release];
+    [_alignmentMode release];
     [super dealloc];
 }
 
