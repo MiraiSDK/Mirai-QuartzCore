@@ -79,6 +79,7 @@
 
 - (void)setFillColor:(CGColorRef)fillColor
 {
+    CGColorRelease(_fillColor);
     _fillColor = CGColorRetain(fillColor);
     [self setNeedsDisplay];
 }
@@ -90,6 +91,7 @@
 
 - (void)setStrokeColor:(CGColorRef)strokeColor
 {
+    CGColorRelease(_strokeColor);
     _strokeColor = CGColorRetain(strokeColor);
     [self setNeedsDisplay];
 }
@@ -101,6 +103,7 @@
 
 - (void)setPath:(CGPathRef)path
 {
+    CGPathRelease(_path);
     _path = CGPathRetain(path);
     [self setNeedsDisplay];
 }
