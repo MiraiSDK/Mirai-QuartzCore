@@ -81,6 +81,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 @property (assign) BOOL needsCommit;
 @property (assign) CALayerType type;
 @property (assign) CALayer *renderingLayer;
+@property (retain) CAGLTexture *texture;
 
 @end
 
@@ -140,6 +141,8 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 @synthesize name = _name;
 @synthesize finishedAnimations = _finishedAnimations;
 @synthesize renderingLayer = _renderingLayer;
+@synthesize texture = _texture;
+
 /* *** dynamic synthesis of properties *** */
 #if 0
 + (void) initialize
@@ -395,6 +398,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
         _name = [layer->_name copy];
         
         _needsLayout = layer.needsLayout;
+        _texture = [layer->_texture retain];
     }
   return self;
 }
@@ -432,7 +436,8 @@ typedef NS_ENUM(NSInteger, CALayerType) {
         [_modelLayer release];
     }
   [_finishedAnimations release];
-  
+    [_texture release];
+    
   [super dealloc];
 }
 

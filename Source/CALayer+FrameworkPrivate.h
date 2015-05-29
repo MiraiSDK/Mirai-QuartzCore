@@ -26,6 +26,8 @@
 
 #import "QuartzCore/CALayer.h"
 
+@class CAGLTexture;
+
 @interface CALayer (FrameworkPrivate)
 /* sets value passed into -[CARenderer beginFrameAtTime:...]
    used as "time of object superior to root layer" (that is,
@@ -50,4 +52,6 @@
 - (CFTimeInterval) localTime;
 
 @property (retain) CABackingStore * backingStore;
+@property (retain) CAGLTexture *texture;
+
 @end

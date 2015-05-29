@@ -7,6 +7,7 @@
 //
 
 #import "CATextureLoader.h"
+#import "CALayer+FrameworkPrivate.h"
 
 @interface CATextureLoader ()
 @property (nonatomic, strong) NSMutableDictionary *cachedTexture;
@@ -26,13 +27,12 @@
 - (CAGLTexture *)cachedTextureForLayer:(CALayer *)layer
 {
     CALayer *modelLayer = [layer modelLayer];
-    NSString *layerIdentify = [NSString stringWithFormat:@"%p",modelLayer];
-
-    CAGLTexture *texture = self.cachedTexture[layerIdentify];
+    CAGLTexture *texture = modelLayer.texture;
+    
     if (texture) {
         if (texture.contents != layer.contents ||
             texture.isInvalidated) {
-            [self.cachedTexture removeObjectForKey:layerIdentify];
+            layer.texture = nil;
             texture = nil;
         }
     }
@@ -42,9 +42,7 @@
 - (void)cacheTexture:(CAGLTexture *)texture forLayer:(CALayer *)layer
 {
     CALayer *modelLayer = [layer modelLayer];
-    NSString *layerIdentify = [NSString stringWithFormat:@"%p",modelLayer];
-
-    self.cachedTexture[layerIdentify] = texture;
+    modelLayer.texture = texture;
 }
 
 - (CAGLTexture *)textureForLayer:(CALayer *)layer
