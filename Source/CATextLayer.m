@@ -113,7 +113,7 @@
             fontUsing = CTFontCreateWithName((CFStringRef)@"Helvetica", _fontSize ?: 36, NULL);
         } else if (CFGetTypeID(_font)==CTFontGetTypeID()){
             
-            fontUsing = _font;
+            fontUsing = CFRetain(_font);
         } else if(CFGetTypeID(_font)==(CGFontGetTypeID())) {
             
             fontUsing = CTFontCreateWithGraphicsFont((CGFontRef)_font, _fontSize ?: 36, NULL, NULL );
@@ -142,6 +142,7 @@
 
             CTParagraphStyleRef paragraphStyle = CTParagraphStyleCreate(theSettings, theNumberOfSettings);
             [attributesDict setObject:(id)paragraphStyle forKey:(id)kCTParagraphStyleAttributeName];
+            CFRelease(paragraphStyle);
         }
         
         NSAttributedString * stringToDraw;
