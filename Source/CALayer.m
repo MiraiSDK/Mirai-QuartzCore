@@ -142,6 +142,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 @synthesize finishedAnimations = _finishedAnimations;
 @synthesize renderingLayer = _renderingLayer;
 @synthesize texture = _texture;
+@synthesize mask = _mask;
 
 /* *** dynamic synthesis of properties *** */
 #if 0
@@ -437,6 +438,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
     }
   [_finishedAnimations release];
     [_texture release];
+    [_mask release];
     
   [super dealloc];
 }
