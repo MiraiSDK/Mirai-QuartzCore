@@ -8,7 +8,8 @@ checkError()
     fi
 }
 
-if [ ! -f $MIRAI_SDK_PREFIX/lib/libQuartzCore.so ]; then
+if [ ! -f $MIRAI_SDK_PREFIX/lib/libQuartzCore.so ] || 
+	[ "$OPTION_REBUILD_COCOA" == "yes" ]; then
 	echo "build QuartzCore..."
 	
 	pushd $MIRAI_PROJECT_ROOT_PATH/Mirai-QuartzCore
