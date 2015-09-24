@@ -46,11 +46,14 @@
 {
     CGColorSpaceRef cs = CGColorSpaceCreateDeviceRGB();
     
+    CGFloat width = ceilf(self.bounds.size.width);
+    CGFloat height = ceilf(self.bounds.size.height);
+    
     CGContextRef ctx = CGBitmapContextCreate(NULL,
-                                             self.bounds.size.width,
-                                             self.bounds.size.height,
+                                             width,
+                                             height,
                                              8,
-                                             self.bounds.size.width * 4,
+                                             width * 4,
                                              cs,
                                              kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little);
     
