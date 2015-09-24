@@ -24,6 +24,24 @@
     return self;
 }
 
+- (id) initWithLayer: (CALayer*)layer
+{
+    self = [super initWithLayer:layer];
+    if (self) {
+        if ([layer isKindOfClass:[CAGradientLayer class]]) {
+            CAGradientLayer *l = (CAGradientLayer *)layer;
+            self.colors = l.colors;
+            self.locations = l.locations;
+            self.type = l.type;
+            
+            self.startPoint = l.startPoint;
+            self.endPoint = l.endPoint;
+        }
+        
+    }
+    return self;
+}
+
 - (void)dealloc
 {
     [_colors release];
@@ -66,6 +84,10 @@
 
 - (void) drawInContext: (CGContextRef)context
 {
+    if (! [[NSThread currentThread] isMainThread]) {
+        NSLog(@"[ERROR] display a layer outside main thread: %@",self);
+    }
+    
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     
     if (!_colors) {
