@@ -557,7 +557,7 @@ static CARenderer *_currentRenderr = nil;
     _stencilMaskDepth = 0;
 
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     [self _rasterizeAll];
     
     /* Perform render */
@@ -738,6 +738,11 @@ void configureColorBuffer(CGFloat *buffer, CGColorRef color, CGFloat opacity)
     } else {
         NSLog(@"Expection NumberOfComponents:%zu",numberOfComponents);
     }
+    
+    //premultiplication, rgb * alpha
+    components[0] *= components[3];
+    components[1] *= components[3];
+    components[2] *= components[3];
     
     // apply opacity
     components[3] *= opacity;
