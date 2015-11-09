@@ -30,7 +30,6 @@
     UIImage *image = [UIImage imageNamed:@"umaru.jpg"];
     UIImageView *demoView = [[UIImageView alloc] initWithImage:image];
     [demoView setFrame:CGRectMake(5, 220, image.size.width, image.size.height)];
-    [self.view addSubview:demoView];
     
     CGRect rect = CGRectMake(0, 0, image.size.width, image.size.height);
     UIGraphicsBeginImageContext(rect.size);
@@ -50,8 +49,8 @@
     
     _demoLayer.mask = _maskLayer;
     
+    
     UIButton *moveButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    [self.view addSubview:moveButton];
     [moveButton setFrame:CGRectMake(10, image.size.height + 250, 200, 100)];
     [moveButton setTitle:@"MOVE" forState:UIControlStateNormal];
     [moveButton addTarget:self action:@selector(_onClickMoveButton:)
@@ -59,11 +58,17 @@
     
     
     UIButton *resetButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    [self.view addSubview:resetButton];
     [resetButton setFrame:CGRectMake(250, image.size.height + 250, 200, 100)];
     [resetButton setTitle:@"RESET" forState:UIControlStateNormal];
     [resetButton addTarget:self action:@selector(_onClickResetButton:)
      forControlEvents:UIControlEventTouchUpInside];
+    
+    [self.view addSubview:demoView];
+    [self.view addSubview:moveButton];
+    [self.view addSubview:resetButton];
+    
+    NSLog(@">> %@ from %@", _demoLayer.contents, _maskLayer.contents);
+    
 }
 
 - (void)_onClickMoveButton:(id)sender

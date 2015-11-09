@@ -8,5 +8,5 @@
 
 #import <Foundation/Foundation.h>
 
-void glClientActiveTexture(int texture);
-void glTexEnvx(int target, int pname, int param);
+//void glClientActiveTexture(int texture);
+//void glTexEnvx(int target, int pname, int param);

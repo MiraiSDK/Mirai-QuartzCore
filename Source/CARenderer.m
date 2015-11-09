@@ -1129,6 +1129,13 @@ static CGRect CALayerContentsGetGravityRect(CALayer *layer)
                 NSLog(@"[Warning] rendering a invalidated texture");
             }
             [texture bind];
+            CAGLTexture *maskTexture = nil;
+            if (layer.mask) {
+                maskTexture = [layer.mask maskTextureWithLoader:_textureLoader];
+            }
+            if (maskTexture) {
+                NSLog(@"[FOUND]");
+            }
             glVertexAttribPointer(CAVertexAttribColor, 4, GL_FLOAT, GL_FALSE, 0, whiteColor);
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
             [texture unbind];

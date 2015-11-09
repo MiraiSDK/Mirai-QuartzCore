@@ -27,6 +27,7 @@
 #import "QuartzCore/CALayer.h"
 
 @class CAGLTexture;
+@class CATextureLoader;
 
 @interface CALayer (FrameworkPrivate)
 /* sets value passed into -[CARenderer beginFrameAtTime:...]
@@ -53,5 +54,7 @@
 
 @property (retain) CABackingStore * backingStore;
 @property (retain) CAGLTexture *texture;
+
+- (CAGLTexture *) maskTextureWithLoader:(CATextureLoader *)texureLoader;
 
 @end

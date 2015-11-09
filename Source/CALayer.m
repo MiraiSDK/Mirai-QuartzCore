@@ -39,6 +39,8 @@
 #import "CABackingStore.h"
 #import "CATransaction+FrameworkPrivate.h"
 #import "CATransformDecompose.h"
+#import "CAMovieLayer.h"
+#import "CATextureLoader.h"
 
 #if GNUSTEP
 #import <CoreGraphics/CoreGraphics.h>
@@ -342,7 +344,6 @@ typedef NS_ENUM(NSInteger, CALayerType) {
      layers. */
   if ((self = [super init]) != nil)
     {
-        _delegate = layer->_delegate;
         _layoutManager = [layer->_layoutManager retain];
         _superlayer = layer->_superlayer; /* if copied for use in presentation layer, then ignored */
         _sublayers = [layer->_sublayers copy]; /* if copied for use in presentation layer, then ignored */
@@ -406,7 +407,9 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 
 - (void) dealloc
 {
-  
+  if ([self isRenderLayer]) {
+    [_delegate release];
+  }
   CGColorRelease(_shadowColor);
   CGPathRelease(_shadowPath);
     CGColorRelease(_borderColor);
@@ -558,12 +561,31 @@ GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(setSpeed, float, speed)
 GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(setDuration, CFTimeInterval, duration)
 GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(setAutoreverses, BOOL, autoreverses)
 
-//GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setDelegate, id, delegate)
 GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setOpacity, CGFloat, opacity)
 GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowOpacity, float, shadowOpacity)
 GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 
+- (void)setDelegate:(id)delegate
+{
+    if (_delegate != delegate) {
+        
+        // keeping render layer's refrence never meants keep model layer's refrence.
+        // when the _delegate release, it will become a wild pointer and make a big trouble.
+        // so, we should keep _delegate's refrence in render layer.
+        // anyway, render layer only exist a short time.
+        
+        if ([self isRenderLayer]) {
+            [_delegate release];
+            [delegate retain];
+        }
+        _delegate = delegate;
+    }
+}
 
+- (id)delegate
+{
+    return _delegate;
+}
 
 - (void)beginChangeKeyPath:(NSString *)keyPath
 {
@@ -774,6 +796,42 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     }
 }
 
+- (CAGLTexture *) maskTextureWithLoader:(CATextureLoader *)texureLoader
+{
+    CAGLTexture * texture = nil;
+    id layerContents = [self contents];
+    
+    if ([self isKindOfClass:[CAMovieLayer class]]) {
+        texture = [self.backingStore contentsTexture];
+    } else if ([layerContents isKindOfClass: [CABackingStore class]]) {
+        CABackingStore * backingStore = layerContents;
+        texture = [backingStore contentsTexture];
+    }
+#if GNUSTEP
+    else if ([layerContents isKindOfClass: NSClassFromString(@"CGImage")])
+#else
+    else if ([layerContents isKindOfClass: NSClassFromString(@"__NSCFType")] &&
+             CFGetTypeID(layerContents) == CGImageGetTypeID())
+#endif
+    {
+        CGImageRef image = (CGImageRef)layerContents;
+        texture = [texureLoader textureForLayer:self];
+        if (texture.contents == nil) {
+            NSLog(@"Texture:load image");
+            [texture loadImage: image];
+            texture.contents = layerContents;
+        }
+    } else {
+            NSLog(@"UnSupported layerContents:%@ class:%@",layerContents, NSStringFromClass(self.class));
+    }
+    
+    if (texture && texture.isInvalidated) {
+        NSLog(@"[Warning] rendering a invalidated texture");
+        texture = nil;
+    }
+    return texture;
+}
+
 /* ********************** */
 /* MARK: - Layout methods */
 - (CGSize)preferredFrameSize
@@ -797,10 +855,15 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 - (void) layoutSublayers
 {
     if (self.delegate && [self.delegate respondsToSelector:@selector(layoutSublayersOfLayer:)]) {
+        NSLog(@"(1)");
         [self.delegate layoutSublayersOfLayer:self];
+        NSLog(@"(2)");
     } else if (self.layoutManager && [self.layoutManager respondsToSelector:@selector(layoutSublayersOfLayer:)]) {
+        NSLog(@"(3)");
         [self.layoutManager layoutSublayersOfLayer:self];
+        NSLog(@"(4)");
     }
+    NSLog(@"(5)");
 }
 
 - (void) setNeedsLayout
@@ -822,6 +885,14 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     NSArray *sublayers = self.sublayers;
     for (CALayer *layer in sublayers) {
         [layer _recursionLayoutAndDisplayIfNeeds];
+    }
+    if (self.mask) {
+        NSLog(@">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        //        [self.mask _recursionLayoutAndDisplayIfNeeds];
+        [self.mask layoutIfNeeded];
+        NSLog(@"------");
+        [self.mask displayIfNeeded];
+        NSLog(@"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
     }
 }
 
@@ -1893,6 +1964,10 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     CALayer *copy = [[[self class] alloc] initWithLayer:self];
     [copy setModelLayer:self];
     [copy setType:CALayerRenderingType];
+    [copy setDelegate:self.delegate];
+    if (self.mask) {
+        [copy setMask:[self.mask copyRenderLayer:transaction]];
+    }
     self.renderingLayer = copy;
     
     NSArray *subLayers = [self.sublayers copy];
