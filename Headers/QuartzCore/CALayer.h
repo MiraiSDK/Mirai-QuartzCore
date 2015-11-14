@@ -176,6 +176,7 @@ CA_EXTERN NSString *const kCATransition;
 - (void) addAnimation: (CAAnimation *)anim forKey: (NSString *)key;
 - (void) removeAnimationForKey: (NSString *)key;
 - (CAAnimation *) animationForKey:( NSString *)key;
+- (void)removeAllAnimations;
 
 - (void) addSublayer: (CALayer *)layer;
 - (void) removeFromSuperlayer;
