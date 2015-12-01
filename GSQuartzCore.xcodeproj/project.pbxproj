@@ -194,6 +194,11 @@
 		7FFBC86615AB4F58004B0E68 /* CAImplicitAnimationObserver.h in Headers */ = {isa = PBXBuildFile; fileRef = 7FFBC86415AB4F58004B0E68 /* CAImplicitAnimationObserver.h */; };
 		7FFBC86915AB6391004B0E68 /* CATransaction+FrameworkPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 7FFBC86815AB6390004B0E68 /* CATransaction+FrameworkPrivate.h */; };
 		BD0D61F318607AFF00BD348A /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD0D61F218607AFF00BD348A /* CoreText.framework */; };
+		D21C4AF81C0CA62C000DBB2F /* CAGLNestingSequencer.h in Headers */ = {isa = PBXBuildFile; fileRef = D21C4AF61C0CA62C000DBB2F /* CAGLNestingSequencer.h */; };
+		D21C4AF91C0CA62C000DBB2F /* CAGLNestingSequencer.h in Headers */ = {isa = PBXBuildFile; fileRef = D21C4AF61C0CA62C000DBB2F /* CAGLNestingSequencer.h */; };
+		D21C4AFA1C0CA62C000DBB2F /* CAGLNestingSequencer.m in Sources */ = {isa = PBXBuildFile; fileRef = D21C4AF71C0CA62C000DBB2F /* CAGLNestingSequencer.m */; };
+		D21C4AFB1C0CA62C000DBB2F /* CAGLNestingSequencer.m in Sources */ = {isa = PBXBuildFile; fileRef = D21C4AF71C0CA62C000DBB2F /* CAGLNestingSequencer.m */; };
+		D21C4AFC1C0CA62C000DBB2F /* CAGLNestingSequencer.m in Sources */ = {isa = PBXBuildFile; fileRef = D21C4AF71C0CA62C000DBB2F /* CAGLNestingSequencer.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -351,6 +356,8 @@
 		7FFBC86515AB4F58004B0E68 /* CAImplicitAnimationObserver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CAImplicitAnimationObserver.m; sourceTree = "<group>"; };
 		7FFBC86815AB6390004B0E68 /* CATransaction+FrameworkPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CATransaction+FrameworkPrivate.h"; sourceTree = "<group>"; };
 		BD0D61F218607AFF00BD348A /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
+		D21C4AF61C0CA62C000DBB2F /* CAGLNestingSequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CAGLNestingSequencer.h; sourceTree = "<group>"; };
+		D21C4AF71C0CA62C000DBB2F /* CAGLNestingSequencer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CAGLNestingSequencer.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -469,6 +476,8 @@
 				7F1DE5A715D6F35D00C2AE2A /* CAGLProgram.m */,
 				43B819FA18E5522F0020624F /* CALayer+Texture.h */,
 				43B819FB18E5522F0020624F /* CALayer+Texture.m */,
+				D21C4AF61C0CA62C000DBB2F /* CAGLNestingSequencer.h */,
+				D21C4AF71C0CA62C000DBB2F /* CAGLNestingSequencer.m */,
 			);
 			path = GLHelpers;
 			sourceTree = "<group>";
@@ -667,6 +676,7 @@
 				43A9D0A3185D9B2E00720B81 /* CAValueFunction.h in Headers */,
 				43A9D0A4185D9B2E00720B81 /* CoreAnimation.h in Headers */,
 				43F91D2F198695A4009E154D /* CAMovieLayer.h in Headers */,
+				D21C4AF91C0CA62C000DBB2F /* CAGLNestingSequencer.h in Headers */,
 				43E112A5185EDBFF00E771B4 /* CAAction.h in Headers */,
 				43A9D0A5185D9B2E00720B81 /* QuartzCore.h in Headers */,
 				43A9D0A8185D9B2E00720B81 /* CABackingStore.h in Headers */,
@@ -705,6 +715,7 @@
 				7F7751C01594AF3A00F56E92 /* CARenderer.h in Headers */,
 				7F7751C11594AF3A00F56E92 /* CAReplicatorLayer.h in Headers */,
 				43EE874D1953266A00CFB759 /* CATextureLoader.h in Headers */,
+				D21C4AF81C0CA62C000DBB2F /* CAGLNestingSequencer.h in Headers */,
 				7F7751C21594AF3A00F56E92 /* CAScrollLayer.h in Headers */,
 				7F7751C31594AF3A00F56E92 /* CAShapeLayer.h in Headers */,
 				7F7751C41594AF3A00F56E92 /* CATextLayer.h in Headers */,
@@ -936,6 +947,7 @@
 				43EE87511953266A00CFB759 /* CATextureLoader.m in Sources */,
 				4398B9621897D63B00445C3A /* CAGLSimpleFramebuffer.m in Sources */,
 				4398B9591897D63300445C3A /* CAReplicatorLayer.m in Sources */,
+				D21C4AFC1C0CA62C000DBB2F /* CAGLNestingSequencer.m in Sources */,
 				4398B9511897D63300445C3A /* CAEAGLLayer.m in Sources */,
 				4398B95D1897D63300445C3A /* CATiledLayer.m in Sources */,
 				4398B9581897D63300445C3A /* CARenderer.m in Sources */,
@@ -959,6 +971,7 @@
 				43A9D079185D9B2E00720B81 /* CAGradientLayer.m in Sources */,
 				43EE87501953266A00CFB759 /* CATextureLoader.m in Sources */,
 				43A9D07A185D9B2E00720B81 /* CALayer.m in Sources */,
+				D21C4AFB1C0CA62C000DBB2F /* CAGLNestingSequencer.m in Sources */,
 				43A9D07B185D9B2E00720B81 /* CAMediaTimingFunction.m in Sources */,
 				43F91D2519855549009E154D /* CAGLExternalTexture.m in Sources */,
 				4365B40819F8F5F70087164B /* CAExternalContentLayer.m in Sources */,
@@ -995,6 +1008,7 @@
 				7F7751921594AF2900F56E92 /* CAEAGLLayer.m in Sources */,
 				7F7751931594AF2900F56E92 /* CAGradientLayer.m in Sources */,
 				7F7751941594AF2900F56E92 /* CALayer.m in Sources */,
+				D21C4AFA1C0CA62C000DBB2F /* CAGLNestingSequencer.m in Sources */,
 				7F7751951594AF2900F56E92 /* CAMediaTimingFunction.m in Sources */,
 				7F7751961594AF2900F56E92 /* CARenderer.m in Sources */,
 				7F7751971594AF2900F56E92 /* CAReplicatorLayer.m in Sources */,
