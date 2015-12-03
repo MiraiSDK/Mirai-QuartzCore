@@ -889,8 +889,6 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     }
     if (self.mask) {
         [self.mask _recursionLayoutAndDisplayIfNeeds];
-        [self.mask layoutIfNeeded];
-        [self.mask displayIfNeeded];
     }
 }
 

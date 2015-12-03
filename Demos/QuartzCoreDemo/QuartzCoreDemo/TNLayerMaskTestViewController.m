@@ -12,6 +12,7 @@
 {
     CALayer *_demoLayer;
     CALayer *_maskLayer;
+    UIView *_maskView;
 }
 + (NSString *)testName
 {
@@ -41,11 +42,11 @@
     UIImage *maskImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     
-    UIImageView *maskView = [[UIImageView alloc] initWithImage:maskImage];
-    [maskView setFrame:CGRectMake(0, 0, demoView.bounds.size.width, demoView.bounds.size.height)];
+    _maskView = [[UIImageView alloc] initWithImage:maskImage];
+    [_maskView setFrame:CGRectMake(0, 0, demoView.bounds.size.width, demoView.bounds.size.height)];
     
     _demoLayer = demoView.layer;
-    _maskLayer = maskView.layer;
+    _maskLayer = _maskView.layer;
     
     _demoLayer.mask = _maskLayer;
     
