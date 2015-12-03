@@ -565,6 +565,28 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setOpacity, CGFloat, opacity)
 GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowOpacity, float, shadowOpacity)
 GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 
+- (void)beginChangeKeyPath:(NSString *)keyPath
+{
+    if (!_inited) {
+        return;
+    }
+    if (![self isModelLayer])
+    {
+        return;
+    }
+
+    NSObject<CAAction>* action = (id)[self actionForKey: keyPath];
+    if (!action || [action isKindOfClass: [NSNull class]])
+        return;
+    [[CATransaction topTransaction] registerAction: action
+                                          onObject: self
+                                           keyPath: keyPath];
+    [self markDirty];
+}
+
+
+#endif
+
 - (void)setDelegate:(id)delegate
 {
     if (_delegate != delegate) {
@@ -587,27 +609,11 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     return _delegate;
 }
 
-- (void)beginChangeKeyPath:(NSString *)keyPath
+- (void)releaseDelegate
 {
-    if (!_inited) {
-        return;
-    }
-    if (![self isModelLayer])
-    {
-        return;
-    }
-
-    NSObject<CAAction>* action = (id)[self actionForKey: keyPath];
-    if (!action || [action isKindOfClass: [NSNull class]])
-        return;
-    [[CATransaction topTransaction] registerAction: action
-                                          onObject: self
-                                           keyPath: keyPath];
-    [self markDirty];
+    [self setDelegate:nil];
 }
 
-
-#endif
 - (CGRect)frame
 {
     CGAffineTransform t = self.affineTransform;
@@ -855,15 +861,10 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 - (void) layoutSublayers
 {
     if (self.delegate && [self.delegate respondsToSelector:@selector(layoutSublayersOfLayer:)]) {
-        NSLog(@"(1)");
         [self.delegate layoutSublayersOfLayer:self];
-        NSLog(@"(2)");
     } else if (self.layoutManager && [self.layoutManager respondsToSelector:@selector(layoutSublayersOfLayer:)]) {
-        NSLog(@"(3)");
         [self.layoutManager layoutSublayersOfLayer:self];
-        NSLog(@"(4)");
     }
-    NSLog(@"(5)");
 }
 
 - (void) setNeedsLayout
@@ -887,12 +888,9 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
         [layer _recursionLayoutAndDisplayIfNeeds];
     }
     if (self.mask) {
-        NSLog(@">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        //        [self.mask _recursionLayoutAndDisplayIfNeeds];
+        [self.mask _recursionLayoutAndDisplayIfNeeds];
         [self.mask layoutIfNeeded];
-        NSLog(@"------");
         [self.mask displayIfNeeded];
-        NSLog(@"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
     }
 }
 
