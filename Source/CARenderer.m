@@ -1046,9 +1046,6 @@ static CGRect CALayerContentsGetGravityRect(CALayer *layer)
             
 //            NSLog(@"rendering contents");
             glUniform1f(_textureFlagUniform, 1);
-            CAGLTexture * texture = nil;
-            BOOL restoreProgram = NO;
-            id layerContents = [layer contents];
             
             CGRect vr = CALayerContentsGetGravityRect(layer);
            
@@ -1066,52 +1063,7 @@ static CGRect CALayerContentsGetGravityRect(CALayer *layer)
             
             glVertexAttribPointer(CAVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, 0, contentsVertices);
             
-            if ([layer isKindOfClass:[CAMovieLayer class]]) {
-                restoreProgram = YES;
-                [_videoProgram use];
-
-                CAMovieLayer *eglLayer = [layer modelLayer];
-                static CATransform3D t;
-                [eglLayer updateTextureIfNeeds:&t];
-                
-                //_modelViewProjectionMatrix = CATransform3DMultiply(_modelViewProjectionMatrix, t);
-                glVertexAttribPointer(CAVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-
-                glUniformMatrix4fv(_videoProjectionUniform, 1, 0, &_modelViewProjectionMatrix);
-                glVertexAttribPointer(CAVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
-
-                
-                texture = [layer.backingStore contentsTexture];
-            } else
-            if ([layerContents isKindOfClass: [CABackingStore class]])
-            {
-//                NSLog(@"contents is CABackingStore");
-                CABackingStore * backingStore = layerContents;
-                if (backingStore.needsRefresh) {
-                    [backingStore refresh];
-                }
-                
-                texture = [backingStore contentsTexture];
-            }
-#if GNUSTEP
-            else if ([layerContents isKindOfClass: NSClassFromString(@"CGImage")])
-#else
-                else if ([layerContents isKindOfClass: NSClassFromString(@"__NSCFType")] &&
-                         CFGetTypeID(layerContents) == CGImageGetTypeID())
-#endif
-                {
-//                    NSLog(@"contents is CGImageRef, load it");
-
-                    CGImageRef image = (CGImageRef)layerContents;
-                    texture = [_textureLoader textureForLayer:layer];
-                    if (texture.contents == nil) {
-                        NSLog(@"Texture:load image");
-                        [texture loadImage: image];
-                        texture.contents = layerContents;
-                    }
-                } else {
-                    NSLog(@"UnSupported layerContents:%@",layerContents);
-                }
+            CAGLTexture * texture = [self _textureOfLayer:layer vertices:vertices texCoords:texCoords];
             
 #if !__OPENGL_ES__
             if ([texture textureTarget] == GL_TEXTURE_RECTANGLE_ARB)
@@ -1137,7 +1089,7 @@ static CGRect CALayerContentsGetGravityRect(CALayer *layer)
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
             [texture unbind];
             
-            if (restoreProgram) {
+            if ([layer isKindOfClass:[CAMovieLayer class]]) {
                 [_simpleProgram use];
             }
         }
@@ -1222,6 +1174,58 @@ static CGRect CALayerContentsGetGravityRect(CALayer *layer)
         }
         [subLayers release];
     }
+}
+
+- (CAGLTexture *)_textureOfLayer:(CALayer *)layer
+                        vertices:(GLfloat *)vertices
+                       texCoords:(GLfloat *)texCoords
+{
+    CAGLTexture *texture = nil;
+    id layerContents = [layer contents];
+    
+    if ([layer isKindOfClass:[CAMovieLayer class]]) {
+        [_videoProgram use];
+        
+        CAMovieLayer *eglLayer = [layer modelLayer];
+        static CATransform3D t;
+        [eglLayer updateTextureIfNeeds:&t];
+        
+        //_modelViewProjectionMatrix = CATransform3DMultiply(_modelViewProjectionMatrix, t);
+        glVertexAttribPointer(CAVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+        
+        glUniformMatrix4fv(_videoProjectionUniform, 1, 0, &_modelViewProjectionMatrix);
+        glVertexAttribPointer(CAVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
+        
+        texture = [layer.backingStore contentsTexture];
+        
+    } else if ([layerContents isKindOfClass: [CABackingStore class]]) {
+        
+//                NSLog(@"contents is CABackingStore");
+        CABackingStore * backingStore = layerContents;
+        if (backingStore.needsRefresh) {
+            [backingStore refresh];
+        }
+        texture = [backingStore contentsTexture];
+    }
+#if GNUSTEP
+    else if ([layerContents isKindOfClass: NSClassFromString(@"CGImage")])
+#else
+    else if ([layerContents isKindOfClass: NSClassFromString(@"__NSCFType")] &&
+                     CFGetTypeID(layerContents) == CGImageGetTypeID())
+#endif
+    {
+//          NSLog(@"contents is CGImageRef, load it");
+        CGImageRef image = (CGImageRef)layerContents;
+        texture = [_textureLoader textureForLayer:layer];
+        if (texture.contents == nil) {
+            NSLog(@"Texture:load image");
+            [texture loadImage: image];
+            texture.contents = layerContents;
+        }
+    } else {
+        NSLog(@"UnSupported layerContents:%@",layerContents);
+    }
+    return texture;
 }
 
 #else
