@@ -38,24 +38,32 @@
 - (void)refreshCombineBufferIfNeed
 {
     if (_needsRefreshCombineBuffer) {
-        _needsRefreshCombineBuffer = NO;
+        [self.mask refreshCombineBufferIfNeed];
         [self _refreshCombineBuffer];
+        _needsRefreshCombineBuffer = NO;
     }
 }
 
 - (CAGLTexture *)combinedTexture
 {
-    if (_combinedBackingStore.needsRefresh) {
-        [_combinedBackingStore refresh];
-    }
     return [_combinedBackingStore contentsTexture];
 }
 
 - (void)_refreshCombineBuffer
 {
     [self _resizeCombineBackingStoreSize];
-    [self _drawSelfAppearanceToCombinedContext];
     
+    if ([_combinedBackingStore context]) {
+        CGContextSaveGState ([_combinedBackingStore context]);
+        CGContextScaleCTM([_combinedBackingStore context], self.contentsScale, self.contentsScale);
+        CGContextClipToRect ([_combinedBackingStore context], [self bounds]);
+        [self _drawSelfAppearanceToCombinedContext];
+        [self _combineWithMask];
+        CGContextRestoreGState ([_combinedBackingStore context]);
+    } else {
+        NSLog(@"[WARNING] EMPTY backing store context");
+    }
+    [_combinedBackingStore refresh];
 }
 
 - (void)_resizeCombineBackingStoreSize
@@ -91,19 +99,21 @@
 
 - (void)_drawImageToCombinedContext:(CGImageRef)image
 {
-    if ([_combinedBackingStore context]) {
-        CGFloat width = CGImageGetWidth(image);
-        CGFloat height = CGImageGetHeight(image);
-        CGContextSaveGState ([_combinedBackingStore context]);
-        CGContextScaleCTM([_combinedBackingStore context], self.contentsScale, self.contentsScale);
-        CGContextClipToRect ([_combinedBackingStore context], [self bounds]);
-        CGContextDrawImage([_combinedBackingStore context], CGRectMake(0, 0, width, height), image);
-        CGContextRestoreGState ([_combinedBackingStore context]);
-    } else {
-        NSLog(@"[WARNING] EMPTY backing store context");
+    CGFloat width = CGImageGetWidth(image);
+    CGFloat height = CGImageGetHeight(image);
+    CGContextDrawImage([_combinedBackingStore context], CGRectMake(0, 0, width, height), image);
+}
+
+- (void)_combineWithMask
+{
+    static CGColorRef _color;
+    static BOOL hasInit;
+    if (!hasInit) {
+        hasInit = YES;
+        _color = CGColorRetain(CGColorCreateGenericRGB(0.0, 0.0, 0.0, 1.0));
     }
-    [_combinedBackingStore refresh];
-    _combinedBackingStore.refreshed = NO;
+    CGContextSetFillColorWithColor([_combinedBackingStore context], _color);
+    CGContextFillRect([_combinedBackingStore context], CGRectMake(0, 0, 640/2, 348/2));
 }
 
 @end
