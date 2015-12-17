@@ -54,17 +54,8 @@
 - (void)_refreshCombineBuffer
 {
     [self _resizeCombineBackingStoreSize];
+    [self _drawSelfAppearanceToCombinedContext];
     
-    id layerContents = [self contents];
-#if GNUSTEP
-    if ([layerContents isKindOfClass: NSClassFromString(@"CGImage")])
-#else
-    if ([layerContents isKindOfClass: NSClassFromString(@"__NSCFType")] &&
-                 CFGetTypeID(layerContents) == CGImageGetTypeID())
-#endif
-    {
-        [self _drawImageToCombinedContext:(CGImageRef)layerContents];
-    }
 }
 
 - (void)_resizeCombineBackingStoreSize
@@ -84,6 +75,20 @@
     _combinedBackingStore = [backingStore retain];
 }
 
+- (void)_drawSelfAppearanceToCombinedContext
+{
+    id layerContents = [self contents];
+#if GNUSTEP
+    if ([layerContents isKindOfClass: NSClassFromString(@"CGImage")])
+#else
+    if ([layerContents isKindOfClass: NSClassFromString(@"__NSCFType")] &&
+        CFGetTypeID(layerContents) == CGImageGetTypeID())
+#endif
+    {
+        [self _drawImageToCombinedContext:(CGImageRef)layerContents];
+    }
+}
+
 - (void)_drawImageToCombinedContext:(CGImageRef)image
 {
     if ([_combinedBackingStore context]) {
@@ -97,6 +102,7 @@
     } else {
         NSLog(@"[WARNING] EMPTY backing store context");
     }
+    [_combinedBackingStore refresh];
     _combinedBackingStore.refreshed = NO;
 }
 

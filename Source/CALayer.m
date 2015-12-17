@@ -405,6 +405,8 @@ typedef NS_ENUM(NSInteger, CALayerType) {
         
         _needsLayout = layer.needsLayout;
         _texture = [layer->_texture retain];
+        
+        _combinedBackingStore = [layer->_combinedBackingStore retain];
     }
   return self;
 }
@@ -787,6 +789,10 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
       
         self.backingStore.refreshed = NO;
         //[self.backingStore refresh];
+    }
+    
+    if (self.mask) {
+        [self refreshCombineBufferIfNeed];
     }
 }
 
