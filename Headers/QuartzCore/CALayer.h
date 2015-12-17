@@ -111,9 +111,12 @@ CA_EXTERN NSString *const kCATransition;
   /* i-vars */
   BOOL _needsDisplay;
   BOOL _needsLayout;
+  BOOL _needsRefreshCombineBuffer;
+  NSMutableSet *_layersMaskedByMe;
   NSMutableDictionary *_animations;
   NSMutableArray *_animationKeys;
   CABackingStore * _backingStore;
+  CABackingStore * _combinedBackingStore;
     
     BOOL _inited;
 

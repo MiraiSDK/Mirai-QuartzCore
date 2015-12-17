@@ -198,6 +198,11 @@
 		D27032B51BE9EA2F0067D1BD /* CAGLAndroidFunctionBridge.h in Headers */ = {isa = PBXBuildFile; fileRef = D27032B21BE9EA2F0067D1BD /* CAGLAndroidFunctionBridge.h */; };
 		D27032B61BE9EA2F0067D1BD /* CAGLAndroidFunctionBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = D27032B31BE9EA2F0067D1BD /* CAGLAndroidFunctionBridge.m */; };
 		D27032B71BE9EA2F0067D1BD /* CAGLAndroidFunctionBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = D27032B31BE9EA2F0067D1BD /* CAGLAndroidFunctionBridge.m */; };
+		D282C6B51C22E7630060880C /* CALayer+CARender.h in Headers */ = {isa = PBXBuildFile; fileRef = D282C6B31C22E7630060880C /* CALayer+CARender.h */; };
+		D282C6B61C22E7630060880C /* CALayer+CARender.h in Headers */ = {isa = PBXBuildFile; fileRef = D282C6B31C22E7630060880C /* CALayer+CARender.h */; };
+		D282C6B71C22E7630060880C /* CALayer+CARender.m in Sources */ = {isa = PBXBuildFile; fileRef = D282C6B41C22E7630060880C /* CALayer+CARender.m */; };
+		D282C6B81C22E7630060880C /* CALayer+CARender.m in Sources */ = {isa = PBXBuildFile; fileRef = D282C6B41C22E7630060880C /* CALayer+CARender.m */; };
+		D282C6B91C22E7630060880C /* CALayer+CARender.m in Sources */ = {isa = PBXBuildFile; fileRef = D282C6B41C22E7630060880C /* CALayer+CARender.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -357,6 +362,8 @@
 		BD0D61F218607AFF00BD348A /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
 		D27032B21BE9EA2F0067D1BD /* CAGLAndroidFunctionBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CAGLAndroidFunctionBridge.h; sourceTree = "<group>"; };
 		D27032B31BE9EA2F0067D1BD /* CAGLAndroidFunctionBridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CAGLAndroidFunctionBridge.m; sourceTree = "<group>"; };
+		D282C6B31C22E7630060880C /* CALayer+CARender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CALayer+CARender.h"; sourceTree = "<group>"; };
+		D282C6B41C22E7630060880C /* CALayer+CARender.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CALayer+CARender.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -568,6 +575,7 @@
 		7F77517B1594AF2900F56E92 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				D282C6AB1C22E6F80060880C /* CAPrivate */,
 				7F5026AA15BC62D000184772 /* GLHelpers */,
 				7F77517C1594AF2900F56E92 /* CAAnimation.m */,
 				7F8CC66C15A0A964003AEB38 /* CAAnimation+FrameworkPrivate.h */,
@@ -646,6 +654,15 @@
 			path = QuartzCore;
 			sourceTree = "<group>";
 		};
+		D282C6AB1C22E6F80060880C /* CAPrivate */ = {
+			isa = PBXGroup;
+			children = (
+				D282C6B31C22E7630060880C /* CALayer+CARender.h */,
+				D282C6B41C22E7630060880C /* CALayer+CARender.m */,
+			);
+			name = CAPrivate;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -681,6 +698,7 @@
 				43A9D0A8185D9B2E00720B81 /* CABackingStore.h in Headers */,
 				43A9D0A9185D9B2E00720B81 /* CAAnimation+FrameworkPrivate.h in Headers */,
 				43A9D0AA185D9B2E00720B81 /* CALayer+FrameworkPrivate.h in Headers */,
+				D282C6B61C22E7630060880C /* CALayer+CARender.h in Headers */,
 				43A9D0AB185D9B2E00720B81 /* CAImplicitAnimationObserver.h in Headers */,
 				43A9D0AC185D9B2E00720B81 /* CATransaction+FrameworkPrivate.h in Headers */,
 				43A9D0AD185D9B2E00720B81 /* CAMediaTimingFunction+FrameworkPrivate.h in Headers */,
@@ -708,6 +726,7 @@
 				4365B40519F8F5F70087164B /* CAExternalContentLayer.h in Headers */,
 				7F7751BD1594AF3A00F56E92 /* CALayer.h in Headers */,
 				7F7751BE1594AF3A00F56E92 /* CAMediaTiming.h in Headers */,
+				D282C6B51C22E7630060880C /* CALayer+CARender.h in Headers */,
 				43F91D2219855549009E154D /* CAGLExternalTexture.h in Headers */,
 				7F7751BF1594AF3A00F56E92 /* CAMediaTimingFunction.h in Headers */,
 				43B819FC18E5522F0020624F /* CALayer+Texture.h in Headers */,
@@ -952,6 +971,7 @@
 				4398B9611897D63300445C3A /* CAValueFunction.m in Sources */,
 				4398B95E1897D63300445C3A /* CATransaction.m in Sources */,
 				4398B9551897D63300445C3A /* CALayer+DynamicProperties.m in Sources */,
+				D282C6B91C22E7630060880C /* CALayer+CARender.m in Sources */,
 				4398B9601897D63300445C3A /* CATransformLayer.m in Sources */,
 				4398B95F1897D63300445C3A /* CATransform3D.m in Sources */,
 			);
@@ -990,6 +1010,7 @@
 				43A9D089185D9B2E00720B81 /* CAGLSimpleFramebuffer.m in Sources */,
 				43A9D08A185D9B2E00720B81 /* CAGLTexture.m in Sources */,
 				43A9D08B185D9B2E00720B81 /* CALayer+DynamicProperties.m in Sources */,
+				D282C6B81C22E7630060880C /* CALayer+CARender.m in Sources */,
 				43A9D08C185D9B2E00720B81 /* CAGLShader.m in Sources */,
 				43A9D08D185D9B2E00720B81 /* CAGLProgram.m in Sources */,
 			);
@@ -1003,6 +1024,7 @@
 				7F77518F1594AF2900F56E92 /* CAAnimation.m in Sources */,
 				7F7751901594AF2900F56E92 /* CABase.m in Sources */,
 				7F7751911594AF2900F56E92 /* CADisplayLink.m in Sources */,
+				D282C6B71C22E7630060880C /* CALayer+CARender.m in Sources */,
 				7F7751921594AF2900F56E92 /* CAEAGLLayer.m in Sources */,
 				7F7751931594AF2900F56E92 /* CAGradientLayer.m in Sources */,
 				7F7751941594AF2900F56E92 /* CALayer.m in Sources */,

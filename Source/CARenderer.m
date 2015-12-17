@@ -37,6 +37,7 @@
 #import "CABackingStore.h"
 #import "CAMovieLayer.h"
 #import "CALayer+Texture.h"
+#import "CALayer+CARender.h"
 
 #if defined (__APPLE__)
 #   if TARGET_OS_IPHONE
@@ -1063,7 +1064,8 @@ static CGRect CALayerContentsGetGravityRect(CALayer *layer)
             
             glVertexAttribPointer(CAVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, 0, contentsVertices);
             
-            CAGLTexture * texture = [self _textureOfLayer:layer vertices:vertices texCoords:texCoords];
+            CAGLTexture * texture = [self _textureToDisplayWithLayer:layer
+                                                            vertices:vertices texCoords:texCoords];
             
 #if !__OPENGL_ES__
             if ([texture textureTarget] == GL_TEXTURE_RECTANGLE_ARB)
@@ -1174,6 +1176,19 @@ static CGRect CALayerContentsGetGravityRect(CALayer *layer)
         }
         [subLayers release];
     }
+}
+
+- (CAGLTexture *)_textureToDisplayWithLayer:(CALayer *)layer
+                                   vertices:(GLfloat *)vertices
+                                  texCoords:(GLfloat *)texCoords
+{
+    CAGLTexture *texture;
+    if (layer.mask) {
+        texture = nil;
+    } else {
+        texture = [self _textureOfLayer:layer vertices:vertices texCoords:texCoords];
+    }
+    return texture;
 }
 
 - (CAGLTexture *)_textureOfLayer:(CALayer *)layer

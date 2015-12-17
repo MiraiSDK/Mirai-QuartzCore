@@ -30,6 +30,7 @@
 #import <Foundation/Foundation.h>
 #import "QuartzCore/CAAnimation.h"
 #import "QuartzCore/CALayer.h"
+#import "CALayer+CARender.h"
 #import "CABackingStore.h"
 #import "CALayer+FrameworkPrivate.h"
 #import "CAAnimation+FrameworkPrivate.h"
@@ -74,6 +75,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 @property (nonatomic, retain) NSMutableDictionary * animations;
 @property (retain) NSMutableArray * animationKeys;
 @property (retain) CABackingStore * backingStore;
+@property (retain) CABackingStore * combinedBackingStore;
 @property (assign,getter = isDirty) BOOL dirty;
 @property (nonatomic, retain) NSMutableArray *finishedAnimations;
 
@@ -134,6 +136,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 @synthesize animations=_animations;
 @synthesize animationKeys=_animationKeys;
 @synthesize backingStore=_backingStore;
+@synthesize combinedBackingStore=_combinedBackingStore;
 
 @synthesize dirty = _dirty;
 @synthesize type = _type;
@@ -284,6 +287,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 {
   if ((self = [super init]) != nil)
     {
+      _layersMaskedByMe = [[NSMutableSet alloc] init];
       _animations = [[NSMutableDictionary alloc] init];
       _animationKeys = [[NSMutableArray alloc] init];
       _sublayers = [[NSMutableArray alloc] init];
@@ -428,6 +432,8 @@ typedef NS_ENUM(NSInteger, CALayerType) {
   [_fillMode release];
   
   [_backingStore release];
+  [_combinedBackingStore release];
+  [_layersMaskedByMe release];
   [_animations release];
   [_animationKeys release];
     if (_modelLayer) {
@@ -614,6 +620,24 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     [self setDelegate:nil];
 }
 
+- (void)setMask:(CALayer *)mask
+{
+    if (_mask != mask) {
+        [self setNeedsDisplay];
+        if ([self isModelLayer]) {
+            if (_mask) {
+                [_layersMaskedByMe removeObject:_mask];
+            }
+            if (mask) {
+                [_layersMaskedByMe addObject:mask];
+            }
+        }
+        [_mask release];
+        _mask = [mask retain];
+    }
+}
+
+
 - (CGRect)frame
 {
     CGAffineTransform t = self.affineTransform;
@@ -785,8 +809,14 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 {
   /* TODO: schedule redraw of the scene */
   _needsDisplay = YES;
-    
+    if ([self isModelLayer]) {
+        for (CALayer *maskedLayer in _layersMaskedByMe) {
+            [maskedLayer setNeedsDisplay];
+        }
+        _combinedBackingStore;
+    }
     [self markDirty];
+    [self setNeedsRefreshCombineBuffer];
 }
 
 - (void) setNeedsDisplayInRect: (CGRect)r
