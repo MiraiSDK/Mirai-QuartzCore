@@ -1184,7 +1184,9 @@ static CGRect CALayerContentsGetGravityRect(CALayer *layer)
 {
     CAGLTexture *texture;
     if (layer.mask) {
-        texture = nil;
+        layer = [layer modelLayer];
+        [layer refreshCombineBufferIfNeed];
+        texture = [layer combinedTexture];
     } else {
         texture = [self _textureOfLayer:layer vertices:vertices texCoords:texCoords];
     }

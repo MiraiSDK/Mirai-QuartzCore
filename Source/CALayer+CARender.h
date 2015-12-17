@@ -8,9 +8,12 @@
 
 #import <Foundation/Foundation.h>
 #import "CALayer.h"
+#import "CAGLTexture.h"
 
 @interface CALayer (CARender)
 
 - (void)setNeedsRefreshCombineBuffer;
+- (void)refreshCombineBufferIfNeed;
+- (CAGLTexture *)combinedTexture;
 
 @end

@@ -22,42 +22,6 @@
 #import "CALayer+Texture.h"
 #import "CALayer+CARender.h"
 
-#if defined (__APPLE__)
-#   if TARGET_OS_IPHONE
-#   import <OpenGLES/ES2/gl.h>
-#   import <OpenGLES/ES2/glext.h>
-#   else
-#   import <OpenGL/OpenGL.h>
-#   import <OpenGL/gl.h>
-#   import <OpenGL/glu.h>
-#   endif
-#elif defined(ANDROID)
-#import <GLES2/gl2.h>
-#import <GLES2/gl2ext.h>
-#import <OpenGLES/EAGL.h>
-#import <OpenGLES/EAGLDrawable.h>
-#else
-#define GL_GLEXT_PROTOTYPES 1
-#import <GL/gl.h>
-#import <GL/glu.h>
-#import <GL/glext.h>
-#endif
-
-#if defined(ANDROID) || defined(TARGET_OS_IPHONE)
-#import <OpenGLES/EAGL.h>
-#else
-#import <AppKit/NSOpenGL.h>
-#endif
-
-#import "GLHelpers/CAGLTexture.h"
-#import "GLHelpers/CAGLSimpleFramebuffer.h"
-#import "GLHelpers/CAGLShader.h"
-#import "GLHelpers/CAGLProgram.h"
-
-#if GNUSTEP
-#import <CoreGraphics/CoreGraphics.h>
-#endif
-
 #import "CATextureLoader.h"
 
 #if GNUSTEP
@@ -69,6 +33,71 @@
 - (void)setNeedsRefreshCombineBuffer
 {
     _needsRefreshCombineBuffer = YES;
+}
+
+- (void)refreshCombineBufferIfNeed
+{
+    if (_needsRefreshCombineBuffer) {
+        _needsRefreshCombineBuffer = NO;
+        [self _refreshCombineBuffer];
+    }
+}
+
+- (CAGLTexture *)combinedTexture
+{
+    if (_combinedBackingStore.needsRefresh) {
+        [_combinedBackingStore refresh];
+    }
+    return [_combinedBackingStore contentsTexture];
+}
+
+- (void)_refreshCombineBuffer
+{
+    [self _resizeCombineBackingStoreSize];
+    
+    id layerContents = [self contents];
+#if GNUSTEP
+    if ([layerContents isKindOfClass: NSClassFromString(@"CGImage")])
+#else
+    if ([layerContents isKindOfClass: NSClassFromString(@"__NSCFType")] &&
+                 CFGetTypeID(layerContents) == CGImageGetTypeID())
+#endif
+    {
+        [self _drawImageToCombinedContext:(CGImageRef)layerContents];
+    }
+}
+
+- (void)_resizeCombineBackingStoreSize
+{
+    if (!_combinedBackingStore ||
+        [_combinedBackingStore width] != self.bounds.size.width ||
+        [_combinedBackingStore height] != self.bounds.size.height)
+    {
+        [self _resetCombinedBackingStore:[CABackingStore backingStoreWithWidth: self.bounds.size.width
+                                                                        height: self.bounds.size.height]];
+    }
+}
+
+- (void)_resetCombinedBackingStore:(CABackingStore *)backingStore
+{
+    [_combinedBackingStore release];
+    _combinedBackingStore = [backingStore retain];
+}
+
+- (void)_drawImageToCombinedContext:(CGImageRef)image
+{
+    if ([_combinedBackingStore context]) {
+        CGFloat width = CGImageGetWidth(image);
+        CGFloat height = CGImageGetHeight(image);
+        CGContextSaveGState ([_combinedBackingStore context]);
+        CGContextScaleCTM([_combinedBackingStore context], self.contentsScale, self.contentsScale);
+        CGContextClipToRect ([_combinedBackingStore context], [self bounds]);
+        CGContextDrawImage([_combinedBackingStore context], CGRectMake(0, 0, width, height), image);
+        CGContextRestoreGState ([_combinedBackingStore context]);
+    } else {
+        NSLog(@"[WARNING] EMPTY backing store context");
+    }
+    _combinedBackingStore.refreshed = NO;
 }
 
 @end
