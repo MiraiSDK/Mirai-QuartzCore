@@ -792,6 +792,7 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     }
     
     if (self.mask) {
+        [self.mask displayIfNeeded];
         [self refreshCombineBufferIfNeed];
     }
 }
@@ -819,7 +820,6 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
         for (CALayer *maskedLayer in _layersMaskedByMe) {
             [maskedLayer setNeedsDisplay];
         }
-        _combinedBackingStore;
     }
     [self markDirty];
     [self setNeedsRefreshCombineBuffer];

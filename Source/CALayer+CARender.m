@@ -37,7 +37,7 @@
 
 - (void)refreshCombineBufferIfNeed
 {
-    if (_needsRefreshCombineBuffer) {
+    if (_needsRefreshCombineBuffer && self.mask) {
         [self.mask refreshCombineBufferIfNeed];
         [self _refreshCombineBuffer];
         _needsRefreshCombineBuffer = NO;
@@ -51,6 +51,7 @@
 
 - (void)_refreshCombineBuffer
 {
+    NSLog(@"refresh...");
     [self _resizeCombineBackingStoreSize];
     
     if ([_combinedBackingStore context]) {
@@ -106,14 +107,19 @@
 
 - (void)_combineWithMask
 {
-    static CGColorRef _color;
-    static BOOL hasInit;
-    if (!hasInit) {
-        hasInit = YES;
-        _color = CGColorRetain(CGColorCreateGenericRGB(0.0, 0.0, 0.0, 1.0));
+    int width = [_combinedBackingStore width];
+    int height = [_combinedBackingStore height];
+    UInt32 *imageData = CGBitmapContextGetData([_combinedBackingStore context]);
+    
+    if (imageData == NULL) {
+        return;
     }
-    CGContextSetFillColorWithColor([_combinedBackingStore context], _color);
-    CGContextFillRect([_combinedBackingStore context], CGRectMake(0, 0, 640/2, 348/2));
+    for (int x = 0; x < width; x++) {
+        for (int y = 0; y < height; y++) {
+            int index = x*height + y;
+            imageData[index] &= 0xff00ffff;
+        }
+    }
 }
 
 @end
