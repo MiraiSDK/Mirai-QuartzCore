@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "2703C7E618ED1E243C403110E68D836BE8B3534D",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "2703C7E618ED1E243C403110E68D836BE8B3534D" : 0,
+    "DAAE31B7A32B48881EE67AA60C950247E82A7ADE" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "B9532CAE-1C28-4553-BCC4-F65766542119",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "2703C7E618ED1E243C403110E68D836BE8B3534D" : "Mirai-QuartzCore\/",
+    "DAAE31B7A32B48881EE67AA60C950247E82A7ADE" : ""
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "GSQuartzCore",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "GSQuartzCore.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:moskize\/Mirai-QuartzCore.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "2703C7E618ED1E243C403110E68D836BE8B3534D"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:moskize\/MiraiSDK.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "DAAE31B7A32B48881EE67AA60C950247E82A7ADE"
+    }
+  ]
+}
