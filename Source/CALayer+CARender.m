@@ -37,10 +37,8 @@
 
 - (void)refreshCombineBufferIfNeed
 {
-    if (_needsRefreshCombineBuffer && self.mask) {
-        [self.mask refreshCombineBufferIfNeed];
-        [self _refreshCombineBuffer];
-        _needsRefreshCombineBuffer = NO;
+    if (self.mask) {
+        [self _refreshCOmbineBufferIfHasSetNeed];
     }
 }
 
@@ -49,9 +47,17 @@
     return [_combinedBackingStore contentsTexture];
 }
 
+- (void)_refreshCOmbineBufferIfHasSetNeed
+{
+    if (_needsRefreshCombineBuffer) {
+        [self.mask _refreshCOmbineBufferIfHasSetNeed];
+        [self _refreshCombineBuffer];
+        _needsRefreshCombineBuffer = NO;
+    }
+}
+
 - (void)_refreshCombineBuffer
 {
-    NSLog(@"refresh...");
     [self _resizeCombineBackingStoreSize];
     
     if ([_combinedBackingStore context]) {
@@ -107,17 +113,40 @@
 
 - (void)_combineWithMask
 {
-    int width = [_combinedBackingStore width];
-    int height = [_combinedBackingStore height];
-    UInt32 *imageData = CGBitmapContextGetData([_combinedBackingStore context]);
-    
-    if (imageData == NULL) {
+    if (!self.mask) {
         return;
     }
-    for (int x = 0; x < width; x++) {
-        for (int y = 0; y < height; y++) {
-            int index = x*height + y;
-            imageData[index] &= 0xff00ffff;
+    CABackingStore *maskCombinedBackingStore = self.mask->_combinedBackingStore;
+    UInt32 *selfImageData = CGBitmapContextGetData([_combinedBackingStore context]);
+    UInt32 *maskImageData = CGBitmapContextGetData([maskCombinedBackingStore context]);
+    
+    if (selfImageData == NULL || maskImageData == NULL) {
+        return;
+    }
+    
+    int maskWidth = [maskCombinedBackingStore width];
+    int maskHeight = [maskCombinedBackingStore height];
+    int selfWidth = [_combinedBackingStore width];
+    int selfHeight = [_combinedBackingStore height];
+    int dx = self.mask.frame.origin.x;
+    int dy = self.mask.frame.origin.y;
+    
+    int squeezeWidth = MIN(selfWidth, dx + maskWidth) - dx;
+    int squeezeHeight = MIN(selfHeight, dy + maskHeight) - dy;
+    
+    if (squeezeWidth <= 0 || squeezeHeight <= 0) {
+        return;
+    }
+    
+    for (int x = 0; x < selfWidth; x++) {
+        for (int y = 0; y < selfHeight; y++) {
+            if (x < dx | x >= dx + squeezeWidth | y < dy | y >= dy + squeezeHeight) {
+                selfImageData[y*selfWidth + x] &= 0x00ffffff;
+            } else {
+                UInt32 *selfPixel = &selfImageData[y*selfWidth + x];
+                UInt32 *maskPixel = &maskImageData[(y - dy)*maskWidth + x - dx];
+                *selfPixel = (*selfPixel | 0xff000000) & (*maskPixel | 0x00ffffff);
+            }
         }
     }
 }

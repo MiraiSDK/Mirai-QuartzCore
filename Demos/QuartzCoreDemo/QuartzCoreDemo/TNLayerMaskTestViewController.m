@@ -38,7 +38,8 @@
     CGContextSetFillColorWithColor(context, [[UIColor colorWithRed:0 green:0 blue:0 alpha:0.5] CGColor]);
     CGContextFillRect(context, rect);
     CGContextSetFillColorWithColor(context, [[UIColor colorWithRed:1 green:1 blue:0 alpha:1] CGColor]);
-    CGContextFillEllipseInRect(context, rect);
+    CGContextFillRect(context, CGRectMake(rect.size.width/4, rect.size.height/4,
+                                          rect.size.width/2, rect.size.height/2));
     UIImage *maskImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     
