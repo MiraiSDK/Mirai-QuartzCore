@@ -12,8 +12,7 @@
 
 @interface CALayer (CARender)
 
-- (void)setNeedsRefreshCombineBuffer;
-- (void)refreshCombineBufferIfNeed;
+- (void)displayAccordingToSpecialCondition;
 - (CAGLTexture *)combinedTexture;
 
 @end

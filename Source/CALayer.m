@@ -748,53 +748,10 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 
 - (void) display
 {
-  if ([_delegate respondsToSelector: @selector(displayLayer:)])
-    {
-      [_delegate displayLayer: self];
-    }
-  else
-    {
-      /* By default, uses -drawInContext: to update the 'contents' property. */
-    
-      CGRect bounds = [self bounds];
-      if (CGRectIsEmpty(bounds))
-      {
-        return;
-      }
-      
-      if (!_backingStore ||
-          [_backingStore width] != bounds.size.width ||
-          [_backingStore height] != bounds.size.height)
-      {
-          //TODO: taking account the opaque property, should create a bitmap without alpha channel while opaque is YES.
-          CGFloat backingWidth = bounds.size.width * self.contentsScale;
-          CGFloat backingHeight = bounds.size.height * self.contentsScale;
-        [self setBackingStore: [CABackingStore backingStoreWithWidth: backingWidth height: backingHeight]];
-        [self setContents:nil];
-      }
-      
-        if ([_backingStore context]) {
-            CGContextSaveGState ([_backingStore context]);
-            CGContextScaleCTM([_backingStore context], self.contentsScale, self.contentsScale);
-            CGContextClipToRect ([_backingStore context], [self bounds]);
-            [self drawInContext: [_backingStore context]];
-            CGContextRestoreGState ([_backingStore context]);
-        } else {
-            NSLog(@"[WARNING] EMPTY backing store context");
-        }
-
-      /* Call -refresh on backing store to fill its texture */
-      if (![self contents])
-        [self setContents: [self backingStore]];
-      
-        self.backingStore.refreshed = NO;
-        //[self.backingStore refresh];
-    }
-    
     if (self.mask) {
         [self.mask displayIfNeeded];
-        [self refreshCombineBufferIfNeed];
     }
+    [self displayAccordingToSpecialCondition];
 }
 
 - (void) displayIfNeeded
@@ -822,7 +779,6 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
         }
     }
     [self markDirty];
-    [self setNeedsRefreshCombineBuffer];
 }
 
 - (void) setNeedsDisplayInRect: (CGRect)r

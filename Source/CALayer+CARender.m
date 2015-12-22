@@ -30,67 +30,29 @@
 
 @implementation CALayer (CARender)
 
-- (void)setNeedsRefreshCombineBuffer
-{
-    _needsRefreshCombineBuffer = YES;
-}
-
-- (void)refreshCombineBufferIfNeed
-{
-    if (self.mask) {
-        [self _refreshCOmbineBufferIfHasSetNeed];
-    }
-}
-
 - (CAGLTexture *)combinedTexture
 {
-    return [_combinedBackingStore contentsTexture];
+    return [_backingStore contentsTexture];
 }
 
-- (void)_refreshCOmbineBufferIfHasSetNeed
+- (void)displayAccordingToSpecialCondition
 {
-    if (_needsRefreshCombineBuffer) {
-        [self.mask _refreshCOmbineBufferIfHasSetNeed];
-        [self _refreshCombineBuffer];
-        _needsRefreshCombineBuffer = NO;
-    }
-}
-
-- (void)_refreshCombineBuffer
-{
-    [self _resizeCombineBackingStoreSize];
-    
-    if ([_combinedBackingStore context]) {
-        CGContextSaveGState ([_combinedBackingStore context]);
-        CGContextScaleCTM([_combinedBackingStore context], self.contentsScale, self.contentsScale);
-        CGContextClipToRect ([_combinedBackingStore context], [self bounds]);
-        [self _drawSelfAppearanceToCombinedContext];
-        [self _combineWithMask];
-        CGContextRestoreGState ([_combinedBackingStore context]);
+    if ([_delegate respondsToSelector: @selector(displayLayer:)]) {
+        [_delegate displayLayer: self];
+        if ([self _shouldDrawToBackingStore]) {
+            [self _drawImageToBackingStoreIfNeed];
+        }
     } else {
-        NSLog(@"[WARNING] EMPTY backing store context");
-    }
-    [_combinedBackingStore refresh];
-}
-
-- (void)_resizeCombineBackingStoreSize
-{
-    if (!_combinedBackingStore ||
-        [_combinedBackingStore width] != self.bounds.size.width ||
-        [_combinedBackingStore height] != self.bounds.size.height)
-    {
-        [self _resetCombinedBackingStore:[CABackingStore backingStoreWithWidth: self.bounds.size.width
-                                                                        height: self.bounds.size.height]];
+        [self _drawByCustomToBackingStoreIfNeed];
     }
 }
 
-- (void)_resetCombinedBackingStore:(CABackingStore *)backingStore
+- (BOOL)_shouldDrawToBackingStore
 {
-    [_combinedBackingStore release];
-    _combinedBackingStore = [backingStore retain];
+    return self.mask || _layersMaskedByMe.count > 0;
 }
 
-- (void)_drawSelfAppearanceToCombinedContext
+- (void)_drawImageToBackingStoreIfNeed
 {
     id layerContents = [self contents];
 #if GNUSTEP
@@ -100,34 +62,93 @@
         CFGetTypeID(layerContents) == CGImageGetTypeID())
 #endif
     {
-        [self _drawImageToCombinedContext:(CGImageRef)layerContents];
+        [self _resizeBackingStoreSize];
+        
+        if ([_backingStore context]) {
+            CGImageRef image = (CGImageRef)layerContents;
+            CGFloat width = CGImageGetWidth(image);
+            CGFloat height = CGImageGetHeight(image);
+            CGContextSaveGState ([_backingStore context]);
+            CGContextScaleCTM([_backingStore context], self.contentsScale, self.contentsScale);
+            CGContextClipToRect ([_backingStore context], [self bounds]);
+            CGContextDrawImage([_backingStore context], CGRectMake(0, 0, width, height), image);
+            [self _combineWithMask];
+            CGContextRestoreGState ([_backingStore context]);
+        } else {
+            NSLog(@"[WARNING] EMPTY backing store context");
+        }
+        [_backingStore refresh];
     }
 }
 
-- (void)_drawImageToCombinedContext:(CGImageRef)image
+- (void)_drawByCustomToBackingStoreIfNeed
 {
-    CGFloat width = CGImageGetWidth(image);
-    CGFloat height = CGImageGetHeight(image);
-    CGContextDrawImage([_combinedBackingStore context], CGRectMake(0, 0, width, height), image);
+    /* By default, uses -drawInContext: to update the 'contents' property. */
+    CGRect bounds = [self bounds];
+    if (CGRectIsEmpty(bounds)) {
+        return;
+    }
+    
+    if (!_backingStore ||
+        [_backingStore width] != bounds.size.width ||
+        [_backingStore height] != bounds.size.height)
+    {
+        //TODO: taking account the opaque property, should create a bitmap without alpha channel while opaque is YES.
+        CGFloat backingWidth = bounds.size.width * self.contentsScale;
+        CGFloat backingHeight = bounds.size.height * self.contentsScale;
+        [self setBackingStore: [CABackingStore backingStoreWithWidth: backingWidth height: backingHeight]];
+        [self setContents:nil];
+    }
+    
+    if ([_backingStore context]) {
+        CGContextSaveGState ([_backingStore context]);
+        CGContextScaleCTM([_backingStore context], self.contentsScale, self.contentsScale);
+        CGContextClipToRect ([_backingStore context], [self bounds]);
+        [self drawInContext: [_backingStore context]];
+        [self _combineWithMask];
+        CGContextRestoreGState ([_backingStore context]);
+    } else {
+        NSLog(@"[WARNING] EMPTY backing store context");
+    }
+    
+    /* Call -refresh on backing store to fill its texture */
+    if (![self contents])
+        [self setContents: [self backingStore]];
+    
+    self.backingStore.refreshed = NO;
+    //[self.backingStore refresh];
+}
+
+- (void)_resizeBackingStoreSize
+{
+    if (!_backingStore ||
+        [_backingStore width] != self.bounds.size.width ||
+        [_backingStore height] != self.bounds.size.height)
+    {
+        [self setBackingStore:[CABackingStore backingStoreWithWidth: self.bounds.size.width
+                                                             height: self.bounds.size.height]];
+    }
 }
 
 - (void)_combineWithMask
 {
-    if (!self.mask) {
+    if (![self _shouldDrawToBackingStore]) {
         return;
     }
-    CABackingStore *maskCombinedBackingStore = self.mask->_combinedBackingStore;
-    UInt32 *selfImageData = CGBitmapContextGetData([_combinedBackingStore context]);
-    UInt32 *maskImageData = CGBitmapContextGetData([maskCombinedBackingStore context]);
+    CABackingStore *maskBackingStore = self.mask->_backingStore;
+    UInt32 *selfImageData = CGBitmapContextGetData([_backingStore context]);
+    UInt32 *maskImageData = CGBitmapContextGetData([maskBackingStore context]);
     
+    NSLog(@"selfImageData %i, maskImageData %i", selfImageData == NULL, maskImageData == NULL);
     if (selfImageData == NULL || maskImageData == NULL) {
         return;
     }
+    NSLog(@"------3");
     
-    int maskWidth = [maskCombinedBackingStore width];
-    int maskHeight = [maskCombinedBackingStore height];
-    int selfWidth = [_combinedBackingStore width];
-    int selfHeight = [_combinedBackingStore height];
+    int maskWidth = [maskBackingStore width];
+    int maskHeight = [maskBackingStore height];
+    int selfWidth = [_backingStore width];
+    int selfHeight = [_backingStore height];
     int dx = self.mask.frame.origin.x;
     int dy = self.mask.frame.origin.y;
     
@@ -137,6 +158,7 @@
     if (squeezeWidth <= 0 || squeezeHeight <= 0) {
         return;
     }
+    NSLog(@"------4");
     
     for (int x = 0; x < selfWidth; x++) {
         for (int y = 0; y < selfHeight; y++) {
@@ -149,6 +171,7 @@
             }
         }
     }
+    NSLog(@"------5");
 }
 
 @end
