@@ -407,6 +407,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
         _texture = [layer->_texture retain];
         
         _combinedBackingStore = [layer->_combinedBackingStore retain];
+        _layersMaskedByMe = [layer->_layersMaskedByMe retain];
     }
   return self;
 }
@@ -628,10 +629,14 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
         [self setNeedsDisplay];
         if ([self isModelLayer]) {
             if (_mask) {
-                [_layersMaskedByMe removeObject:_mask];
+                NSValue *value = [NSValue valueWithNonretainedObject:self];
+                [_mask->_layersMaskedByMe removeObject:value];
+                [value release];
             }
             if (mask) {
-                [_layersMaskedByMe addObject:mask];
+                NSValue *value = [NSValue valueWithNonretainedObject:self];
+                [mask->_layersMaskedByMe addObject:value];
+                [value release];
             }
         }
         [_mask release];
@@ -774,7 +779,8 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
   /* TODO: schedule redraw of the scene */
   _needsDisplay = YES;
     if ([self isModelLayer]) {
-        for (CALayer *maskedLayer in _layersMaskedByMe) {
+        for (NSValue *maskedLayerValue in _layersMaskedByMe) {
+            CALayer *maskedLayer  = [maskedLayerValue nonretainedObjectValue];
             [maskedLayer setNeedsDisplay];
         }
     }

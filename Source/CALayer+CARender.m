@@ -132,7 +132,7 @@
 
 - (void)_combineWithMask
 {
-    if (![self _shouldDrawToBackingStore]) {
+    if (self.mask == nil) {
         return;
     }
     CABackingStore *maskBackingStore = self.mask->_backingStore;
