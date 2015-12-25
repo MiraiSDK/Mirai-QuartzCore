@@ -74,6 +74,7 @@
             CGContextSaveGState ([_backingStore context]);
             CGContextScaleCTM([_backingStore context], self.contentsScale, self.contentsScale);
             CGContextClipToRect ([_backingStore context], [self bounds]);
+            CGContextClearRect([_backingStore context], [self bounds]);
             CGContextDrawImage([_backingStore context], CGRectMake(0, 0, width, height), image);
             [self _combineWithMask];
             CGContextRestoreGState ([_backingStore context]);
