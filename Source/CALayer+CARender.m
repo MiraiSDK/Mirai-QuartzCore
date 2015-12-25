@@ -32,6 +32,9 @@
 
 - (CAGLTexture *)combinedTexture
 {
+    if ([_backingStore needsRefresh]) {
+        [_backingStore refresh];
+    }
     return [_backingStore contentsTexture];
 }
 
@@ -77,7 +80,7 @@
         } else {
             NSLog(@"[WARNING] EMPTY backing store context");
         }
-        [_backingStore refresh];
+        [self.backingStore setNeedRefresh];
     }
 }
 
@@ -115,8 +118,7 @@
     if (![self contents])
         [self setContents: [self backingStore]];
     
-    self.backingStore.refreshed = NO;
-    //[self.backingStore refresh];
+    [self.backingStore setNeedRefresh];
 }
 
 - (void)_resizeBackingStoreSize

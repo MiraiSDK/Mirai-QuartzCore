@@ -143,7 +143,7 @@ static CGContextRef createCGBitmapContext (int pixelsWide,
   
   /* Refresh */
 //  [self refresh];
-    self.refreshed = NO;
+    [self setNeedRefresh];
 }
 
 - (CGFloat) width
@@ -180,6 +180,11 @@ static CGContextRef createCGBitmapContext (int pixelsWide,
     
     self.refreshed = YES;
 
+}
+
+- (void) setNeedRefresh
+{
+    self.refreshed = NO;
 }
 
 - (BOOL)needsRefresh

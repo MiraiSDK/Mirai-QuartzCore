@@ -1184,11 +1184,16 @@ static CGRect CALayerContentsGetGravityRect(CALayer *layer)
 {
     CAGLTexture *texture;
     if (layer.mask) {
-        texture = [[layer modelLayer] combinedTexture];
-        return nil;
+//        texture = [[layer modelLayer] combinedTexture];
+//        NSAssert(texture != nil, @"can return nil texture!!!");
+        
+        CALayer *mask = [layer.mask modelLayer];
+        NSLog(@" real refresh [%zi]", [mask.backingStore hash]);
+        texture = [mask combinedTexture];
     } else {
         texture = [self _textureOfLayer:layer vertices:vertices texCoords:texCoords];
     }
+    
     return texture;
 }
 

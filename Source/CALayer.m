@@ -287,6 +287,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 {
   if ((self = [super init]) != nil)
     {
+      _needsDisplay = YES;
       _layersMaskedByMe = [[NSMutableSet alloc] init];
       _animations = [[NSMutableDictionary alloc] init];
       _animationKeys = [[NSMutableArray alloc] init];
@@ -754,7 +755,8 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 - (void) display
 {
     if (self.mask) {
-        [self.mask displayIfNeeded];
+        CALayer *maskLayer = [self.mask isModelLayer]? self.mask: [self modelLayer];
+        [maskLayer displayIfNeeded];
     }
     [self displayAccordingToSpecialCondition];
 }

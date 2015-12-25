@@ -76,6 +76,7 @@
 - (id) initWithWidth: (CGFloat) width
               height: (CGFloat) height;
 - (void) refresh;
+- (void) setNeedRefresh;
 @property (assign, getter = isRefreshed) BOOL refreshed;
 @property (assign, readonly) BOOL needsRefresh;
 
