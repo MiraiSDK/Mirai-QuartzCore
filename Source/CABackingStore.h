@@ -77,6 +77,8 @@
               height: (CGFloat) height;
 - (void) refresh;
 - (void) setNeedRefresh;
+- (void)refreshIfNeed;
+
 @property (assign, getter = isRefreshed) BOOL refreshed;
 @property (assign, readonly) BOOL needsRefresh;
 

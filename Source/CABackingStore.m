@@ -182,6 +182,13 @@ static CGContextRef createCGBitmapContext (int pixelsWide,
 
 }
 
+- (void)refreshIfNeed
+{
+    if (self.needsRefresh) {
+        [self refresh];
+    }
+}
+
 - (void) setNeedRefresh
 {
     self.refreshed = NO;

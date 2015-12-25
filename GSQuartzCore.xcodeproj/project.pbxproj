@@ -194,6 +194,8 @@
 		7FFBC86615AB4F58004B0E68 /* CAImplicitAnimationObserver.h in Headers */ = {isa = PBXBuildFile; fileRef = 7FFBC86415AB4F58004B0E68 /* CAImplicitAnimationObserver.h */; };
 		7FFBC86915AB6391004B0E68 /* CATransaction+FrameworkPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 7FFBC86815AB6390004B0E68 /* CATransaction+FrameworkPrivate.h */; };
 		BD0D61F318607AFF00BD348A /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD0D61F218607AFF00BD348A /* CoreText.framework */; };
+		D2446C911C2D52E200F12A11 /* CALayer+CAType.h in Headers */ = {isa = PBXBuildFile; fileRef = D2446C901C2D52E200F12A11 /* CALayer+CAType.h */; };
+		D2446C921C2D52E200F12A11 /* CALayer+CAType.h in Headers */ = {isa = PBXBuildFile; fileRef = D2446C901C2D52E200F12A11 /* CALayer+CAType.h */; };
 		D27032B41BE9EA2F0067D1BD /* CAGLAndroidFunctionBridge.h in Headers */ = {isa = PBXBuildFile; fileRef = D27032B21BE9EA2F0067D1BD /* CAGLAndroidFunctionBridge.h */; };
 		D27032B51BE9EA2F0067D1BD /* CAGLAndroidFunctionBridge.h in Headers */ = {isa = PBXBuildFile; fileRef = D27032B21BE9EA2F0067D1BD /* CAGLAndroidFunctionBridge.h */; };
 		D27032B61BE9EA2F0067D1BD /* CAGLAndroidFunctionBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = D27032B31BE9EA2F0067D1BD /* CAGLAndroidFunctionBridge.m */; };
@@ -360,6 +362,7 @@
 		7FFBC86515AB4F58004B0E68 /* CAImplicitAnimationObserver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CAImplicitAnimationObserver.m; sourceTree = "<group>"; };
 		7FFBC86815AB6390004B0E68 /* CATransaction+FrameworkPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CATransaction+FrameworkPrivate.h"; sourceTree = "<group>"; };
 		BD0D61F218607AFF00BD348A /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
+		D2446C901C2D52E200F12A11 /* CALayer+CAType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CALayer+CAType.h"; sourceTree = "<group>"; };
 		D27032B21BE9EA2F0067D1BD /* CAGLAndroidFunctionBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CAGLAndroidFunctionBridge.h; sourceTree = "<group>"; };
 		D27032B31BE9EA2F0067D1BD /* CAGLAndroidFunctionBridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CAGLAndroidFunctionBridge.m; sourceTree = "<group>"; };
 		D282C6B31C22E7630060880C /* CALayer+CARender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CALayer+CARender.h"; sourceTree = "<group>"; };
@@ -659,6 +662,7 @@
 			children = (
 				D282C6B31C22E7630060880C /* CALayer+CARender.h */,
 				D282C6B41C22E7630060880C /* CALayer+CARender.m */,
+				D2446C901C2D52E200F12A11 /* CALayer+CAType.h */,
 			);
 			name = CAPrivate;
 			sourceTree = "<group>";
@@ -696,6 +700,7 @@
 				43E112A5185EDBFF00E771B4 /* CAAction.h in Headers */,
 				43A9D0A5185D9B2E00720B81 /* QuartzCore.h in Headers */,
 				43A9D0A8185D9B2E00720B81 /* CABackingStore.h in Headers */,
+				D2446C921C2D52E200F12A11 /* CALayer+CAType.h in Headers */,
 				43A9D0A9185D9B2E00720B81 /* CAAnimation+FrameworkPrivate.h in Headers */,
 				43A9D0AA185D9B2E00720B81 /* CALayer+FrameworkPrivate.h in Headers */,
 				D282C6B61C22E7630060880C /* CALayer+CARender.h in Headers */,
@@ -759,6 +764,7 @@
 				7F88F46915CE9FD2002F25F0 /* CALayer+DynamicProperties.h in Headers */,
 				D27032B41BE9EA2F0067D1BD /* CAGLAndroidFunctionBridge.h in Headers */,
 				7F1DE5A415D6EBAC00C2AE2A /* CAGLShader.h in Headers */,
+				D2446C911C2D52E200F12A11 /* CALayer+CAType.h in Headers */,
 				7F1DE5A815D6F35D00C2AE2A /* CAGLProgram.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

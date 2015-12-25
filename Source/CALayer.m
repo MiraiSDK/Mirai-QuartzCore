@@ -31,6 +31,7 @@
 #import "QuartzCore/CAAnimation.h"
 #import "QuartzCore/CALayer.h"
 #import "CALayer+CARender.h"
+#import "CALayer+CAType.h"
 #import "CABackingStore.h"
 #import "CALayer+FrameworkPrivate.h"
 #import "CAAnimation+FrameworkPrivate.h"

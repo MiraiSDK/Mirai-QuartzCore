@@ -21,6 +21,7 @@
 #import "CAMovieLayer.h"
 #import "CALayer+Texture.h"
 #import "CALayer+CARender.h"
+#import "CALayer+CAType.h"
 
 #import "CATextureLoader.h"
 
@@ -32,10 +33,9 @@
 
 - (CAGLTexture *)combinedTexture
 {
-    if ([_backingStore needsRefresh]) {
-        [_backingStore refresh];
-    }
-    return [_backingStore contentsTexture];
+    CABackingStore *backingStore = [self _toModeLayer]->_backingStore;
+    [backingStore refreshIfNeed];
+    return [backingStore contentsTexture];
 }
 
 - (void)displayAccordingToSpecialCondition
@@ -137,22 +137,20 @@
     if (self.mask == nil) {
         return;
     }
-    CABackingStore *maskBackingStore = self.mask->_backingStore;
+    CALayer *mask = [self.mask _toModeLayer];
+    CABackingStore *maskBackingStore = mask->_backingStore;
     UInt32 *selfImageData = CGBitmapContextGetData([_backingStore context]);
     UInt32 *maskImageData = CGBitmapContextGetData([maskBackingStore context]);
     
-    NSLog(@"selfImageData %i, maskImageData %i", selfImageData == NULL, maskImageData == NULL);
     if (selfImageData == NULL || maskImageData == NULL) {
         return;
     }
-    NSLog(@"------3");
-    
     int maskWidth = [maskBackingStore width];
     int maskHeight = [maskBackingStore height];
     int selfWidth = [_backingStore width];
     int selfHeight = [_backingStore height];
-    int dx = self.mask.frame.origin.x;
-    int dy = self.mask.frame.origin.y;
+    int dx = mask.frame.origin.x;
+    int dy = mask.frame.origin.y;
     
     int squeezeWidth = MIN(selfWidth, dx + maskWidth) - dx;
     int squeezeHeight = MIN(selfHeight, dy + maskHeight) - dy;
@@ -160,8 +158,6 @@
     if (squeezeWidth <= 0 || squeezeHeight <= 0) {
         return;
     }
-    NSLog(@"------4");
-    
     for (int x = 0; x < selfWidth; x++) {
         for (int y = 0; y < selfHeight; y++) {
             if (x < dx | x >= dx + squeezeWidth | y < dy | y >= dy + squeezeHeight) {
@@ -173,7 +169,15 @@
             }
         }
     }
-    NSLog(@"------5");
+}
+
+- (CALayer *)_toModeLayer
+{
+    if ([self isModelLayer]) {
+        return self;
+    } else {
+        return [self modelLayer];
+    }
 }
 
 @end
