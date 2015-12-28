@@ -96,6 +96,7 @@ typedef struct _CVTimeStamp
 - (CFTimeInterval) nextFrameTime;
 - (void) render;
 - (CGRect) updateBounds;
++ (NSLock *) layerDisplayLock;
 
 //private
 + (CARenderer *)currentRenderer;

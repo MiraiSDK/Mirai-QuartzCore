@@ -666,11 +666,21 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     CGAffineTransform invertedTransform = CGAffineTransformInvert(self.affineTransform);
     CGSize transformedSize = CGSizeApplyAffineTransform(frame.size, invertedTransform);
     CGPoint newOrigin = frame.origin;
+    CGPoint transformedPosition = CGPointMake(newOrigin.x + (frame.size.width * _anchorPoint.x),
+                                              newOrigin.y + (frame.size.height * _anchorPoint.y));
+    
+    BOOL sizeChanged = CGSizeEqualToSize(transformedSize, frame.size);
+    BOOL positionChanged = CGPointEqualToPoint(transformedPosition, frame.origin);
     
     _bounds.size = transformedSize;
-    _position = CGPointMake(newOrigin.x + (frame.size.width * _anchorPoint.x),
-                            newOrigin.y + (frame.size.height * _anchorPoint.y));
-    [self setNeedsLayout];
+    _position = transformedPosition;
+    
+    if (sizeChanged || (self.mask && positionChanged)) {
+        [self setNeedsDisplay];
+    }
+    if (sizeChanged || positionChanged) {
+        [self setNeedsLayout];
+    }
 }
 
 - (void) setBounds: (CGRect)bounds
@@ -764,12 +774,17 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 
 - (void) displayIfNeeded
 {
-  if (_needsDisplay)
-    {
-      [self display];
+    if (_needsDisplay) {
+        if ([self isModelLayer]) {
+            @try {
+                [[CARenderer layerDisplayLock] lock];
+                [self display];
+            } @finally {
+                [[CARenderer layerDisplayLock] unlock];
+            }
+        }
+        _needsDisplay = NO;
     }
-
-  _needsDisplay = NO;
 }
 
 - (BOOL) needsDisplay

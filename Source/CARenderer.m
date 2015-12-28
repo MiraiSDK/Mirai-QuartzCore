@@ -144,6 +144,8 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
     CAGLProgram *_videoProgram;
     GLuint _stencilMaskDepth;
 }
+static NSLock *_layerDisplayLock;
+
 @synthesize layer=_layer;
 @synthesize bounds=_bounds;
 
@@ -179,6 +181,11 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
 }
 
 #endif
+
++ (void)initialize
+{
+    _layerDisplayLock = [[NSRecursiveLock alloc] init];
+}
 
 /* *** methods *** */
 #if ANDROID || TARGET_OS_IPHONE
@@ -223,6 +230,11 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
   [_blurVertProgram release];
   
   [super dealloc];
+}
+
++ (NSLock *) layerDisplayLock
+{
+    return _layerDisplayLock;
 }
 
 #pragma mark - 
