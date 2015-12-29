@@ -6,8 +6,8 @@
 //  Copyright © 2015年 Shanghai TinyNetwork Inc. All rights reserved.
 //
 
-#import "TNTestViewController.h"
+#import "TNBasicLayerMaskTestViewController.h"
 
-@interface TNLayerMaskTestViewController : TNTestViewController
+@interface TNLayerImageMaskTestViewController : TNBasicLayerMaskTestViewController
 
 @end

@@ -39,8 +39,12 @@
 		D2726A7C1ABE95500010F435 /* tabicon0.png in Resources */ = {isa = PBXBuildFile; fileRef = D2726A7A1ABE95500010F435 /* tabicon0.png */; };
 		D2A5F49D1AB084CD0011AF7B /* loveheart.png in Resources */ = {isa = PBXBuildFile; fileRef = D2A5F49C1AB084CD0011AF7B /* loveheart.png */; };
 		D2A5F49E1AB084CD0011AF7B /* loveheart.png in Resources */ = {isa = PBXBuildFile; fileRef = D2A5F49C1AB084CD0011AF7B /* loveheart.png */; };
-		D2B10CFC1BE361A800E698D8 /* TNLayerMaskTestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D2B10CFB1BE361A800E698D8 /* TNLayerMaskTestViewController.m */; };
-		D2B10CFD1BE361A800E698D8 /* TNLayerMaskTestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D2B10CFB1BE361A800E698D8 /* TNLayerMaskTestViewController.m */; };
+		D2B10CFC1BE361A800E698D8 /* TNLayerImageMaskTestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D2B10CFB1BE361A800E698D8 /* TNLayerImageMaskTestViewController.m */; };
+		D2B10CFD1BE361A800E698D8 /* TNLayerImageMaskTestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D2B10CFB1BE361A800E698D8 /* TNLayerImageMaskTestViewController.m */; };
+		D2CD42FA1C32825D003BFC43 /* TNLayerDrawInRectMaskTestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D2CD42F91C32825D003BFC43 /* TNLayerDrawInRectMaskTestViewController.m */; };
+		D2CD42FB1C32825D003BFC43 /* TNLayerDrawInRectMaskTestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D2CD42F91C32825D003BFC43 /* TNLayerDrawInRectMaskTestViewController.m */; };
+		D2CD42FF1C328294003BFC43 /* TNBasicLayerMaskTestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D2CD42FE1C328294003BFC43 /* TNBasicLayerMaskTestViewController.m */; };
+		D2CD43001C328294003BFC43 /* TNBasicLayerMaskTestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D2CD42FE1C328294003BFC43 /* TNBasicLayerMaskTestViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -116,8 +120,12 @@
 		D283B4D11BE35BB100910AC3 /* GSQuartzCore.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = GSQuartzCore.xcodeproj; path = ../../GSQuartzCore.xcodeproj; sourceTree = "<group>"; };
 		D2A5F49C1AB084CD0011AF7B /* loveheart.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = loveheart.png; sourceTree = "<group>"; };
 		D2B10CED1BE3617F00E698D8 /* UIKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UIKit.xcodeproj; path = "../../../Mirai-UIKit/UIKit.xcodeproj"; sourceTree = "<group>"; };
-		D2B10CFA1BE361A800E698D8 /* TNLayerMaskTestViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TNLayerMaskTestViewController.h; sourceTree = "<group>"; };
-		D2B10CFB1BE361A800E698D8 /* TNLayerMaskTestViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TNLayerMaskTestViewController.m; sourceTree = "<group>"; };
+		D2B10CFA1BE361A800E698D8 /* TNLayerImageMaskTestViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TNLayerImageMaskTestViewController.h; sourceTree = "<group>"; };
+		D2B10CFB1BE361A800E698D8 /* TNLayerImageMaskTestViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TNLayerImageMaskTestViewController.m; sourceTree = "<group>"; };
+		D2CD42F81C32825D003BFC43 /* TNLayerDrawInRectMaskTestViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TNLayerDrawInRectMaskTestViewController.h; sourceTree = "<group>"; };
+		D2CD42F91C32825D003BFC43 /* TNLayerDrawInRectMaskTestViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TNLayerDrawInRectMaskTestViewController.m; sourceTree = "<group>"; };
+		D2CD42FD1C328294003BFC43 /* TNBasicLayerMaskTestViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TNBasicLayerMaskTestViewController.h; sourceTree = "<group>"; };
+		D2CD42FE1C328294003BFC43 /* TNBasicLayerMaskTestViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TNBasicLayerMaskTestViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -254,10 +262,22 @@
 		D2B10CF91BE3618700E698D8 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				D2B10CFA1BE361A800E698D8 /* TNLayerMaskTestViewController.h */,
-				D2B10CFB1BE361A800E698D8 /* TNLayerMaskTestViewController.m */,
+				D2CD42FC1C32826D003BFC43 /* LayerMaskTest */,
 			);
 			name = Tests;
+			sourceTree = "<group>";
+		};
+		D2CD42FC1C32826D003BFC43 /* LayerMaskTest */ = {
+			isa = PBXGroup;
+			children = (
+				D2B10CFA1BE361A800E698D8 /* TNLayerImageMaskTestViewController.h */,
+				D2B10CFB1BE361A800E698D8 /* TNLayerImageMaskTestViewController.m */,
+				D2CD42F81C32825D003BFC43 /* TNLayerDrawInRectMaskTestViewController.h */,
+				D2CD42F91C32825D003BFC43 /* TNLayerDrawInRectMaskTestViewController.m */,
+				D2CD42FD1C328294003BFC43 /* TNBasicLayerMaskTestViewController.h */,
+				D2CD42FE1C328294003BFC43 /* TNBasicLayerMaskTestViewController.m */,
+			);
+			name = LayerMaskTest;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -432,9 +452,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D2B10CFD1BE361A800E698D8 /* TNLayerMaskTestViewController.m in Sources */,
+				D2B10CFD1BE361A800E698D8 /* TNLayerImageMaskTestViewController.m in Sources */,
+				D2CD42FB1C32825D003BFC43 /* TNLayerDrawInRectMaskTestViewController.m in Sources */,
 				4390B8071A8351470082B0F1 /* TNTestCase.m in Sources */,
 				437F25DC1A736FA800FBE3E2 /* AppDelegate.m in Sources */,
+				D2CD43001C328294003BFC43 /* TNBasicLayerMaskTestViewController.m in Sources */,
 				437F25E01A736FA800FBE3E2 /* TNAndroidLauncher.m in Sources */,
 				437F25E71A736FA800FBE3E2 /* ViewController.m in Sources */,
 				4390B8091A8351470082B0F1 /* TNTestViewController.m in Sources */,
@@ -448,8 +470,10 @@
 			files = (
 				437F25EF1A736FB400FBE3E2 /* AppDelegate.m in Sources */,
 				4390B8061A8351470082B0F1 /* TNTestCase.m in Sources */,
-				D2B10CFC1BE361A800E698D8 /* TNLayerMaskTestViewController.m in Sources */,
+				D2B10CFC1BE361A800E698D8 /* TNLayerImageMaskTestViewController.m in Sources */,
+				D2CD42FF1C328294003BFC43 /* TNBasicLayerMaskTestViewController.m in Sources */,
 				437F25F11A736FB400FBE3E2 /* ViewController.m in Sources */,
+				D2CD42FA1C32825D003BFC43 /* TNLayerDrawInRectMaskTestViewController.m in Sources */,
 				437F25F21A736FB400FBE3E2 /* main.m in Sources */,
 				4390B8081A8351470082B0F1 /* TNTestViewController.m in Sources */,
 			);
