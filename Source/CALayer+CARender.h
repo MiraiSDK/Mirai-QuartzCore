@@ -14,5 +14,6 @@
 
 - (void)displayAccordingToSpecialCondition;
 - (CAGLTexture *)combinedTexture;
+- (void)prepareContentsBeforeDisplay;
 
 @end

@@ -3,6 +3,8 @@
 */
 
 #import "CAShapeLayer.h"
+#import "CALayer+CARender.h"
+
 @implementation CAShapeLayer
 @synthesize path = _path;
 @synthesize fillColor = _fillColor;
@@ -42,7 +44,7 @@
 }
 
 // FIXME: The Apple's documentation indicate that CAShapeLayer class creates its content by rendering the path into a bitmap image at composite time.
-- (void)display
+- (void)prepareContentsBeforeDisplay
 {
     CGColorSpaceRef cs = CGColorSpaceCreateDeviceRGB();
     

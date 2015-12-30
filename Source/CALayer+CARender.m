@@ -40,6 +40,8 @@
 
 - (void)displayAccordingToSpecialCondition
 {
+    [self prepareContentsBeforeDisplay];
+    
     if ([_delegate respondsToSelector: @selector(displayLayer:)]) {
         [_delegate displayLayer: self];
         if ([self _shouldDrawToBackingStore]) {
@@ -48,6 +50,17 @@
     } else {
         [self _drawByCustomToBackingStoreIfNeed];
     }
+}
+
+- (BOOL)_hasOverridePrepareContentsBeforeDisplayMethod
+{
+    SEL method = @selector(prepareContentsBeforeDisplay);
+    return [CALayer instanceMethodForSelector:method] != [[self class] instanceMethodForSelector:method];
+}
+
+- (void)prepareContentsBeforeDisplay
+{
+    // can be overiide by subclasses.
 }
 
 - (BOOL)_shouldDrawToBackingStore
