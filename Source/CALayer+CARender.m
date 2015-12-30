@@ -42,7 +42,11 @@
 {
     [self prepareContentsBeforeDisplay];
     
-    if ([_delegate respondsToSelector: @selector(displayLayer:)]) {
+    if ([self isKindOfClass:[CAShapeLayer class]]) {
+        if ([self _shouldDrawToBackingStore]) {
+            [self _drawImageToBackingStoreIfNeed];
+        }
+    } else if ([_delegate respondsToSelector: @selector(displayLayer:)]) {
         [_delegate displayLayer: self];
         if ([self _shouldDrawToBackingStore]) {
             [self _drawImageToBackingStoreIfNeed];
