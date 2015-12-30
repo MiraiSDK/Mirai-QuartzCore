@@ -35,6 +35,7 @@
 #import "CALayer+FrameworkPrivate.h"
 #import "CATransaction+FrameworkPrivate.h"
 #import "CABackingStore.h"
+#import "CAShapeLayer.h"
 #import "CAMovieLayer.h"
 #import "CALayer+Texture.h"
 #import "CALayer+CARender.h"
@@ -1195,13 +1196,19 @@ static CGRect CALayerContentsGetGravityRect(CALayer *layer)
                                   texCoords:(GLfloat *)texCoords
 {
     CAGLTexture *texture;
-    if (layer.mask && ![layer isKindOfClass:[CAMovieLayer class]]) {
+    if (layer.mask && ![self _isLayerUnsupported:layer]) {
         texture = [layer combinedTexture];
     } else {
         texture = [self _textureOfLayer:layer vertices:vertices texCoords:texCoords];
     }
     
     return texture;
+}
+
+- (BOOL)_isLayerUnsupported:(CALayer *)layer
+{
+    return [layer isKindOfClass:[CAMovieLayer class]] || [layer isKindOfClass:[CAShapeLayer class]];
+    
 }
 
 - (CAGLTexture *)_textureOfLayer:(CALayer *)layer
