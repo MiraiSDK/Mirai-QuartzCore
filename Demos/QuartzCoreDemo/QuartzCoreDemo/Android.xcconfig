@@ -1,0 +1,25 @@
+//
+//  Android.xcconfig
+//  QuartzCoreDemo
+//
+//  Created by Chen Yonghui on 1/24/15.
+//  Copyright (c) 2015 Shanghai TinyNetwork Inc. All rights reserved.
+//
+
+CODE_SIGN_IDENTITY[sdk=iphoneos*] =
+LD_DEPENDENCY_INFO_FILE =
+EXECUTABLE_EXTENSION = so
+EXECUTABLE_PREFIX = lib
+MACOSX_DEPLOYMENT_TARGET=
+
+WRAPPER_EXTENSION = app
+
+SDKROOT = macosx0.0
+MACH_O_TYPE = mh_dylib //change Mach-O Type to dynamic library
+CLANG_ENABLE_MODULES = NO
+
+BASE_CFLAGS = -DANDROID -fobjc-nonfragile-abi -fblocks
+BASE_LDFLAGS= -shared -Wl,-z,defs -landroid -lobjc -ldispatch -lgnustep-base -fconstant-class=NSConstantString -lm -llog -lz
+
+OTHER_CFLAGS = $(inherited) $(BASE_CFLAGS)
+OTHER_LDFLAGS = $(inherited) $(BASE_LDFLAGS)
