@@ -43,6 +43,7 @@
 #import "CATransformDecompose.h"
 #import "CAMovieLayer.h"
 #import "CATextureLoader.h"
+#import "CAGLNestingSequencer.h"
 
 #if GNUSTEP
 #import <CoreGraphics/CoreGraphics.h>
@@ -1027,7 +1028,6 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
             NSLog(@"[Warning] exepect animation doesn't exist");
         }
     }
-    
   [_animations setValue: anim
                  forKey: key];
   [key retain];
@@ -1171,16 +1171,17 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
         }
     }
     
-    NSArray *animationsToRemove = [_animations objectsForKeys:animationKeysToRemove notFoundMarker:[NSNull null]];
-
-  [_animations removeObjectsForKeys: animationKeysToRemove];
-  [_animationKeys removeObjectsInArray: animationKeysToRemove];
-  [animationKeysToRemove release];
-    
-    if (animationsToRemove.count > 0) {
-        [[self modelLayer] addFinishedAnimations:animationsToRemove];
+    if ([[self modelLayer] superlayer] != nil) {
+        NSArray *animationsToRemove = [_animations objectsForKeys:animationKeysToRemove notFoundMarker:[NSNull null]];
+        
+        [_animations removeObjectsForKeys: animationKeysToRemove];
+        [_animationKeys removeObjectsInArray: animationKeysToRemove];
+        [animationKeysToRemove release];
+        
+        if (animationsToRemove.count > 0) {
+            [[self modelLayer] addFinishedAnimations:animationsToRemove];
+        }
     }
-  
   return lowestNextFrameTime;
 }
 
@@ -1237,11 +1238,48 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 - (void)removeFromSuperlayer
 {
   NSMutableArray * mutableSublayersOfSuperlayer = (NSMutableArray*)[[self superlayer] sublayers];
-  
+    
+    [self _forceFinishAllAnimationAndCallbackSequencing];
   [mutableSublayersOfSuperlayer removeObject: self];
   [self setSuperlayer: nil];
-    
-    [self setNeedsLayout];
+  [self setNeedsLayout];
+}
+
+- (void)_forceFinishAllAnimationAndCallbackSequencing
+{
+    [[self.class _nestingSequencer] invokeTarget:self
+                                          method:@selector(_forceFinishAllAnimationAndCallback)];
+}
+
+- (void)_forceFinishAllAnimationAndCallback
+{
+    if (_animations.count > 0 || _finishedAnimations.count > 0) {
+        NSMutableArray *allAnimations = [[NSMutableArray alloc] init];
+        [allAnimations addObjectsFromArray:[_animations allValues]];
+        [allAnimations addObjectsFromArray:_finishedAnimations];
+        
+        [self notifyAnimationsStopped:allAnimations finished:YES];
+        [allAnimations release];
+        
+        [_animations removeAllObjects];
+        [_animationKeys removeAllObjects];
+        [_finishedAnimations removeAllObjects];
+    }
+    NSArray *sublayers = [self.sublayers copy];
+    for (CALayer *subLayer in sublayers) {
+        [[self.class _nestingSequencer] invokeTarget:subLayer
+                                              method:@selector(_forceFinishAllAnimationAndCallback)];
+    }
+    [sublayers release];
+}
+
++ (CAGLNestingSequencer *)_nestingSequencer
+{
+    static CAGLNestingSequencer *sequencer;
+    if (sequencer == nil) {
+        sequencer = [[CAGLNestingSequencer alloc] init];
+    }
+    return sequencer;
 }
 
 - (void) insertSublayer: (CALayer *)layer atIndex: (unsigned)index
