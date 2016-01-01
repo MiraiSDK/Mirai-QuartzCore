@@ -34,16 +34,12 @@
 - (instancetype)invokeTarget:(id)target method:(SEL)method
 {
     if (_nodeQueue) {
-        NSLog(@" ");
-        NSLog(@"-->");
         _CAGLNestingSequencerNode *node = [[_CAGLNestingSequencerNode alloc] init];
         node->_target = [target retain];
         node->_method = method;
         [_nodeQueue addObject:node];
         [node release];
     } else {
-        NSLog(@" ");
-        NSLog(@">>>");
         _nodeQueue = [[NSMutableArray alloc] init];
         [target performSelector:method];
         
@@ -54,8 +50,6 @@
         }
         [_nodeQueue release];
         _nodeQueue = nil;
-        NSLog(@"<<<");
-        NSLog(@" ");
     }
 }
 
