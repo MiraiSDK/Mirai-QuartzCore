@@ -26,6 +26,11 @@ LOCAL_SRC_FILES := $(TN_LIBRARY_PATH)/libgnustep-base.so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE    := AVFoundation
+LOCAL_SRC_FILES := $(TN_LIBRARY_PATH)/libAVFoundation.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE    := TNJavaHelper
 LOCAL_SRC_FILES := $(TN_LIBRARY_PATH)/libTNJavaHelper.so
 include $(PREBUILT_SHARED_LIBRARY)
@@ -69,7 +74,7 @@ include $(PREBUILT_SHARED_LIBRARY)
 
 # Application
 include $(CLEAR_VARS)
-LOCAL_MODULE    := libQuartzCoreDemo
-LOCAL_SRC_FILES := libQuartzCoreDemo.so
+LOCAL_MODULE    := libUIKitDemo
+LOCAL_SRC_FILES := libUIKitDemo.so
 include $(PREBUILT_SHARED_LIBRARY)
 

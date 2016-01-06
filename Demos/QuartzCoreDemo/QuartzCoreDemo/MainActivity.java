@@ -1,4 +1,4 @@
-package org.tiny4.QuartzCoreDemo;
+package org.tiny4.UIKitDemo;
 
 import org.tiny4.CocoaActivity.CocoaActivity;
 
@@ -19,6 +19,7 @@ public class MainActivity extends CocoaActivity
         System.loadLibrary ("objc");
         System.loadLibrary ("gnustep-base");
         System.loadLibrary ("gnustep-corebase");
+        System.loadLibrary ("AVFoundation");
         System.loadLibrary ("TNJavaHelper");
         System.loadLibrary ("CoreGraphics");
         System.loadLibrary ("CoreText");
@@ -27,7 +28,7 @@ public class MainActivity extends CocoaActivity
         System.loadLibrary ("QuartzCore");
         System.loadLibrary ("UIKit");
         System.loadLibrary ("MediaPlayer");
-        System.loadLibrary ("QuartzCoreDemo");
+        System.loadLibrary ("UIKitDemo");
     }
     
     /** Called when the activity is first created. */
