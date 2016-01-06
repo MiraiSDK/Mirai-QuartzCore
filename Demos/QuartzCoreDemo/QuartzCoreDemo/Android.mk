@@ -74,7 +74,7 @@ include $(PREBUILT_SHARED_LIBRARY)
 
 # Application
 include $(CLEAR_VARS)
-LOCAL_MODULE    := libUIKitDemo
-LOCAL_SRC_FILES := libUIKitDemo.so
+LOCAL_MODULE    := libQuartzCoreDemo
+LOCAL_SRC_FILES := libQuartzCoreDemo.so
 include $(PREBUILT_SHARED_LIBRARY)
 

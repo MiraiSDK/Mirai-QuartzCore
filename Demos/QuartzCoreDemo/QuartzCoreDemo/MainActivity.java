@@ -1,5 +1,4 @@
-package org.tiny4.UIKitDemo;
-
+package org.tiny4.QuartzCoreDemo;
 import org.tiny4.CocoaActivity.CocoaActivity;
 
 import android.app.Activity;
@@ -28,7 +27,7 @@ public class MainActivity extends CocoaActivity
         System.loadLibrary ("QuartzCore");
         System.loadLibrary ("UIKit");
         System.loadLibrary ("MediaPlayer");
-        System.loadLibrary ("UIKitDemo");
+        System.loadLibrary ("QuartzCoreDemo");
     }
     
     /** Called when the activity is first created. */
