@@ -30,6 +30,8 @@
 #import <Foundation/Foundation.h>
 #import "QuartzCore/CAAnimation.h"
 #import "QuartzCore/CALayer.h"
+#import "CALayer+CARender.h"
+#import "CALayer+CAType.h"
 #import "CABackingStore.h"
 #import "CALayer+FrameworkPrivate.h"
 #import "CAAnimation+FrameworkPrivate.h"
@@ -39,6 +41,9 @@
 #import "CABackingStore.h"
 #import "CATransaction+FrameworkPrivate.h"
 #import "CATransformDecompose.h"
+#import "CAMovieLayer.h"
+#import "CATextureLoader.h"
+#import "CAGLNestingSequencer.h"
 
 #if GNUSTEP
 #import <CoreGraphics/CoreGraphics.h>
@@ -72,6 +77,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 @property (nonatomic, retain) NSMutableDictionary * animations;
 @property (retain) NSMutableArray * animationKeys;
 @property (retain) CABackingStore * backingStore;
+@property (retain) CABackingStore * combinedBackingStore;
 @property (assign,getter = isDirty) BOOL dirty;
 @property (nonatomic, retain) NSMutableArray *finishedAnimations;
 
@@ -132,6 +138,7 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 @synthesize animations=_animations;
 @synthesize animationKeys=_animationKeys;
 @synthesize backingStore=_backingStore;
+@synthesize combinedBackingStore=_combinedBackingStore;
 
 @synthesize dirty = _dirty;
 @synthesize type = _type;
@@ -282,6 +289,8 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 {
   if ((self = [super init]) != nil)
     {
+      _needsDisplay = YES;
+      _layersMaskedByMe = [[NSMutableSet alloc] init];
       _animations = [[NSMutableDictionary alloc] init];
       _animationKeys = [[NSMutableArray alloc] init];
       _sublayers = [[NSMutableArray alloc] init];
@@ -342,7 +351,6 @@ typedef NS_ENUM(NSInteger, CALayerType) {
      layers. */
   if ((self = [super init]) != nil)
     {
-        _delegate = layer->_delegate;
         _layoutManager = [layer->_layoutManager retain];
         _superlayer = layer->_superlayer; /* if copied for use in presentation layer, then ignored */
         _sublayers = [layer->_sublayers copy]; /* if copied for use in presentation layer, then ignored */
@@ -400,13 +408,18 @@ typedef NS_ENUM(NSInteger, CALayerType) {
         
         _needsLayout = layer.needsLayout;
         _texture = [layer->_texture retain];
+        
+        _combinedBackingStore = [layer->_combinedBackingStore retain];
+        _layersMaskedByMe = [layer->_layersMaskedByMe retain];
     }
   return self;
 }
 
 - (void) dealloc
 {
-  
+  if ([self isRenderLayer]) {
+    [_delegate release];
+  }
   CGColorRelease(_shadowColor);
   CGPathRelease(_shadowPath);
     CGColorRelease(_borderColor);
@@ -425,6 +438,8 @@ typedef NS_ENUM(NSInteger, CALayerType) {
   [_fillMode release];
   
   [_backingStore release];
+  [_combinedBackingStore release];
+  [_layersMaskedByMe release];
   [_animations release];
   [_animationKeys release];
     if (_modelLayer) {
@@ -558,12 +573,9 @@ GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(setSpeed, float, speed)
 GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(setDuration, CFTimeInterval, duration)
 GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(setAutoreverses, BOOL, autoreverses)
 
-//GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setDelegate, id, delegate)
 GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setOpacity, CGFloat, opacity)
 GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowOpacity, float, shadowOpacity)
 GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
-
-
 
 - (void)beginChangeKeyPath:(NSString *)keyPath
 {
@@ -586,6 +598,56 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 
 
 #endif
+
+- (void)setDelegate:(id)delegate
+{
+    if (_delegate != delegate) {
+        
+        // keeping render layer's refrence never meants keep model layer's refrence.
+        // when the _delegate release, it will become a wild pointer and make a big trouble.
+        // so, we should keep _delegate's refrence in render layer.
+        // anyway, render layer only exist a short time.
+        
+        if ([self isRenderLayer]) {
+            [_delegate release];
+            [delegate retain];
+        }
+        _delegate = delegate;
+    }
+}
+
+- (id)delegate
+{
+    return _delegate;
+}
+
+- (void)releaseDelegate
+{
+    [self setDelegate:nil];
+}
+
+- (void)setMask:(CALayer *)mask
+{
+    if (_mask != mask) {
+        [self setNeedsDisplay];
+        if ([self isModelLayer]) {
+            if (_mask) {
+                NSValue *value = [NSValue valueWithNonretainedObject:self];
+                [_mask->_layersMaskedByMe removeObject:value];
+                [value release];
+            }
+            if (mask) {
+                NSValue *value = [NSValue valueWithNonretainedObject:self];
+                [mask->_layersMaskedByMe addObject:value];
+                [value release];
+            }
+        }
+        [_mask release];
+        _mask = [mask retain];
+    }
+}
+
+
 - (CGRect)frame
 {
     CGAffineTransform t = self.affineTransform;
@@ -605,11 +667,21 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     CGAffineTransform invertedTransform = CGAffineTransformInvert(self.affineTransform);
     CGSize transformedSize = CGSizeApplyAffineTransform(frame.size, invertedTransform);
     CGPoint newOrigin = frame.origin;
+    CGPoint transformedPosition = CGPointMake(newOrigin.x + (frame.size.width * _anchorPoint.x),
+                                              newOrigin.y + (frame.size.height * _anchorPoint.y));
+    
+    BOOL sizeChanged = CGSizeEqualToSize(transformedSize, frame.size);
+    BOOL positionChanged = CGPointEqualToPoint(transformedPosition, frame.origin);
     
     _bounds.size = transformedSize;
-    _position = CGPointMake(newOrigin.x + (frame.size.width * _anchorPoint.x),
-                            newOrigin.y + (frame.size.height * _anchorPoint.y));
-    [self setNeedsLayout];
+    _position = transformedPosition;
+    
+    if (sizeChanged || (self.mask && positionChanged)) {
+        [self setNeedsDisplay];
+    }
+    if (sizeChanged || positionChanged) {
+        [self setNeedsLayout];
+    }
 }
 
 - (void) setBounds: (CGRect)bounds
@@ -694,58 +766,26 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 
 - (void) display
 {
-  if ([_delegate respondsToSelector: @selector(displayLayer:)])
-    {
-      [_delegate displayLayer: self];
+    if (self.mask) {
+        CALayer *maskLayer = [self.mask isModelLayer]? self.mask: [self modelLayer];
+        [maskLayer displayIfNeeded];
     }
-  else
-    {
-      /* By default, uses -drawInContext: to update the 'contents' property. */
-    
-      CGRect bounds = [self bounds];
-      if (CGRectIsEmpty(bounds))
-      {
-        return;
-      }
-      
-      if (!_backingStore ||
-          [_backingStore width] != bounds.size.width ||
-          [_backingStore height] != bounds.size.height)
-      {
-          //TODO: taking account the opaque property, should create a bitmap without alpha channel while opaque is YES.
-          CGFloat backingWidth = bounds.size.width * self.contentsScale;
-          CGFloat backingHeight = bounds.size.height * self.contentsScale;
-        [self setBackingStore: [CABackingStore backingStoreWithWidth: backingWidth height: backingHeight]];
-        [self setContents:nil];
-      }
-      
-        if ([_backingStore context]) {
-            CGContextSaveGState ([_backingStore context]);
-            CGContextScaleCTM([_backingStore context], self.contentsScale, self.contentsScale);
-            CGContextClipToRect ([_backingStore context], [self bounds]);
-            [self drawInContext: [_backingStore context]];
-            CGContextRestoreGState ([_backingStore context]);
-        } else {
-            NSLog(@"[WARNING] EMPTY backing store context");
-        }
-
-      /* Call -refresh on backing store to fill its texture */
-      if (![self contents])
-        [self setContents: [self backingStore]];
-      
-        self.backingStore.refreshed = NO;
-        //[self.backingStore refresh];
-    }
+    [self displayAccordingToSpecialCondition];
 }
 
 - (void) displayIfNeeded
 {
-  if (_needsDisplay)
-    {
-      [self display];
+    if (_needsDisplay) {
+        if ([self isModelLayer]) {
+            @try {
+                [[CARenderer layerDisplayLock] lock];
+                [self display];
+            } @finally {
+                [[CARenderer layerDisplayLock] unlock];
+            }
+        }
+        _needsDisplay = NO;
     }
-
-  _needsDisplay = NO;
 }
 
 - (BOOL) needsDisplay
@@ -757,7 +797,12 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 {
   /* TODO: schedule redraw of the scene */
   _needsDisplay = YES;
-    
+    if ([self isModelLayer]) {
+        for (NSValue *maskedLayerValue in _layersMaskedByMe) {
+            CALayer *maskedLayer  = [maskedLayerValue nonretainedObjectValue];
+            [maskedLayer setNeedsDisplay];
+        }
+    }
     [self markDirty];
 }
 
@@ -772,6 +817,42 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     {
       [_delegate drawLayer: self inContext: context];
     }
+}
+
+- (CAGLTexture *) maskTextureWithLoader:(CATextureLoader *)texureLoader
+{
+    CAGLTexture * texture = nil;
+    id layerContents = [self contents];
+    
+    if ([self isKindOfClass:[CAMovieLayer class]]) {
+        texture = [self.backingStore contentsTexture];
+    } else if ([layerContents isKindOfClass: [CABackingStore class]]) {
+        CABackingStore * backingStore = layerContents;
+        texture = [backingStore contentsTexture];
+    }
+#if GNUSTEP
+    else if ([layerContents isKindOfClass: NSClassFromString(@"CGImage")])
+#else
+    else if ([layerContents isKindOfClass: NSClassFromString(@"__NSCFType")] &&
+             CFGetTypeID(layerContents) == CGImageGetTypeID())
+#endif
+    {
+        CGImageRef image = (CGImageRef)layerContents;
+        texture = [texureLoader textureForLayer:self];
+        if (texture.contents == nil) {
+            NSLog(@"Texture:load image");
+            [texture loadImage: image];
+            texture.contents = layerContents;
+        }
+    } else {
+            NSLog(@"UnSupported layerContents:%@ class:%@",layerContents, NSStringFromClass(self.class));
+    }
+    
+    if (texture && texture.isInvalidated) {
+        NSLog(@"[Warning] rendering a invalidated texture");
+        texture = nil;
+    }
+    return texture;
 }
 
 /* ********************** */
@@ -822,6 +903,9 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     NSArray *sublayers = self.sublayers;
     for (CALayer *layer in sublayers) {
         [layer _recursionLayoutAndDisplayIfNeeds];
+    }
+    if (self.mask) {
+        [self.mask _recursionLayoutAndDisplayIfNeeds];
     }
 }
 
@@ -944,7 +1028,6 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
             NSLog(@"[Warning] exepect animation doesn't exist");
         }
     }
-    
   [_animations setValue: anim
                  forKey: key];
   [key retain];
@@ -1094,16 +1177,17 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
         }
     }
     
-    NSArray *animationsToRemove = [_animations objectsForKeys:animationKeysToRemove notFoundMarker:[NSNull null]];
-
-  [_animations removeObjectsForKeys: animationKeysToRemove];
-  [_animationKeys removeObjectsInArray: animationKeysToRemove];
-  [animationKeysToRemove release];
-    
-    if (animationsToRemove.count > 0) {
-        [[self modelLayer] addFinishedAnimations:animationsToRemove];
+    if ([[self modelLayer] superlayer] != nil) {
+        NSArray *animationsToRemove = [_animations objectsForKeys:animationKeysToRemove notFoundMarker:[NSNull null]];
+        
+        [_animations removeObjectsForKeys: animationKeysToRemove];
+        [_animationKeys removeObjectsInArray: animationKeysToRemove];
+        [animationKeysToRemove release];
+        
+        if (animationsToRemove.count > 0) {
+            [[self modelLayer] addFinishedAnimations:animationsToRemove];
+        }
     }
-  
   return lowestNextFrameTime;
 }
 
@@ -1160,11 +1244,48 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 - (void)removeFromSuperlayer
 {
   NSMutableArray * mutableSublayersOfSuperlayer = (NSMutableArray*)[[self superlayer] sublayers];
-  
+    
+    [self _forceFinishAllAnimationAndCallbackSequencing];
   [mutableSublayersOfSuperlayer removeObject: self];
   [self setSuperlayer: nil];
-    
-    [self setNeedsLayout];
+  [self setNeedsLayout];
+}
+
+- (void)_forceFinishAllAnimationAndCallbackSequencing
+{
+    [[self.class _nestingSequencer] invokeTarget:self
+                                          method:@selector(_forceFinishAllAnimationAndCallback)];
+}
+
+- (void)_forceFinishAllAnimationAndCallback
+{
+    if (_animations.count > 0 || _finishedAnimations.count > 0) {
+        NSMutableArray *allAnimations = [[NSMutableArray alloc] init];
+        [allAnimations addObjectsFromArray:[_animations allValues]];
+        [allAnimations addObjectsFromArray:_finishedAnimations];
+        
+        [self notifyAnimationsStopped:allAnimations finished:YES];
+        [allAnimations release];
+        
+        [_animations removeAllObjects];
+        [_animationKeys removeAllObjects];
+        [_finishedAnimations removeAllObjects];
+    }
+    NSArray *sublayers = [self.sublayers copy];
+    for (CALayer *subLayer in sublayers) {
+        [[self.class _nestingSequencer] invokeTarget:subLayer
+                                              method:@selector(_forceFinishAllAnimationAndCallback)];
+    }
+    [sublayers release];
+}
+
++ (CAGLNestingSequencer *)_nestingSequencer
+{
+    static CAGLNestingSequencer *sequencer;
+    if (sequencer == nil) {
+        sequencer = [[CAGLNestingSequencer alloc] init];
+    }
+    return sequencer;
 }
 
 - (void) insertSublayer: (CALayer *)layer atIndex: (unsigned)index
@@ -1899,6 +2020,10 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     CALayer *copy = [[[self class] alloc] initWithLayer:self];
     [copy setModelLayer:self];
     [copy setType:CALayerRenderingType];
+    [copy setDelegate:self.delegate];
+    if (self.mask) {
+        [copy setMask:[self.mask copyRenderLayer:transaction]];
+    }
     self.renderingLayer = copy;
     
     NSArray *subLayers = [self.sublayers copy];
