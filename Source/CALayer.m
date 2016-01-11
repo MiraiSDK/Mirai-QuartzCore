@@ -151,6 +151,13 @@ typedef NS_ENUM(NSInteger, CALayerType) {
 @synthesize texture = _texture;
 @synthesize mask = _mask;
 
+static CAGLNestingSequencer *_animationFinishCallbackNestingSequencer;
+
++ (void) initialize
+{
+    _animationFinishCallbackNestingSequencer = [[CAGLNestingSequencer alloc] init];
+}
+
 /* *** dynamic synthesis of properties *** */
 #if 0
 + (void) initialize
@@ -1217,9 +1224,12 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 
 - (void)notifyAnimationsStopped:(NSArray *)animations finished:(BOOL)finished
 {
-    for (CAAnimation *animation in animations) {
+    for (NSInteger i = 0; i<animations.count; ++i) {
+        CAAnimation *animation = [animations objectAtIndex:i];
         if (animation.delegate && [animation.delegate respondsToSelector:@selector(animationDidStop:finished:)]) {
-            [animation.delegate animationDidStop:animation finished:finished];
+            [_animationFinishCallbackNestingSequencer invokeTarget:animation.delegate
+                                                            method:@selector(animationDidStop:finished:)
+                                                            params:@[animation, @(finished)]];
         }
     }
 }
@@ -1245,16 +1255,10 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 {
   NSMutableArray * mutableSublayersOfSuperlayer = (NSMutableArray*)[[self superlayer] sublayers];
     
-    [self _forceFinishAllAnimationAndCallbackSequencing];
+    [self _forceFinishAllAnimationAndCallback];
   [mutableSublayersOfSuperlayer removeObject: self];
   [self setSuperlayer: nil];
   [self setNeedsLayout];
-}
-
-- (void)_forceFinishAllAnimationAndCallbackSequencing
-{
-    [[self.class _nestingSequencer] invokeTarget:self
-                                          method:@selector(_forceFinishAllAnimationAndCallback)];
 }
 
 - (void)_forceFinishAllAnimationAndCallback
@@ -1273,19 +1277,9 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     }
     NSArray *sublayers = [self.sublayers copy];
     for (CALayer *subLayer in sublayers) {
-        [[self.class _nestingSequencer] invokeTarget:subLayer
-                                              method:@selector(_forceFinishAllAnimationAndCallback)];
+        [subLayer _forceFinishAllAnimationAndCallback];
     }
     [sublayers release];
-}
-
-+ (CAGLNestingSequencer *)_nestingSequencer
-{
-    static CAGLNestingSequencer *sequencer;
-    if (sequencer == nil) {
-        sequencer = [[CAGLNestingSequencer alloc] init];
-    }
-    return sequencer;
 }
 
 - (void) insertSublayer: (CALayer *)layer atIndex: (unsigned)index
