@@ -924,6 +924,9 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     for (CALayer *layer in sublayers) {
         [layer _recursionLayoutIfNeeds];
     }
+    if (self.mask) {
+        [self _recursionLayoutIfNeeds];
+    }
 }
 
 - (void)_recursionDisplayIfNeeds
@@ -933,6 +936,9 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     NSArray *sublayers = self.sublayers;
     for (CALayer *layer in sublayers) {
         [layer _recursionDisplayIfNeeds];
+    }
+    if (self.mask) {
+        [self _recursionDisplayIfNeeds];
     }
 }
 /* ************************************* */
@@ -1231,6 +1237,10 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
         [subLayer callAnimationsFinishedCallback];
     }
     [sublayers release];
+    
+    if (self.mask) {
+        [self.mask callAnimationsFinishedCallback];
+    }
 }
 
 - (void)notifyAnimationsStopped:(NSArray *)animations finished:(BOOL)finished
@@ -1291,6 +1301,10 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
         [subLayer _forceFinishAllAnimationAndCallback];
     }
     [sublayers release];
+    
+    if (self.mask) {
+        [self.mask _forceFinishAllAnimationAndCallback];
+    }
 }
 
 - (void) insertSublayer: (CALayer *)layer atIndex: (unsigned)index
