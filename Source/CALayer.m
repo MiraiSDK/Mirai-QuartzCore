@@ -1209,6 +1209,17 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 }
 
 // should called in main thead
+- (void)callAnimationsFinishedCallbackInMainThread
+{
+    @try {
+        [[CARenderer layerDisplayLock] lock];
+        [self callAnimationsFinishedCallback];
+    }
+    @finally {
+        [[CARenderer layerDisplayLock] unlock];
+    }
+}
+
 - (void)callAnimationsFinishedCallback
 {
     [self notifyAnimationsStopped:_finishedAnimations finished:YES];
