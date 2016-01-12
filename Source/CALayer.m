@@ -635,23 +635,23 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 
 - (void)setMask:(CALayer *)mask
 {
-    if (_mask != mask) {
-        [self setNeedsDisplay];
-        if ([self isModelLayer]) {
-            if (_mask) {
-                NSValue *value = [NSValue valueWithNonretainedObject:self];
-                [_mask->_layersMaskedByMe removeObject:value];
-                [value release];
-            }
-            if (mask) {
-                NSValue *value = [NSValue valueWithNonretainedObject:self];
-                [mask->_layersMaskedByMe addObject:value];
-                [value release];
-            }
-        }
-        [_mask release];
-        _mask = [mask retain];
-    }
+//    if (_mask != mask) {
+//        [self setNeedsDisplay];
+//        if ([self isModelLayer]) {
+//            if (_mask) {
+//                NSValue *value = [NSValue valueWithNonretainedObject:self];
+//                [_mask->_layersMaskedByMe removeObject:value];
+//                [value release];
+//            }
+//            if (mask) {
+//                NSValue *value = [NSValue valueWithNonretainedObject:self];
+//                [mask->_layersMaskedByMe addObject:value];
+//                [value release];
+//            }
+//        }
+//        [_mask release];
+//        _mask = [mask retain];
+//    }
 }
 
 
