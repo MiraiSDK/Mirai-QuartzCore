@@ -1,5 +1,4 @@
 package org.tiny4.QuartzCoreDemo;
-
 import org.tiny4.CocoaActivity.CocoaActivity;
 
 import android.app.Activity;
@@ -19,6 +18,7 @@ public class MainActivity extends CocoaActivity
         System.loadLibrary ("objc");
         System.loadLibrary ("gnustep-base");
         System.loadLibrary ("gnustep-corebase");
+        System.loadLibrary ("AVFoundation");
         System.loadLibrary ("TNJavaHelper");
         System.loadLibrary ("CoreGraphics");
         System.loadLibrary ("CoreText");

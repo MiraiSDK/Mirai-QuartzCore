@@ -10,6 +10,7 @@
 
 @interface CAGLNestingSequencer : NSObject
 
-- (instancetype)invokeTarget:(id)target method:(SEL)method;
+- (void)invokeTarget:(id)target method:(SEL)method;
+- (void)invokeTarget:(id)target method:(SEL)method params:(NSArray *)params;
 
 @end
