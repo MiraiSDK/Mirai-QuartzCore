@@ -1098,12 +1098,6 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
   [_animationKeys removeObject: key];
 }
 
-- (void) removeAllAnimations
-{
-    [_animations removeAllObjects];
-    [_animationKeys removeAllObjects];
-}
-
 - (CAAnimation *)animationForKey: (NSString *)key
 {
     if (key == nil) {
