@@ -92,6 +92,11 @@ static NSMutableArray *_textures;
     self.invalidated = YES;
 }
 
+- (BOOL)isInvalidated
+{
+    return _invalidated || !glIsTexture(_textureID);
+}
+
 - (id) init
 {
   self = [super init];
