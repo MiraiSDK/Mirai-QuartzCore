@@ -424,9 +424,6 @@ static CAGLNestingSequencer *_animationFinishCallbackNestingSequencer;
 
 - (void) dealloc
 {
-  if ([self isRenderLayer]) {
-    [_delegate release];
-  }
   CGColorRelease(_shadowColor);
   CGPathRelease(_shadowPath);
     CGColorRelease(_borderColor);
@@ -606,25 +603,11 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 
 #endif
 
-- (void)setDelegate:(id)delegate
-{
-    if (_delegate != delegate) {
-        
-        // keeping render layer's refrence never meants keep model layer's refrence.
-        // when the _delegate release, it will become a wild pointer and make a big trouble.
-        // so, we should keep _delegate's refrence in render layer.
-        // anyway, render layer only exist a short time.
-        
-        if ([self isRenderLayer]) {
-            [_delegate release];
-            [delegate retain];
-        }
-        _delegate = delegate;
-    }
-}
-
 - (id)delegate
 {
+    if ([self isRenderLayer]) {
+        return ((CALayer *)_modelLayer)->_delegate;
+    }
     return _delegate;
 }
 
@@ -2039,7 +2022,6 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     CALayer *copy = [[[self class] alloc] initWithLayer:self];
     [copy setModelLayer:self];
     [copy setType:CALayerRenderingType];
-    [copy setDelegate:self.delegate];
     if (self.mask) {
         [copy setMask:[self.mask copyRenderLayer:transaction]];
     }
