@@ -2019,7 +2019,7 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 #pragma mark - commit
 - (CALayer *)copyRenderLayer:(CATransaction *)transaction
 {
-    CALayer *copy = [[[self class] alloc] initWithLayer:self];
+    CALayer *copy = [[CALayer alloc] initWithLayer:self];
     [copy setModelLayer:self];
     [copy setType:CALayerRenderingType];
     if (self.mask) {
