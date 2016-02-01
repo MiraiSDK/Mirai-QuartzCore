@@ -215,8 +215,7 @@ static NSMutableArray *_textures;
   CGImageAlphaInfo alphaInfo = CGImageGetAlphaInfo(image);
     
     // speedup image decode if it's dataprovider's formate is RGBA
-    if (CGImageGetBitsPerComponent(image) == 8 &&
-        (alphaInfo == kCGImageAlphaPremultipliedFirst || alphaInfo == kCGImageAlphaNoneSkipFirst)) {
+    if (CGImageGetBitsPerComponent(image) == 8 && alphaInfo == kCGImageAlphaNoneSkipFirst) {
         //
         // FIXME: Workaround
         // We remove typically styles to get CGImage data
