@@ -12,6 +12,7 @@ SDK_LIB_PATH=$(SDK_ROOT)/usr/lib
 DEPLOYMENT_LOCATION = YES
 DSTROOT = /
 INSTALL_PATH = $(SDK_ROOT)/System/Library/Frameworks/
+DEBUG_INFORMATION_FORMAT = dwarf
 
 BASE_CFLAGS= -DANDROID=1 -fblocks -DGNUSTEP=1
 BASE_LDFLAGS= -shared -Wl,-z,defs -lobjc -lgnustl_shared -lGLESv2 -lm
