@@ -8,6 +8,17 @@ checkError()
     fi
 }
 
+## CAGLAndroidBridge require TNJavaHelper, we need build this framework first
+if [ ! -f $MIRAI_SDK_PREFIX/lib/libTNJavaHelper.so ]; then
+	pushd $MIRAI_PROJECT_ROOT_PATH/Mirai-UIKit/TNJavaHelper
+	xcodebuild -target TNJavaHelper-Android -xcconfig xcconfig/Android-$ABI.xcconfig
+	checkError $? "build JavaHelper failed"
+	
+	#clean up
+	rm -r build
+	popd
+fi
+
 if [ ! -f $MIRAI_SDK_PREFIX/lib/libQuartzCore.so ] || 
 	[ "$OPTION_REBUILD_COCOA" == "yes" ]; then
 	echo "build QuartzCore..."
