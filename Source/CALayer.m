@@ -1244,6 +1244,12 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
 {
     if (layer == nil) {return;}
     
+    // is better to call [layer removeFromSuperlayer]?
+    if (layer.superlayer&& layer.superlayer != self) {
+        NSMutableArray * mutableSublayersOfSuperlayer = (NSMutableArray*)[[layer superlayer] sublayers];
+        [mutableSublayersOfSuperlayer removeObject:layer];
+    }
+    
   NSMutableArray * mutableSublayers = (NSMutableArray*)_sublayers;
     if ([mutableSublayers containsObject:layer]) {
         [mutableSublayers removeObject:layer];
