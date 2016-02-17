@@ -20,9 +20,16 @@
 @synthesize frameInterval = _frameInterval;
 @synthesize timer = _timer;
 
++ (BOOL)hasInstalledLinks
+{
+    return [self installedLinks].count > 0;
+}
+
 + (void)_endFrame
 {
-    [(NSObject *)self performSelectorOnMainThread:@selector(performLinks) withObject:nil waitUntilDone:YES];
+    if ([self hasInstalledLinks]) {
+        [(NSObject *)self performSelectorOnMainThread:@selector(performLinks) withObject:nil waitUntilDone:YES];
+    }
 }
 
 + (void)performLinks
