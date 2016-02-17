@@ -228,6 +228,7 @@ CA_EXTERN NSString *const kCATransition;
 - (CALayer *)copyRenderLayer:(CATransaction *)transaction;
 - (void)commitIfNeeds:(CATransaction *)transaction;
 
+- (BOOL)_hasFinishedAnimation;
 @end
 
 @interface NSObject (CALayerActions)

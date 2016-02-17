@@ -1209,6 +1209,25 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     }
 }
 
+- (BOOL)_hasFinishedAnimation
+{
+    if (_finishedAnimations.count > 0) {
+        return YES;
+    }
+    
+    BOOL sublayersHasAnimation = NO;
+    NSArray *sublayers = [self.sublayers copy];
+    for (CALayer *subLayer in sublayers) {
+        if ([subLayer _hasFinishedAnimation]) {
+            sublayersHasAnimation = YES;
+            break;
+        }
+    }
+    [sublayers release];
+    
+    return sublayersHasAnimation;
+}
+
 - (void)callAnimationsFinishedCallback
 {
     [self notifyAnimationsStopped:_finishedAnimations finished:YES];
