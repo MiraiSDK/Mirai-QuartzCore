@@ -1178,12 +1178,13 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
         
         [_animations removeObjectsForKeys: animationKeysToRemove];
         [_animationKeys removeObjectsInArray: animationKeysToRemove];
-        [animationKeysToRemove release];
         
         if (animationsToRemove.count > 0) {
             [[self modelLayer] addFinishedAnimations:animationsToRemove];
         }
     }
+    [animationKeysToRemove release];
+
   return lowestNextFrameTime;
 }
 
