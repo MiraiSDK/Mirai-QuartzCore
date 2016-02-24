@@ -43,7 +43,7 @@
 
 + (NSMutableArray *)installedLinks
 {
-    @synchronized(self) {
+//    @synchronized(self) {
         static NSMutableArray *_links = nil;
         if (!_links) {
             _links = [[NSMutableArray alloc] init];
@@ -51,7 +51,7 @@
         
         return _links;
 
-    }
+//    }
 }
 
 + (void)installDisplayLink:(CADisplayLink *)link runloop:(NSRunLoop *)runloop mode:(NSString *)mode

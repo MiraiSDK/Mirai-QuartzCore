@@ -530,6 +530,22 @@ static CAGLNestingSequencer *_animationFinishCallbackNestingSequencer;
     }\
   }
 
+#define GSCA_OBSERVABLE_ACCESSES_NONATOMIC(settername, type, prop, comparator) \
+- (void) settername: (type)prop \
+{ \
+if (comparator(prop, _ ## prop)) \
+return; \
+\
+[self beginChangeKeyPath: @ #prop];\
+[self willChangeValueForKey: @ #prop]; \
+_ ## prop = prop; \
+[self didChangeValueForKey: @ #prop]; \
+}\
+- (type) prop \
+{\
+return _  ## prop;  \
+}
+
 #define GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(settername, type, prop) \
   - (void) settername: (type)prop \
   { \
@@ -550,6 +566,22 @@ static CAGLNestingSequencer *_animationFinishCallbackNestingSequencer;
     }\
   }
 
+#define GSCA_OBSERVABLE_ACCESSES_BASIC_NONATOMIC(settername, type, prop) \
+- (void) settername: (type)prop \
+{ \
+if (prop == _ ## prop) \
+return; \
+\
+[self beginChangeKeyPath: @ #prop];\
+[self willChangeValueForKey: @ #prop]; \
+_ ## prop = prop; \
+[self didChangeValueForKey: @ #prop]; \
+}\
+- (type) prop \
+{\
+return _  ## prop;  \
+}
+
 #define GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(settername, type, prop) \
 - (void) settername: (type)prop \
 { \
@@ -569,7 +601,7 @@ GSCA_OBSERVABLE_SETTER(setTransform, CATransform3D, transform, CATransform3DEqua
 GSCA_OBSERVABLE_SETTER(setSublayerTransform, CATransform3D, sublayerTransform, CATransform3DEqualToTransform)
 GSCA_OBSERVABLE_SETTER(setShadowOffset, CGSize, shadowOffset, CGSizeEqualToSize)
 
-GSCA_OBSERVABLE_ACCESSES(setContentsRect, CGRect, contentsRect, CGRectEqualToRect)
+GSCA_OBSERVABLE_ACCESSES_NONATOMIC(setContentsRect, CGRect, contentsRect, CGRectEqualToRect)
 
 GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(setRepeatCount, float, repeatCount)
 GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(setBeginTime, CFTimeInterval, beginTime)
@@ -577,9 +609,9 @@ GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(setSpeed, float, speed)
 GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(setDuration, CFTimeInterval, duration)
 GSCA_OBSERVABLE_SETTER_BASIC_NONATOMIC(setAutoreverses, BOOL, autoreverses)
 
-GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setOpacity, CGFloat, opacity)
-GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowOpacity, float, shadowOpacity)
-GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
+GSCA_OBSERVABLE_ACCESSES_BASIC_NONATOMIC(setOpacity, float, opacity)
+GSCA_OBSERVABLE_ACCESSES_BASIC_NONATOMIC(setShadowOpacity, float, shadowOpacity)
+GSCA_OBSERVABLE_ACCESSES_BASIC_NONATOMIC(setShadowRadius, CGFloat, shadowRadius)
 
 - (void)beginChangeKeyPath:(NSString *)keyPath
 {
