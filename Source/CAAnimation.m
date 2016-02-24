@@ -926,11 +926,36 @@ static GSQuartzCoreQuaternion linearInterpolationQuaternion(GSQuartzCoreQuaterni
 @synthesize calculationMode=_calculationMode;
 @synthesize values=_values;
 
+- (void)dealloc
+{
+    [_calculationMode release];
+    [_values release];
+    if (_path) {
+        CGPathRelease(_path);
+    }
+    
+    [_keyTimes release];
+    [_timingFunctions release];
+    [_tensionValues release];
+    [_continuityValues release];
+    [_biasValues release];
+    [_rotationMode release];
+    
+    [super dealloc];
+}
 @end
 
 @implementation CATransition
 @synthesize type=_type;
 @synthesize subtype=_subtype;
+
+- (void)dealloc
+{
+    [_type release];
+    [_subtype release];
+    
+    [super dealloc];
+}
 
 @end
 
@@ -942,6 +967,13 @@ static GSQuartzCoreQuaternion linearInterpolationQuaternion(GSQuartzCoreQuaterni
     for (CAAnimation *ani in self.animations) {
         [ani applyToLayer:layer];
     }
+}
+
+- (void)dealloc
+{
+    [_animations release];
+    
+    [super dealloc];
 }
 
 @end
