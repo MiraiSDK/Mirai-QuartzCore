@@ -1216,6 +1216,10 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_ATOMIC(setShadowRadius, CGFloat, shadowRadius)
     }
     
     BOOL sublayersHasAnimation = NO;
+    if (self.sublayers.count == 0) {
+        return sublayersHasAnimation;
+    }
+    
     NSArray *sublayers = [self.sublayers copy];
     for (CALayer *subLayer in sublayers) {
         if ([subLayer _hasFinishedAnimation]) {
