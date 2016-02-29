@@ -1137,8 +1137,8 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_NONATOMIC(setShadowRadius, CGFloat, shadowRadius)
     
   NSMutableArray * animationKeysToRemove = [NSMutableArray new];
   CFTimeInterval lowestNextFrameTime = __builtin_inf();
-  
-  for (NSString * animationKey in [self animationKeys])
+   NSArray *animationKeys = [self.animationKeys copy];
+  for (NSString * animationKey in animationKeys)
     {
       CAAnimation * animation = [_animations objectForKey: animationKey];
 
@@ -1204,6 +1204,7 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_NONATOMIC(setShadowRadius, CGFloat, shadowRadius)
             [group applyToLayer:self];
         }
     }
+    [animationKeys release];
     
     if ([[self modelLayer] superlayer] != nil) {
         NSArray *animationsToRemove = [_animations objectsForKeys:animationKeysToRemove notFoundMarker:[NSNull null]];
