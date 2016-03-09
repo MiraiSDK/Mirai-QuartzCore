@@ -203,6 +203,11 @@ static CAGLNestingSequencer *_animationFinishCallbackNestingSequencer;
   return [[self new] autorelease];
 }
 
+- (void) _convertToRootLayer
+{
+    _isRootLayer = YES;
+}
+
 + (id) defaultValueForKey: (NSString *)key
 {
   if ([key isEqualToString:@"delegate"])
@@ -366,6 +371,7 @@ static CAGLNestingSequencer *_animationFinishCallbackNestingSequencer;
         _anchorPoint = layer->_anchorPoint;
         _position = layer->_position;
         _opacity = layer->_opacity;
+        _isRootLayer = layer->_isRootLayer;
         _transform = layer->_transform;
         _sublayerTransform = layer->_sublayerTransform;
         _shouldRasterize = layer->_shouldRasterize;
@@ -634,6 +640,11 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_NONATOMIC(setShadowRadius, CGFloat, shadowRadius)
 
 
 #endif
+
+- (BOOL)isRootLayer
+{
+    return _isRootLayer;
+}
 
 - (id)delegate
 {
@@ -1581,6 +1592,18 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_NONATOMIC(setShadowRadius, CGFloat, shadowRadius)
 /* *************** */
 /* MARK: - Actions */
 
+- (BOOL)_isLayerInVisibleTree
+{
+    CALayer *layer = self;
+    while (layer) {
+        if ([layer isRootLayer]) {
+            return YES;
+        }
+        layer = layer.superlayer;
+    }
+    return NO;
+}
+
 + (id<CAAction>) defaultActionForKey: (NSString *)key;
 {
   /* It appears that Cocoa implementation returns nil by default. */
@@ -1589,6 +1612,10 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_NONATOMIC(setShadowRadius, CGFloat, shadowRadius)
 
 - (id<CAAction>) actionForKey: (NSString *)key
 {
+    if (![self _isLayerInVisibleTree]) {
+        return nil;
+    }
+    
   if ([[self delegate] respondsToSelector: @selector(actionForLayer:forKey:)])
     {
       NSObject<CAAction>* returnValue = (NSObject<CAAction>*)[[self delegate] actionForLayer: self forKey: key];

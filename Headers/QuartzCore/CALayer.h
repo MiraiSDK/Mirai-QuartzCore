@@ -77,6 +77,7 @@ CA_EXTERN NSString *const kCATransition;
   CATransform3D _transform;
   CATransform3D _sublayerTransform;
   float _opacity;
+  BOOL _isRootLayer;
   BOOL _shouldRasterize;
   BOOL _opaque;
   BOOL _geometryFlipped;
