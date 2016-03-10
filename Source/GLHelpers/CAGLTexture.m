@@ -60,31 +60,10 @@
   return [[self new] autorelease];
 }
 
-static NSMutableArray *_textures;
+NSString *const CAGLTextureInvalidatedNotification = @"CAGLTextureInvalidatedNotification";
 + (void)invalidate
 {
-    for (NSValue *value in _textures) {
-        CAGLTexture *texture = [value nonretainedObjectValue];
-        [texture invalidate];
-    }
-    
-    [_textures removeAllObjects];
-}
-
-+ (void)registerInstance:(CAGLTexture *)texture
-{
-    if (_textures == nil) {
-        _textures = [[NSMutableArray alloc] init];
-    }
-    
-    NSValue *value = [NSValue valueWithNonretainedObject:texture];
-    [_textures addObject:value];
-}
-
-+ (void)unregisterInstance:(CAGLTexture *)texture
-{
-    NSValue *value = [NSValue valueWithNonretainedObject:texture];
-    [_textures removeObject:value];
+    [[NSNotificationCenter defaultCenter] postNotificationName:CAGLTextureInvalidatedNotification object:nil];
 }
 
 - (void)invalidate
@@ -104,7 +83,10 @@ static NSMutableArray *_textures;
     return nil;
   
   glGenTextures(1, &_textureID);
-    [CAGLTexture registerInstance:self];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(invalidate)
+                                                 name:CAGLTextureInvalidatedNotification
+                                               object:nil];
     _invalidated = NO;
     
   return self;
@@ -113,7 +95,7 @@ static NSMutableArray *_textures;
 - (void) dealloc
 {
   glDeleteTextures(1, &_textureID);
-    [CAGLTexture unregisterInstance:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:CAGLTextureInvalidatedNotification object:nil];
   [super dealloc];
 }
 
