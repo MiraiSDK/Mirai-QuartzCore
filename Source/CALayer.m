@@ -933,10 +933,11 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_NONATOMIC(setShadowRadius, CGFloat, shadowRadius)
     [self layoutIfNeeded];
     [self displayIfNeeded];
     
-    NSArray *sublayers = self.sublayers;
+    NSArray *sublayers = [self.sublayers copy];
     for (CALayer *layer in sublayers) {
         [layer _recursionLayoutAndDisplayIfNeeds];
     }
+    [sublayers release];
     if (self.mask) {
         [self.mask _recursionLayoutAndDisplayIfNeeds];
     }
@@ -946,10 +947,11 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_NONATOMIC(setShadowRadius, CGFloat, shadowRadius)
 {
     [self layoutIfNeeded];
     
-    NSArray *sublayers = self.sublayers;
+    NSArray *sublayers = [self.sublayers copy];
     for (CALayer *layer in sublayers) {
         [layer _recursionLayoutIfNeeds];
     }
+    [sublayers release];
     if (self.mask) {
         [self _recursionLayoutIfNeeds];
     }
@@ -959,10 +961,11 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_NONATOMIC(setShadowRadius, CGFloat, shadowRadius)
 {
     [self displayIfNeeded];
     
-    NSArray *sublayers = self.sublayers;
+    NSArray *sublayers = [self.sublayers copy];
     for (CALayer *layer in sublayers) {
         [layer _recursionDisplayIfNeeds];
     }
+    [sublayers release];
     if (self.mask) {
         [self _recursionDisplayIfNeeds];
     }
