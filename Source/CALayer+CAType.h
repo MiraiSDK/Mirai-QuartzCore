@@ -11,6 +11,7 @@
 
 @interface CALayer (CAType)
 
+- (BOOL) isRootLayer;
 - (BOOL) isPresentationLayer;
 - (BOOL) isRenderLayer;
 - (BOOL) isModelLayer;
