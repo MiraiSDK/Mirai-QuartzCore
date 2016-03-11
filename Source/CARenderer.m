@@ -145,7 +145,7 @@ typedef NS_ENUM(GLint, CAVertexAttrib)
     CAGLProgram *_videoProgram;
     GLuint _stencilMaskDepth;
 }
-static NSLock *_layerDisplayLock;
+static NSRecursiveLock *_layerDisplayLock;
 
 @synthesize layer=_layer;
 @synthesize bounds=_bounds;
@@ -233,7 +233,7 @@ static NSLock *_layerDisplayLock;
   [super dealloc];
 }
 
-+ (NSLock *) layerDisplayLock
++ (NSRecursiveLock *) layerDisplayLock
 {
     return _layerDisplayLock;
 }
