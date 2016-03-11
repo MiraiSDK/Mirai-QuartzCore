@@ -63,7 +63,7 @@
 
 - (void)_callTarget:(id)target method:(SEL)method params:(NSArray *)params
 {
-    NSLog(@"[%@ %@]", NSStringFromClass([target class]), NSStringFromSelector(method));
+//    NSLog(@"[%@ %@]", NSStringFromClass([target class]), NSStringFromSelector(method));
     if (params == nil || params.count == 0) {
         [target performSelector:method];
     } else if (params.count == 1) {
@@ -73,7 +73,7 @@
     } else {
         NSLog(@"Not Support, Please Add By Your Self If Need.");
     }
-    NSLog(@"[Finish call]");
+//    NSLog(@"[Finish call]");
 }
 
 @end

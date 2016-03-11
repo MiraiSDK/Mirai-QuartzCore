@@ -1253,7 +1253,7 @@ static CGRect CALayerContentsGetGravityRect(CALayer *layer)
         CGImageRef image = (CGImageRef)layerContents;
         texture = [_textureLoader textureForLayer:layer];
         if (texture.contents == nil) {
-            NSLog(@"Texture:load image");
+//            NSLog(@"Texture:load image");
             [texture loadImage: image];
             texture.contents = layerContents;
         }
