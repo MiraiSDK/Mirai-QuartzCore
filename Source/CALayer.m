@@ -1154,7 +1154,7 @@ GSCA_OBSERVABLE_ACCESSES_BASIC_NONATOMIC(setShadowRadius, CGFloat, shadowRadius)
    NSArray *animationKeys = [self.animationKeys copy];
   for (NSString * animationKey in animationKeys)
     {
-      CAAnimation * animation = [_animations objectForKey: animationKey];
+      CAAnimation * animation = [[[_animations objectForKey: animationKey] retain] autorelease];
 
       if ([animation beginTime] == 0)
         {
