@@ -296,6 +296,7 @@ static CAGLNestingSequencer *_animationFinishCallbackNestingSequencer;
     }
   return nil;
 }
+
 /* *** methods *** */
 - (id) init
 {
@@ -309,18 +310,26 @@ static CAGLNestingSequencer *_animationFinishCallbackNestingSequencer;
       _finishedAnimations = [[NSMutableArray alloc] init];
       /* TODO: list all properties below */
       static NSString * keys[] = {
-        @"anchorPoint", @"transform", @"sublayerTransform",
-        @"opacity", @"delegate", @"contentsRect", @"shouldRasterize",
+        @"transform", @"sublayerTransform",
+        @"opacity", @"delegate", @"shouldRasterize",
         @"backgroundColor",
         
         @"beginTime", @"duration", @"speed", @"autoreverses",
         @"repeatCount",
         
-        @"shadowColor", @"shadowOffset", @"shadowOpacity",
+        @"shadowColor", @"shadowOpacity",
         @"shadowPath", @"shadowRadius",
 
-        @"bounds", @"position",
           @"contentsScale"};
+        
+        // Workaround: defaultValueForKey: leaked. why?
+        _contentsRect = CGRectMake(0.0, 0.0, 1.0, 1.0);
+        _bounds = CGRectZero;
+        _position = CGPointZero;
+        
+        _anchorPoint = CGPointMake(0.5, 0.5);
+        _shadowOffset =CGSizeMake(0.0, -3.0);
+        
       
       for (int i = 0; i < sizeof(keys)/sizeof(keys[0]); i++)
         {
